@@ -4,16 +4,16 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{A95E6509-0CDC-4C01-BE2B-E29957BE25BB}</ProjectGuid>
-    <OutputType>Exe</OutputType>
-    <RootNamespace>Main</RootNamespace>
-    <AssemblyName>Main</AssemblyName>
-    <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
+    <ProjectGuid>{60600808-2463-40BE-A3CD-1D155508C195}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>Core</RootNamespace>
+    <AssemblyName>Core</AssemblyName>
+    <TargetFrameworkVersion>v4.5.1</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <PlatformTarget>AnyCPU</PlatformTarget>
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
@@ -24,7 +24,6 @@
     <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <PlatformTarget>AnyCPU</PlatformTarget>
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
     <OutputPath>bin\Release\</OutputPath>
@@ -42,25 +41,25 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Program.cs" />
+    <Compile Include="Allocations\Allocation.cs" />
+    <Compile Include="Allocations\AllocationElement.cs" />
+    <Compile Include="Allocations\AllocationHistory.cs" />
+    <Compile Include="TimeSeriesKeys\AllocationSrategy.cs" />
+    <Compile Include="Interfaces\ITimeSeriesKey.cs" />
+    <Compile Include="Interfaces\ITimeSeriesProvider.cs" />
+    <Compile Include="TimeSeriesKeys\CurrencyPairTimeSeries.cs" />
+    <Compile Include="TimeSeriesKeys\Frequency.cs" />
+    <Compile Include="TimeSeriesKeys\TimeSeriesKeyType.cs" />
+    <Compile Include="Markets\FXMarket.cs" />
+    <Compile Include="Markets\FXMarketHistory.cs" />
+    <Compile Include="Quotes\Currency.cs" />
+    <Compile Include="Quotes\CurrencyPair.cs" />
+    <Compile Include="Quotes\Price.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Quotes\XChangeRate.cs" />
+    <Compile Include="Transactions\Transaction.cs" />
+    <Compile Include="Transactions\TransactionType.cs" />
   </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\Core\Core.csproj">
-      <Project>{60600808-2463-40be-a3cd-1d155508c195}</Project>
-      <Name>Core</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\DataLibrary\DataLibrary.csproj">
-      <Project>{3bd6744b-a4b7-4de0-bf78-93eda8097cde}</Project>
-      <Name>DataLibrary</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\KrakenApi\KrakenApi.csproj">
-      <Project>{F14FBC9A-BB60-4D11-B94D-9D36D621BAC3}</Project>
-      <Name>KrakenApi</Name>
-    </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="app.config" />
-  </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

@@ -5,6 +5,18 @@ VisualStudioVersion = 15.0.27130.2027
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Main", "Main\Main.csproj", "{A95E6509-0CDC-4C01-BE2B-E29957BE25BB}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Core", "Core\Core.csproj", "{60600808-2463-40BE-A3CD-1D155508C195}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KrakenApi", "KrakenApi\KrakenApi.csproj", "{F14FBC9A-BB60-4D11-B94D-9D36D621BAC3}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Test", "Test\Test.csproj", "{FD937A5C-A50A-4018-800D-FA68B2AA5B8A}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DataLibrary", "DataLibrary\DataLibrary.csproj", "{3BD6744B-A4B7-4DE0-BF78-93EDA8097CDE}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CryptoApp", "CryptoApp\CryptoApp.csproj", "{3C0466C4-EBEB-4691-A5B8-18FC927556CF}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TimeSeriesAnalytics", "TimeSeriesAnalytics\TimeSeriesAnalytics.csproj", "{4DBBA2A4-8179-443C-8004-977D88DAB946}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -15,6 +27,30 @@ Global
 		{A95E6509-0CDC-4C01-BE2B-E29957BE25BB}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A95E6509-0CDC-4C01-BE2B-E29957BE25BB}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{A95E6509-0CDC-4C01-BE2B-E29957BE25BB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{60600808-2463-40BE-A3CD-1D155508C195}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{60600808-2463-40BE-A3CD-1D155508C195}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{60600808-2463-40BE-A3CD-1D155508C195}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{60600808-2463-40BE-A3CD-1D155508C195}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F14FBC9A-BB60-4D11-B94D-9D36D621BAC3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F14FBC9A-BB60-4D11-B94D-9D36D621BAC3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F14FBC9A-BB60-4D11-B94D-9D36D621BAC3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F14FBC9A-BB60-4D11-B94D-9D36D621BAC3}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FD937A5C-A50A-4018-800D-FA68B2AA5B8A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FD937A5C-A50A-4018-800D-FA68B2AA5B8A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FD937A5C-A50A-4018-800D-FA68B2AA5B8A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FD937A5C-A50A-4018-800D-FA68B2AA5B8A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3BD6744B-A4B7-4DE0-BF78-93EDA8097CDE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3BD6744B-A4B7-4DE0-BF78-93EDA8097CDE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3BD6744B-A4B7-4DE0-BF78-93EDA8097CDE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3BD6744B-A4B7-4DE0-BF78-93EDA8097CDE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3C0466C4-EBEB-4691-A5B8-18FC927556CF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3C0466C4-EBEB-4691-A5B8-18FC927556CF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3C0466C4-EBEB-4691-A5B8-18FC927556CF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3C0466C4-EBEB-4691-A5B8-18FC927556CF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4DBBA2A4-8179-443C-8004-977D88DAB946}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4DBBA2A4-8179-443C-8004-977D88DAB946}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4DBBA2A4-8179-443C-8004-977D88DAB946}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4DBBA2A4-8179-443C-8004-977D88DAB946}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
