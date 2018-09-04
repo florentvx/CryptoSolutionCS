@@ -44,6 +44,7 @@
     <Compile Include="Allocations\Allocation.cs" />
     <Compile Include="Allocations\AllocationElement.cs" />
     <Compile Include="Allocations\AllocationHistory.cs" />
+    <Compile Include="Allocations\AllocationSummary.cs" />
     <Compile Include="TimeSeriesKeys\AllocationSrategy.cs" />
     <Compile Include="Interfaces\ITimeSeriesKey.cs" />
     <Compile Include="Interfaces\ITimeSeriesProvider.cs" />

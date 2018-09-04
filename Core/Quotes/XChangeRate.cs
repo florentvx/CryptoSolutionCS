@@ -22,6 +22,8 @@ namespace Core.Quotes
             CcyPair = (CurrencyPair)ccyPair.Clone();
         }
 
+        public CryptoFiatPair GetCryptoFiatPair { get { return CcyPair.GetCryptoFiatPair; } }
+
         public string ToString(int precision = 4)
         {
             return $"{Math.Round(Rate,precision)} {CcyPair.ToString}";

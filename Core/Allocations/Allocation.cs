@@ -36,7 +36,7 @@ namespace Core.Allocations
             if (dictionary == null)
                 Dictionary = new Dictionary<Currency, AllocationElement>();
             else { Dictionary = dictionary; }
-            if (fees == null) Fees = new AllocationElement(0, 0, Currency.None);
+            if (fees == null) Fees = new AllocationElement(0, Currency.None);
             else { Fees = fees; }
             Total = new Price(0, Currency.None);
         }
@@ -52,7 +52,7 @@ namespace Core.Allocations
 
         public void CancelFee()
         {
-            Fees = new AllocationElement(0, 0, Currency.None);
+            Fees = new AllocationElement(0, Currency.None);
         }
 
         public void CalculateTotal(FXMarket fxMarket)
@@ -87,7 +87,7 @@ namespace Core.Allocations
             return newAlloc;
         }
 
-        public Allocation AddTransaction(Transaction tx, FXMarket fxMarket)
+        public Allocation AddTransaction(Transaction tx)//, FXMarket fxMarket)
         {
             Allocation res = (Allocation)Clone();
             res.CancelFee();
@@ -104,7 +104,7 @@ namespace Core.Allocations
                 }
                 catch
                 {
-                    res.Dictionary[tx.Received.Ccy] = new AllocationElement(0.0, tx.Received.Amount, tx.Received.Ccy);
+                    res.Dictionary[tx.Received.Ccy] = new AllocationElement(tx.Received.Amount, tx.Received.Ccy);
                 }
             }
             if (tx.Type == TransactionType.Deposit && !tx.Received.Ccy.IsFiat())
@@ -135,16 +135,31 @@ namespace Core.Allocations
                     fAlloc.Price.Amount -= tx.Fees.Amount;
                     if (fAlloc.Price.Amount < 0)
                         throw new Exception("Paid more than available (fees)");
-                    res.Fees = new AllocationElement(0.0, tx.Fees.Amount, tx.Fees.Ccy);
+                    res.Fees = new AllocationElement(tx.Fees.Amount, tx.Fees.Ccy);
                 }
                 catch
                 {
                     throw new Exception("Paid in unavailable currency (fees)");
                 }
             }
-            else res.Fees = new AllocationElement(0, 0, Currency.None);
+            else res.Fees = new AllocationElement(0, Currency.None);
+            //res.Update(fxMarket);
+            return res;
+        }
+
+        public Allocation AddTransaction(Transaction tx, FXMarket fxMarket)
+        {
+            Allocation res = AddTransaction(tx);
             res.Update(fxMarket);
             return res;
+        }
+
+        public void AddValue(Price price)
+        {
+            if (!Dictionary.ContainsKey(price.Ccy))
+                Dictionary.Add(price.Ccy, new AllocationElement(price.Amount, price.Ccy));
+            else
+                Dictionary[price.Ccy].AddValue(price.Amount);
         }
 
         internal double GetImpliedXChangeRate(CurrencyPair cp)

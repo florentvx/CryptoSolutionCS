@@ -16,6 +16,8 @@ namespace Core.Transactions
         public Price Fees { get; }
         public XChangeRate XRate { get; }
 
+        public CryptoFiatPair GetCryptoFiatPair { get { return XRate.GetCryptoFiatPair; } }
+
         public Transaction(TransactionType type, DateTime date, Price paid, Price received, Price fees = null)
         {
             Type = type;

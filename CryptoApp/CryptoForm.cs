@@ -41,13 +41,12 @@ namespace CryptoApp
             }
             foreach (Frequency freq in Enum.GetValues(typeof(Frequency)))
                 comboBoxFrequency.Items.Add(freq.ToString());
-            //checkedListBox1.SetItemChecked(0, true);
             comboBoxFiat.SelectedIndex = 0;
             comboBoxFrequency.SelectedIndex = 5;
             GetCheckedCurrencyPairs();
             TSP = new TimeSeriesProvider(Fiat);
             PrintChart();
-            richTextBoxAllocation.Text = TSP.GetLastAllocationFromAllocationHistory().ToString();
+            richTextBoxAllocation.Text = TSP.PriceLastAllocation().ToString();//TSP.GetLastAllocationFromAllocationHistory().ToString();
         }
 
         private void GetCheckedCurrencyPairs()
@@ -60,11 +59,6 @@ namespace CryptoApp
                 else if (item == "MyStrategy")
                     TimeSeriesKeyList.Add(new AllocationSrategy(item, Fiat));
             }
-        }
-
-        private void UpdateTimeSeriesProvider()
-        {
-            TSP.Update(Fiat, TimeSeriesKeyList, useLowerFrequencies: true); // TODO: put on\off switch
         }
 
         private void PrintChart(bool isIndex = true, double frame = 0.1)
@@ -91,7 +85,7 @@ namespace CryptoApp
         private void ButtonShow_Click(object sender, EventArgs e)
         {
             GetCheckedCurrencyPairs();
-            UpdateTimeSeriesProvider();
+            TSP.Update(Fiat, TimeSeriesKeyList, useLowerFrequencies: true);
             PrintChart(IsIndex);
         }
     }

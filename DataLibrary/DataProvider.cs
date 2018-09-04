@@ -503,6 +503,32 @@ namespace DataLibrary
             return fxmh;
         }
 
+        public FXMarketHistory GetFXMarketHistory_2(Currency ccyRef, List<Currency> ccyList, Frequency freq = Frequency.Hour4)
+        {
+            FXMarketHistory fxmh = new FXMarketHistory(ccyRef);
+            List<Currency> cryptos = ccyList.Where(x => !x.IsFiat() && !x.IsNone()).Select(x => x).ToList();
+            List<Currency> fiats = ccyList.Where(x => x.IsFiat()).Select(x => x).ToList();
+            if (!fiats.Contains(ccyRef)) fiats.Add(ccyRef);
+
+            List<CurrencyPair> cpList = new List<CurrencyPair> { };
+            foreach (Currency crypto in cryptos)
+                foreach (Currency fiat in fiats) cpList.Add(new CurrencyPair(crypto,fiat));
+
+            foreach (CurrencyPair cp in cpList)
+            {
+                CurrencyPairTimeSeries cpts = new CurrencyPairTimeSeries(cp, freq);
+                FillFXMarketHistory_2(fxmh, cpts);
+            }
+            return fxmh;
+        }
+
+        private void FillFXMarketHistory_2(FXMarketHistory fxmh, CurrencyPairTimeSeries cpts)
+        {
+            List<Tuple<DateTime, double>> ts = GetTimeSeries(cpts, isIndex: false);
+            foreach (Tuple<DateTime, double> item in ts)
+                fxmh.AddQuote(item.Item1, new XChangeRate(item.Item2, cpts.CurPair));
+        }
+
         private DateTime FillFXMarketHistory(FXMarketHistory fxmh, CurrencyPairTimeSeries cpts, DateTime firstDate)
         {
             List<Tuple<DateTime, double>> ts = GetTimeSeries(cpts, isIndex: false);

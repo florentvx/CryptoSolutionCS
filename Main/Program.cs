@@ -45,13 +45,17 @@ namespace Main
             dtl.LoadLedger(useKraken: true);
 
             // Allocation
-            List<Transaction> txList = new List<Transaction> { };
-            txList.Add(new Transaction(TransactionType.Deposit, new DateTime(2017, 12, 1), new Price(0, Currency.None), new Price(2000, Currency.USD)));
-            txList.Add(new Transaction(TransactionType.Trade, new DateTime(2017, 12, 15), new Price(600, Currency.USD), new Price(0.1, Currency.XBT)));
-            txList.Add(new Transaction(TransactionType.Trade, new DateTime(2018, 1, 10), new Price(825, Currency.USD), new Price(0.1, Currency.XBT)));
-            AllocationHistory AH = new AllocationHistory(txList, FXMH);
-            Console.WriteLine(FXMH.ToString);
-            Console.WriteLine(AH.ToString()); // ToDo: FALSE!!!
+            //List<Transaction> txList = new List<Transaction> { };
+            //txList.Add(new Transaction(TransactionType.Deposit, new DateTime(2017, 12, 1), new Price(0, Currency.None), new Price(2000, Currency.USD)));
+            //txList.Add(new Transaction(TransactionType.Trade, new DateTime(2017, 12, 15), new Price(600, Currency.USD), new Price(0.1, Currency.XBT)));
+            //txList.Add(new Transaction(TransactionType.Trade, new DateTime(2018, 1, 10), new Price(825, Currency.USD), new Price(0.1, Currency.XBT)));
+            //AllocationHistory AH = new AllocationHistory(txList, FXMH);
+            //Console.WriteLine(FXMH.ToString);
+            //Console.WriteLine(AH.ToString());
+
+            // Allocation Summary
+            AllocationSummary AS = new AllocationSummary(Currency.EUR);
+            AS.LoadTransactionList(dtl.GetTransactionList());
 
             // DataLibrary Stats
             List<Transaction> txL = dtl.GetTransactionList();

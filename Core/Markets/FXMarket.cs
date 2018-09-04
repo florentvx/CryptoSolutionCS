@@ -96,7 +96,7 @@ namespace Core.Markets
                 .Select(x => (x.CcyPair.Ccy1 == curPair.Ccy1) ? x.CcyPair.Ccy2 : x.CcyPair.Ccy1);
             IEnumerable<Currency> Ccy2List = FX
                 .Where(x => x.CcyPair.Contains(curPair.Ccy2))
-                .Select(x => (x.CcyPair.Ccy1 == curPair.Ccy1) ? x.CcyPair.Ccy2 : x.CcyPair.Ccy1);
+                .Select(x => (x.CcyPair.Ccy1 == curPair.Ccy2) ? x.CcyPair.Ccy2 : x.CcyPair.Ccy1);
             IEnumerable<Currency> ThirdCcies = Ccy1List
                 .Where(x => Ccy2List.Contains(x));
             XChangeRate res = new XChangeRate(0.0, (CurrencyPair)curPair.Clone());

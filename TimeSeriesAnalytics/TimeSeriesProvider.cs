@@ -20,6 +20,10 @@ namespace TimeSeriesAnalytics
         public AllocationHistory AH;
         public List<ITimeSeriesKey> TimeSeriesKeyList = new List<ITimeSeriesKey>();
 
+        // New version
+        public AllocationSummary AS;
+        public FXMarketHistory FXMH;
+
         public TimeSeriesProvider(Currency fiat, string path = null)
         {
             Fiat = fiat;
@@ -27,6 +31,7 @@ namespace TimeSeriesAnalytics
             DataProvider = new DataProvider(BasePath);
             DataProvider.LoadLedger(useKraken: true);
             SetUpAllocationHistory();
+            SetUpAllocationSummary();
         }
 
         private void SetUpAllocationHistory()
@@ -46,12 +51,24 @@ namespace TimeSeriesAnalytics
             AH = new AllocationHistory(txL, fxmh);
         }
 
+        public void SetUpAllocationSummary()
+        {
+            AS = new AllocationSummary(Fiat);
+            AS.LoadTransactionList(DataProvider.GetTransactionList());
+            FXMH = DataProvider.GetFXMarketHistory_2(Fiat, AS.Currencies);
+        }
+
+        public Allocation PriceLastAllocation()
+        {
+            FXMarket fxMkt = FXMH.GetLastFXMarket();
+            return AS.PriceAllocation(fxMkt);
+        }
+
         public void Update(Currency fiat, List<ITimeSeriesKey> tskl, bool useLowerFrequencies)
         {
             Fiat = fiat;
             TimeSeriesKeyList = tskl;
             DataProvider.LoadOHLC_2(TimeSeriesKeyList, useLowerFrequencies: useLowerFrequencies);
-            //SetUpAllocationHistory(); TODO: reactivate this line
         }
 
         public ITimeSeriesProvider GetTimeSeriesProvider(ITimeSeriesKey itsk)
@@ -85,16 +102,6 @@ namespace TimeSeriesAnalytics
             }
             res.DateCutting(isIndex);
             return res;
-        }
-
-        public Allocation GetAllocationFromAllocationHistory(DateTime date)
-        {
-            return AH.GetAllocation(date);
-        }
-
-        public Allocation GetLastAllocationFromAllocationHistory()
-        {
-            return AH.GetLastAllocation();
         }
     }
 }

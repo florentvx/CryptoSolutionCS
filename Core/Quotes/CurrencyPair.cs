@@ -7,6 +7,13 @@ using Core.TimeSeriesKeys;
 
 namespace Core.Quotes
 {
+    public struct CryptoFiatPair
+    {
+        public Currency Crypto;
+        public Currency Fiat;
+    }
+
+
     public class CurrencyPair: ICloneable//, ITimeSeriesKey
     {
         public Currency Ccy1;
@@ -32,6 +39,23 @@ namespace Core.Quotes
         public bool IsIdentity { get { return Ccy1 == Ccy2; } }
 
         public bool IsFiatPair { get { return Ccy1.IsFiat() && Ccy2.IsFiat(); } }
+
+        public bool IsCryptoPair { get { return !Ccy1.IsFiat() && !Ccy2.IsFiat(); } }
+
+        public CryptoFiatPair GetCryptoFiatPair
+        {
+            get
+            {
+                CryptoFiatPair cfp = new CryptoFiatPair();
+                if (!IsFiatPair && !IsCryptoPair)
+                {
+                    cfp.Crypto = Ccy1.IsFiat() ? Ccy2 : Ccy1;
+                    cfp.Fiat = Ccy1.IsFiat() ? Ccy1 : Ccy2;
+                }
+                else throw new Exception($"This Currency Pair is not a Crypto/Fiat one : {ToString}");
+                return cfp;
+            }
+        }
 
         public object Clone() { return new CurrencyPair(Ccy1, Ccy2); }
 

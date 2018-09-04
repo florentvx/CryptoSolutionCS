@@ -14,7 +14,7 @@ namespace Core.Allocations
 
         public bool IsNull { get { return Price.IsNull; } }
 
-        public AllocationElement(double share, double amount, Currency ccy)
+        public AllocationElement(double amount, Currency ccy, double share = 0)
         {
             if (share <= 1.0)
                 Share = share;
@@ -24,12 +24,17 @@ namespace Core.Allocations
 
         public object Clone()
         {
-            return new AllocationElement(Share, Price.Amount, Price.Ccy);
+            return new AllocationElement(Price.Amount, Price.Ccy, Share);
         }
 
         public string ToString(int precision = 2)
         {
             return $"{Price.ToString()} : {Math.Round(100 * Share, precision)} %";
+        }
+
+        internal void AddValue(double amount)
+        {
+            Price.Amount += amount;
         }
     }
 }
