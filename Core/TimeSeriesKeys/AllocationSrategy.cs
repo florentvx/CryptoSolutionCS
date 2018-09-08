@@ -35,12 +35,12 @@ namespace Core.Allocations
 
         public string GetTimeSeriesKey()
         {
-            return Name;
+            return $"{Name} ({CcyRef.ToString()})";
         }
 
         public string GetFullName()
         {
-            return Name;
+            return GetTimeSeriesKey();
         }
     }
 }

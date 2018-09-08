@@ -43,10 +43,16 @@ namespace CryptoApp
                 comboBoxFrequency.Items.Add(freq.ToString());
             comboBoxFiat.SelectedIndex = 0;
             comboBoxFrequency.SelectedIndex = 5;
+            OnFiatChange(true);
+        }
+
+        private void OnFiatChange(bool updateKrakrenLedger = false)
+        {
             GetCheckedCurrencyPairs();
-            TSP = new TimeSeriesProvider(Fiat);
+            TSP = new TimeSeriesProvider(Fiat, updateKrakrenLedger);
+            TSP.Update(Fiat, TimeSeriesKeyList, useLowerFrequencies: true);
             PrintChart();
-            richTextBoxAllocation.Text = TSP.PriceLastAllocation().ToString();//TSP.GetLastAllocationFromAllocationHistory().ToString();
+            richTextBoxAllocation.Text = TSP.PriceLastAllocation().ToString();
         }
 
         private void GetCheckedCurrencyPairs()
@@ -80,6 +86,11 @@ namespace CryptoApp
             }
             chart1.ChartAreas[0].AxisY.Minimum = cd.GlobalMin;
             chart1.ChartAreas[0].AxisY.Maximum = cd.GlobalMax;
+        }
+
+        private void ComboBoxFiat_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            OnFiatChange();
         }
 
         private void ButtonShow_Click(object sender, EventArgs e)

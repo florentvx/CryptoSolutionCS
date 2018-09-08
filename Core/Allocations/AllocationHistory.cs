@@ -27,8 +27,10 @@ namespace Core.Allocations
             Allocation alloc = new Allocation(fxMH.CcyRef);
             txList.OrderBy(x => x.Date).ToList();
 
-            List<CurrencyPair> cpList = FXMH.GetLastFXMarket().GetCurrencyPairs(CcyRef);
+            //List<CurrencyPair> cpList = FXMH.GetLastFXMarket().GetCurrencyPairs(CcyRef);
+            List<CurrencyPair> cpList = FXMH.CpList;
 
+            // Filling old dates with constant FX: TODO Change!
             foreach (CurrencyPair cp in cpList)
             {
                 DateTime dateCp = FXMH.GetFirstFXMarket(cp);
@@ -51,7 +53,7 @@ namespace Core.Allocations
                 iStart++;
             }
 
-            // Create artificially the previous FXMarkets
+            // Create artificially the previous FXMarkets (with txs' XRate)
             DateTime prevDate = firstFX.Date;
             for (int i = iStart; i >= 0; i--)
             {

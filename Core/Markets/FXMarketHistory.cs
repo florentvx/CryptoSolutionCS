@@ -10,6 +10,7 @@ namespace Core.Markets
     {
         public Currency CcyRef;
         public List<Currency> CcyList = new List<Currency>();
+        public List<CurrencyPair> CpList = new List<CurrencyPair>();
         public SortedDictionary<DateTime, FXMarket> FXMarkets = new SortedDictionary<DateTime, FXMarket>();
 
         public FXMarketHistory(Currency ccy)
@@ -41,13 +42,24 @@ namespace Core.Markets
 
         private void AddCcy(CurrencyPair ccyPair)
         {
-            AddCcy(ccyPair.Ccy1);
-            AddCcy(ccyPair.Ccy2);
+            bool t1 = AddCcy(ccyPair.Ccy1);
+            bool t2 = AddCcy(ccyPair.Ccy2);
+            if (t1 || t2 ) AddCcyPair((CurrencyPair)ccyPair.Clone());
         }
 
-        private void AddCcy(Currency ccy)
+
+
+        private bool AddCcy(Currency ccy)
         {
-            if (!CcyList.Contains(ccy)) CcyList.Add(ccy);
+            if (!ccy.IsNone() && !CcyList.Contains(ccy)) { CcyList.Add(ccy); return true; }
+            return false;
+        }
+
+        private void AddCcyPair(CurrencyPair ccyPair)
+        {
+            foreach (CurrencyPair item in CpList)
+                if (ccyPair.IsEqual(item)) return;
+            CpList.Add(ccyPair);
         }
 
         public FXMarket GetFXMarket(DateTime date)

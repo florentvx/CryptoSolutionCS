@@ -24,38 +24,40 @@ namespace TimeSeriesAnalytics
         public AllocationSummary AS;
         public FXMarketHistory FXMH;
 
-        public TimeSeriesProvider(Currency fiat, string path = null)
+        public TimeSeriesProvider(Currency fiat, bool useKraken, string path = null)
         {
             Fiat = fiat;
             if (path != null) BasePath = path;
             DataProvider = new DataProvider(BasePath);
-            DataProvider.LoadLedger(useKraken: true);
-            SetUpAllocationHistory();
-            SetUpAllocationSummary();
+            DataProvider.LoadLedger(useKraken: useKraken);
+            SetUpAllocations();
+            //SetUpAllocationHistory();
         }
 
-        private void SetUpAllocationHistory()
-        {
-            List<Transaction> txL = DataProvider.GetTransactionList();
-            List<CurrencyPair> cpList = new List<CurrencyPair>();
-            foreach (Transaction item in txL)
-            {
-                CurrencyPair cp = item.XRate.CcyPair;
-                if (!cp.IsIdentity)
-                    if (cpList.Where(x => x.IsEqual(cp)).Count() == 0) cpList.Add(cp);
-            }
-            List<Currency> otherFiats = DataProvider.LedgerCurrencies
-                .Where(x => x.IsFiat() && x != Fiat)
-                .ToList();
-            FXMarketHistory fxmh = DataProvider.GetFXMarketHistory(Fiat, cpList, txL.First().Date, otherFiats);
-            AH = new AllocationHistory(txL, fxmh);
-        }
+        //private void SetUpAllocationHistory()
+        //{
+        //    List<Transaction> txL = DataProvider.GetTransactionList();
+        //    List<CurrencyPair> cpList = new List<CurrencyPair>();
+        //    foreach (Transaction item in txL)
+        //    {
+        //        CurrencyPair cp = item.XRate.CcyPair;
+        //        if (!cp.IsIdentity)
+        //            if (cpList.Where(x => x.IsEqual(cp)).Count() == 0) cpList.Add(cp);
+        //    }
+        //    List<Currency> otherFiats = DataProvider.LedgerCurrencies
+        //        .Where(x => x.IsFiat() && x != Fiat)
+        //        .ToList();
+        //    FXMarketHistory fxmh = DataProvider.GetFXMarketHistory(Fiat, cpList, txL.First().Date, otherFiats);
+        //    AH = new AllocationHistory(txL, fxmh);
+        //}
 
-        public void SetUpAllocationSummary()
+        public void SetUpAllocations()
         {
             AS = new AllocationSummary(Fiat);
-            AS.LoadTransactionList(DataProvider.GetTransactionList());
+            List<Transaction> txList = DataProvider.GetTransactionList();
+            AS.LoadTransactionList(txList);
             FXMH = DataProvider.GetFXMarketHistory_2(Fiat, AS.Currencies);
+            AH = new AllocationHistory(txList, FXMH);
         }
 
         public Allocation PriceLastAllocation()
