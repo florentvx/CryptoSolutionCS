@@ -59,7 +59,7 @@ namespace Core.Markets
             FX.Add(xRate);
         }
 
-        public XChangeRate GetQuote(CurrencyPair curPair)
+        public XChangeRate GetQuote(CurrencyPair curPair, bool constructNewQuote = true)
         {
             if (curPair.IsIdentity) return new XChangeRate(1, (CurrencyPair)curPair.Clone());
             else
@@ -76,7 +76,9 @@ namespace Core.Markets
                         if (xRate2 != null)
                             return xRate2;
                         {
-                            return ConstructNewQuote(curPair);
+                            if (constructNewQuote)
+                                return ConstructNewQuote(curPair);
+                            else { return null; }
                         }
                     }
                 }
@@ -105,8 +107,8 @@ namespace Core.Markets
             {
                 try
                 {
-                    double rate1 = GetQuote(new CurrencyPair(curPair.Ccy1, ccy)).Rate;
-                    double rate2 = GetQuote(new CurrencyPair(ccy, curPair.Ccy2)).Rate;
+                    double rate1 = GetQuote(new CurrencyPair(curPair.Ccy1, ccy), false).Rate;
+                    double rate2 = GetQuote(new CurrencyPair(ccy, curPair.Ccy2), false).Rate;
                     res.Rate += rate1 / rate2;
                     n++;
                 }
@@ -125,7 +127,7 @@ namespace Core.Markets
         public void AddQuote(XChangeRate xRate)
         {
             if (xRate.CcyPair.IsIdentity) return;
-            XChangeRate find = GetQuote(xRate.CcyPair);
+            XChangeRate find = GetQuote(xRate.CcyPair, false);
             if (find == null)
                 AddFXRate(xRate);
             else

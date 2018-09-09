@@ -73,6 +73,20 @@ namespace TimeSeriesAnalytics
             DataProvider.LoadOHLC_2(TimeSeriesKeyList, useLowerFrequencies: useLowerFrequencies);
         }
 
+        public void FullUpdate()
+        {
+            List<Currency> cryptoList = new List<Currency> { };
+            List<Currency> fiatList = new List<Currency> { };
+            foreach (Currency ccy in Enum.GetValues(typeof(Currency)))
+                if (ccy.IsFiat()) { fiatList.Add(ccy); } else { cryptoList.Add(ccy); }
+            List<ITimeSeriesKey> cptsL = new List<ITimeSeriesKey> { };
+            foreach (Currency cr in cryptoList)
+                foreach (Currency fi in fiatList)
+                    cptsL.Add(new CurrencyPairTimeSeries(cr, fi, DataProvider.SavingMinimumFrequency.GetNextFrequency()));
+            Update(Fiat, cptsL, true);
+            Console.WriteLine("\nFull Update Done!\n");
+        }
+
         public ITimeSeriesProvider GetTimeSeriesProvider(ITimeSeriesKey itsk)
         {
             ITimeSeriesProvider iTSP = null;

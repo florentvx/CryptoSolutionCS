@@ -42,7 +42,7 @@ namespace CryptoApp
             foreach (Frequency freq in Enum.GetValues(typeof(Frequency)))
                 comboBoxFrequency.Items.Add(freq.ToString());
             comboBoxFiat.SelectedIndex = 0;
-            comboBoxFrequency.SelectedIndex = 5;
+            comboBoxFrequency.SelectedIndex = 6;
             OnFiatChange(true);
         }
 
@@ -98,6 +98,11 @@ namespace CryptoApp
             GetCheckedCurrencyPairs();
             TSP.Update(Fiat, TimeSeriesKeyList, useLowerFrequencies: true);
             PrintChart(IsIndex);
+        }
+
+        private void ButtonFullUpdate_Click(object sender, EventArgs e)
+        {
+            TSP.FullUpdate();
         }
     }
 }

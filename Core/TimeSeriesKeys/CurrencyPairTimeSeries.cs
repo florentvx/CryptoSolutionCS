@@ -21,6 +21,12 @@ namespace Core.TimeSeriesKeys
             Freq = freq;
         }
 
+        public CurrencyPairTimeSeries(Currency ccy1, Currency ccy2, Frequency freq = Frequency.Hour4)
+        {
+            _curPair = new CurrencyPair(ccy1, ccy2);
+            Freq = freq;
+        }
+
         public List<CurrencyPair> GetCurrencyPairs()
         {
             return new List<CurrencyPair> { CurPair };

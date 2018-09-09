@@ -28,11 +28,13 @@
         /// </summary>
         private void InitializeComponent()
         {
-            System.Windows.Forms.DataVisualization.Charting.ChartArea chartArea3 = new System.Windows.Forms.DataVisualization.Charting.ChartArea();
-            System.Windows.Forms.DataVisualization.Charting.Legend legend3 = new System.Windows.Forms.DataVisualization.Charting.Legend();
-            System.Windows.Forms.DataVisualization.Charting.Series series3 = new System.Windows.Forms.DataVisualization.Charting.Series();
+            System.Windows.Forms.DataVisualization.Charting.ChartArea chartArea1 = new System.Windows.Forms.DataVisualization.Charting.ChartArea();
+            System.Windows.Forms.DataVisualization.Charting.Legend legend1 = new System.Windows.Forms.DataVisualization.Charting.Legend();
+            System.Windows.Forms.DataVisualization.Charting.Series series1 = new System.Windows.Forms.DataVisualization.Charting.Series();
             this.tabControl1 = new System.Windows.Forms.TabControl();
             this.Allocation = new System.Windows.Forms.TabPage();
+            this.label3 = new System.Windows.Forms.Label();
+            this.richTextBoxAllocation = new System.Windows.Forms.RichTextBox();
             this.Graphs = new System.Windows.Forms.TabPage();
             this.groupBox1 = new System.Windows.Forms.GroupBox();
             this.buttonShow = new System.Windows.Forms.Button();
@@ -42,8 +44,7 @@
             this.comboBoxFiat = new System.Windows.Forms.ComboBox();
             this.label2 = new System.Windows.Forms.Label();
             this.comboBoxFrequency = new System.Windows.Forms.ComboBox();
-            this.richTextBoxAllocation = new System.Windows.Forms.RichTextBox();
-            this.label3 = new System.Windows.Forms.Label();
+            this.buttonFullDataUpdate = new System.Windows.Forms.Button();
             this.tabControl1.SuspendLayout();
             this.Allocation.SuspendLayout();
             this.Graphs.SuspendLayout();
@@ -75,6 +76,23 @@
             this.Allocation.TabIndex = 1;
             this.Allocation.Text = "Allocation";
             this.Allocation.UseVisualStyleBackColor = true;
+            // 
+            // label3
+            // 
+            this.label3.AutoSize = true;
+            this.label3.Location = new System.Drawing.Point(6, 3);
+            this.label3.Name = "label3";
+            this.label3.Size = new System.Drawing.Size(100, 17);
+            this.label3.TabIndex = 2;
+            this.label3.Text = "Last Allocation";
+            // 
+            // richTextBoxAllocation
+            // 
+            this.richTextBoxAllocation.Location = new System.Drawing.Point(3, 23);
+            this.richTextBoxAllocation.Name = "richTextBoxAllocation";
+            this.richTextBoxAllocation.Size = new System.Drawing.Size(405, 233);
+            this.richTextBoxAllocation.TabIndex = 1;
+            this.richTextBoxAllocation.Text = "";
             // 
             // Graphs
             // 
@@ -124,16 +142,16 @@
             this.chart1.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            chartArea3.Name = "ChartArea1";
-            this.chart1.ChartAreas.Add(chartArea3);
-            legend3.Name = "Legend1";
-            this.chart1.Legends.Add(legend3);
+            chartArea1.Name = "ChartArea1";
+            this.chart1.ChartAreas.Add(chartArea1);
+            legend1.Name = "Legend1";
+            this.chart1.Legends.Add(legend1);
             this.chart1.Location = new System.Drawing.Point(235, 6);
             this.chart1.Name = "chart1";
-            series3.ChartArea = "ChartArea1";
-            series3.Legend = "Legend1";
-            series3.Name = "Series1";
-            this.chart1.Series.Add(series3);
+            series1.ChartArea = "ChartArea1";
+            series1.Legend = "Legend1";
+            series1.Name = "Series1";
+            this.chart1.Series.Add(series1);
             this.chart1.Size = new System.Drawing.Size(784, 443);
             this.chart1.TabIndex = 0;
             this.chart1.Text = "chart1";
@@ -173,28 +191,22 @@
             this.comboBoxFrequency.Size = new System.Drawing.Size(177, 24);
             this.comboBoxFrequency.TabIndex = 5;
             // 
-            // richTextBoxAllocation
+            // buttonFullDataUpdate
             // 
-            this.richTextBoxAllocation.Location = new System.Drawing.Point(3, 23);
-            this.richTextBoxAllocation.Name = "richTextBoxAllocation";
-            this.richTextBoxAllocation.Size = new System.Drawing.Size(405, 233);
-            this.richTextBoxAllocation.TabIndex = 1;
-            this.richTextBoxAllocation.Text = "";
-            // 
-            // label3
-            // 
-            this.label3.AutoSize = true;
-            this.label3.Location = new System.Drawing.Point(6, 3);
-            this.label3.Name = "label3";
-            this.label3.Size = new System.Drawing.Size(100, 17);
-            this.label3.TabIndex = 2;
-            this.label3.Text = "Last Allocation";
+            this.buttonFullDataUpdate.Location = new System.Drawing.Point(379, 29);
+            this.buttonFullDataUpdate.Name = "buttonFullDataUpdate";
+            this.buttonFullDataUpdate.Size = new System.Drawing.Size(127, 24);
+            this.buttonFullDataUpdate.TabIndex = 6;
+            this.buttonFullDataUpdate.Text = "Full Data Update";
+            this.buttonFullDataUpdate.UseVisualStyleBackColor = true;
+            this.buttonFullDataUpdate.Click += new System.EventHandler(this.ButtonFullUpdate_Click);
             // 
             // CryptoForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1057, 555);
+            this.Controls.Add(this.buttonFullDataUpdate);
             this.Controls.Add(this.comboBoxFrequency);
             this.Controls.Add(this.label2);
             this.Controls.Add(this.label1);
@@ -228,6 +240,7 @@
         private System.Windows.Forms.ComboBox comboBoxFrequency;
         private System.Windows.Forms.RichTextBox richTextBoxAllocation;
         private System.Windows.Forms.Label label3;
+        private System.Windows.Forms.Button buttonFullDataUpdate;
     }
 }
 

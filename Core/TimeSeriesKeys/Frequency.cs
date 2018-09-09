@@ -8,7 +8,7 @@ namespace Core.TimeSeriesKeys
 {
     public enum Frequency
     {
-        Min1,Min5,Min15,Min30,Hour1,Hour4,Day1,Week1,Day15
+        None,Min1,Min5,Min15,Min30,Hour1,Hour4,Day1,Week1,Day15
     }
     public static class FrequencyMethods
     {
@@ -54,6 +54,45 @@ namespace Core.TimeSeriesKeys
             foreach (Frequency freq in Enum.GetValues(typeof(Frequency)))
                 if (freq.ToString() == input) return freq;
             return Frequency.Hour4;
+        }
+
+        public static Frequency GetNextFrequency(this Frequency freq)
+        {
+            Frequency newFreq;
+            switch (freq)
+            {
+                case Frequency.Min1:
+                    newFreq = Frequency.Min5;
+                    break;
+                case Frequency.Min5:
+                    newFreq = Frequency.Min15;
+                    break;
+                case Frequency.Min15:
+                    newFreq = Frequency.Min30;
+                    break;
+                case Frequency.Min30:
+                    newFreq = Frequency.Hour1;
+                    break;
+                case Frequency.Hour1:
+                    newFreq = Frequency.Hour4;
+                    break;
+                case Frequency.Hour4:
+                    newFreq = Frequency.Day1;
+                    break;
+                case Frequency.Day1:
+                    newFreq = Frequency.Week1;
+                    break;
+                case Frequency.Week1:
+                    newFreq = Frequency.Day15;
+                    break;
+                case Frequency.Day15:
+                    newFreq = Frequency.None;
+                    break;
+                default:
+                    newFreq = Frequency.None;
+                    break;
+            }
+            return newFreq;
         }
     }
     

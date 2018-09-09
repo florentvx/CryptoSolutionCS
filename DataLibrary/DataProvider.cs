@@ -21,7 +21,7 @@ namespace DataLibrary
         public Dictionary<string, List<OHLC>> OHLCData = new Dictionary<string, List<OHLC>>();
         public Dictionary<string, LedgerInfo> Ledger = new Dictionary<string, LedgerInfo>();
         public List<Currency> LedgerCurrencies = new List<Currency>();
-        private Frequency SavingMinimumFrequency = Frequency.Hour1;
+        public Frequency SavingMinimumFrequency { get { return Frequency.Hour1; } }
 
         public DataProvider(string path, string userName = "", string key = "")
         {
@@ -98,69 +98,69 @@ namespace DataLibrary
 
         #region OHLC: Old Way
 
-        private void UpdateData(GetOHLCResult data, CurrencyPair curPair, Frequency freq)
-        {
-            string cpID = curPair.GetRequestID();
-            GetOHLCResult newData = GetKrakenOHLC(curPair, freq);
-            List<OHLC> currentData = data.Pairs[cpID];
-            int lastDate = currentData.Last().Time;
-            foreach (OHLC item in newData.Pairs[cpID])
-            {
-                if (lastDate < item.Time) currentData.Add(item);
-            }
-        }
+        //private void UpdateData(GetOHLCResult data, CurrencyPair curPair, Frequency freq)
+        //{
+        //    string cpID = curPair.GetRequestID();
+        //    GetOHLCResult newData = GetKrakenOHLC(curPair, freq);
+        //    List<OHLC> currentData = data.Pairs[cpID];
+        //    int lastDate = currentData.Last().Time;
+        //    foreach (OHLC item in newData.Pairs[cpID])
+        //    {
+        //        if (lastDate < item.Time) currentData.Add(item);
+        //    }
+        //}
 
-        private void SaveOHLC(CurrencyPair curPair, Frequency freq, GetOHLCResult data)
-        {
-            string pathLib = GetOHLCLibraryPath(curPair, freq);
-            Console.WriteLine($"Saving OHLC: {curPair.ToString} {freq.ToString()}");
-            StringBuilder sb = new StringBuilder();
-            sb.AppendLine("Time,Open,High,Low,Close,Volume,Vwap,Count");
-            foreach (OHLC item in data.Pairs[curPair.GetRequestID()])
-            {
-                //Console.WriteLine($"Saving data: {UnixTimeStampToDateTime(item.Time)}");
-                if (StaticLibrary.UnixTimeStampToDateTime(item.Time + freq.GetFrequency(true)) < DateTime.UtcNow)
-                    sb.AppendLine($"{item.Time},{item.Open},{item.High},{item.Low},{item.Close},{item.Volume},{item.Vwap},{item.Count}");
-                else
-                    Console.WriteLine($"Stopped at line: {StaticLibrary.UnixTimeStampToDateTime(item.Time)}");
-            }
-            File.WriteAllText(pathLib, sb.ToString());
-        }
+        //private void SaveOHLC(CurrencyPair curPair, Frequency freq, GetOHLCResult data)
+        //{
+        //    string pathLib = GetOHLCLibraryPath(curPair, freq);
+        //    Console.WriteLine($"Saving OHLC: {curPair.ToString} {freq.ToString()}");
+        //    StringBuilder sb = new StringBuilder();
+        //    sb.AppendLine("Time,Open,High,Low,Close,Volume,Vwap,Count");
+        //    foreach (OHLC item in data.Pairs[curPair.GetRequestID()])
+        //    {
+        //        //Console.WriteLine($"Saving data: {UnixTimeStampToDateTime(item.Time)}");
+        //        if (StaticLibrary.UnixTimeStampToDateTime(item.Time + freq.GetFrequency(true)) < DateTime.UtcNow)
+        //            sb.AppendLine($"{item.Time},{item.Open},{item.High},{item.Low},{item.Close},{item.Volume},{item.Vwap},{item.Count}");
+        //        else
+        //            Console.WriteLine($"Stopped at line: {StaticLibrary.UnixTimeStampToDateTime(item.Time)}");
+        //    }
+        //    File.WriteAllText(pathLib, sb.ToString());
+        //}
 
-        public void LoadOHLC(CurrencyPairTimeSeries cpts)
-        {
-            CurrencyPair ccyPair = cpts.CurPair;
-            Frequency freq = cpts.Freq;
-            // Creating the object result 
-            GetOHLCResult res = new GetOHLCResult
-            {
-                Pairs = new Dictionary<string, List<OHLC>>()
-            };
-            res.Pairs[ccyPair.GetRequestID()] = new List<OHLC>();
+        //public void LoadOHLC(CurrencyPairTimeSeries cpts)
+        //{
+        //    CurrencyPair ccyPair = cpts.CurPair;
+        //    Frequency freq = cpts.Freq;
+        //    // Creating the object result 
+        //    GetOHLCResult res = new GetOHLCResult
+        //    {
+        //        Pairs = new Dictionary<string, List<OHLC>>()
+        //    };
+        //    res.Pairs[ccyPair.GetRequestID()] = new List<OHLC>();
 
-            // Creating the csv for the first time (if needed)
-            if (!File.Exists(GetOHLCLibraryPath(ccyPair, freq)))
-                res.Pairs[ccyPair.GetRequestID()] = GetKrakenOHLC(ccyPair, freq).Pairs[ccyPair.GetRequestID()];
+        //    // Creating the csv for the first time (if needed)
+        //    if (!File.Exists(GetOHLCLibraryPath(ccyPair, freq)))
+        //        res.Pairs[ccyPair.GetRequestID()] = GetKrakenOHLC(ccyPair, freq).Pairs[ccyPair.GetRequestID()];
 
-            // Updating & Saving
+        //    // Updating & Saving
 
-            GetOHLCResult resCp;
-            bool doSave = true;
-            if (res.Pairs[ccyPair.GetRequestID()].Count == 0)
-            {
-                resCp = ReadOHLC(ccyPair, freq);
-                DateTime lastDate = StaticLibrary.UnixTimeStampToDateTime(resCp.Pairs[ccyPair.GetRequestID()].Last().Time);
-                if (DateTime.UtcNow.Subtract(lastDate).TotalSeconds > 2 * freq.GetFrequency(inSecs: true)) //INTERNET: 2
-                    UpdateData(resCp, ccyPair, freq);
-                else
-                    doSave = false;
-                res.Pairs[ccyPair.GetRequestID()] = resCp.Pairs[ccyPair.GetRequestID()];
-            }
-            if (doSave && freq > SavingMinimumFrequency)
-                SaveOHLC(ccyPair, freq, res);
+        //    GetOHLCResult resCp;
+        //    bool doSave = true;
+        //    if (res.Pairs[ccyPair.GetRequestID()].Count == 0)
+        //    {
+        //        resCp = ReadOHLC(ccyPair, freq);
+        //        DateTime lastDate = StaticLibrary.UnixTimeStampToDateTime(resCp.Pairs[ccyPair.GetRequestID()].Last().Time);
+        //        if (DateTime.UtcNow.Subtract(lastDate).TotalSeconds > 2 * freq.GetFrequency(inSecs: true)) //INTERNET: 2
+        //            UpdateData(resCp, ccyPair, freq);
+        //        else
+        //            doSave = false;
+        //        res.Pairs[ccyPair.GetRequestID()] = resCp.Pairs[ccyPair.GetRequestID()];
+        //    }
+        //    if (doSave && freq > SavingMinimumFrequency)
+        //        SaveOHLC(ccyPair, freq, res);
 
-            OHLCData[cpts.GetTimeSeriesKey()] = res.Pairs[ccyPair.GetRequestID()];
-        }
+        //    OHLCData[cpts.GetTimeSeriesKey()] = res.Pairs[ccyPair.GetRequestID()];
+        //}
 
         #endregion
 
