@@ -25,6 +25,7 @@ namespace CryptoApp
         public Frequency Frequency { get { return FrequencyMethods.StringToFrequency((string)comboBoxFrequency.SelectedItem); } }
         public bool IsIndex { get { return TimeSeriesKeyList.Count > 1; } } // TODO: include on/off switch
         public TimeSeriesProvider TSP;
+        private bool Loaded = false;
 
         public CryptoForm()
         {
@@ -40,18 +41,20 @@ namespace CryptoApp
                 else { comboBoxFiat.Items.Add(ccy.ToFullName()); }
             }
             foreach (Frequency freq in Enum.GetValues(typeof(Frequency)))
-                comboBoxFrequency.Items.Add(freq.ToString());
+                if (freq != Frequency.None) comboBoxFrequency.Items.Add(freq.ToString());
             comboBoxFiat.SelectedIndex = 0;
-            comboBoxFrequency.SelectedIndex = 6;
+            comboBoxFrequency.SelectedIndex = 5;
             OnFiatChange(true);
+            Loaded = true;
         }
 
         private void OnFiatChange(bool updateKrakrenLedger = false)
         {
             GetCheckedCurrencyPairs();
-            TSP = new TimeSeriesProvider(Fiat, updateKrakrenLedger);
+            if (TSP != null) TSP = new TimeSeriesProvider(Fiat, TSP.DataProvider, updateKrakrenLedger); 
+            else { TSP = new TimeSeriesProvider(Fiat, updateKrakrenLedger); }
             TSP.Update(Fiat, TimeSeriesKeyList, useLowerFrequencies: true);
-            PrintChart();
+            PrintChart(IsIndex);
             richTextBoxAllocation.Text = TSP.PriceLastAllocation().ToString();
         }
 
@@ -90,7 +93,7 @@ namespace CryptoApp
 
         private void ComboBoxFiat_SelectedIndexChanged(object sender, EventArgs e)
         {
-            OnFiatChange();
+            if (Loaded) OnFiatChange();
         }
 
         private void ButtonShow_Click(object sender, EventArgs e)

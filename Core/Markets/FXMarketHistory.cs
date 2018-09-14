@@ -44,7 +44,7 @@ namespace Core.Markets
         {
             bool t1 = AddCcy(ccyPair.Ccy1);
             bool t2 = AddCcy(ccyPair.Ccy2);
-            if (t1 || t2 ) AddCcyPair((CurrencyPair)ccyPair.Clone());
+            if (!ccyPair.IsIdentity && !CpList.Contains(ccyPair))  AddCcyPair((CurrencyPair)ccyPair.Clone());
         }
 
 

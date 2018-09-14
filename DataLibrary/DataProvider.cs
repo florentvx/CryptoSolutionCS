@@ -10,6 +10,7 @@ using Core.Transactions;
 using Core.Interfaces;
 using Core.Markets;
 using Core.TimeSeriesKeys;
+using Core.Allocations;
 
 namespace DataLibrary
 {
@@ -518,6 +519,24 @@ namespace DataLibrary
             {
                 CurrencyPairTimeSeries cpts = new CurrencyPairTimeSeries(cp, freq);
                 FillFXMarketHistory_2(fxmh, cpts);
+            }
+            return fxmh;
+        }
+
+        public FXMarketHistory GetFXMarketHistory_3(Currency fiat, List<CurrencyPair> cpList, Frequency freq = Frequency.Hour4)
+        {
+            // Need To Duplicate the market in order to have "clean" dates
+            FXMarketHistory fxmh = new FXMarketHistory(fiat);
+            foreach (CurrencyPair cp in cpList)
+            {
+                CurrencyPairTimeSeries cpts = new CurrencyPairTimeSeries(cp, freq);
+                FillFXMarketHistory_2(fxmh, cpts);
+                CryptoFiatPair cfp = cp.GetCryptoFiatPair;
+                if (cfp.Fiat != fiat)
+                {
+                    CurrencyPairTimeSeries cpts2 = new CurrencyPairTimeSeries(cfp.Crypto, fiat, freq);
+                    FillFXMarketHistory_2(fxmh, cpts2);
+                }
             }
             return fxmh;
         }

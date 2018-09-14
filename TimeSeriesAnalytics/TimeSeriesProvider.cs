@@ -34,6 +34,16 @@ namespace TimeSeriesAnalytics
             //SetUpAllocationHistory();
         }
 
+        public TimeSeriesProvider(Currency fiat, DataProvider dp, bool useKraken, string path = null)
+        {
+            Fiat = fiat;
+            if (path != null) BasePath = path;
+            DataProvider = dp;
+            DataProvider.LoadLedger(useKraken: useKraken);
+            SetUpAllocations();
+            //SetUpAllocationHistory();
+        }
+
         //private void SetUpAllocationHistory()
         //{
         //    List<Transaction> txL = DataProvider.GetTransactionList();
@@ -56,7 +66,7 @@ namespace TimeSeriesAnalytics
             AS = new AllocationSummary(Fiat);
             List<Transaction> txList = DataProvider.GetTransactionList();
             AS.LoadTransactionList(txList);
-            FXMH = DataProvider.GetFXMarketHistory_2(Fiat, AS.Currencies);
+            FXMH = DataProvider.GetFXMarketHistory_3(Fiat, AS.FXMH.CpList);
             AH = new AllocationHistory(txList, FXMH);
         }
 
