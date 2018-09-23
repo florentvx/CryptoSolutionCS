@@ -15,11 +15,14 @@ using Core.Allocations;
 using Core.Markets;
 using TimeSeriesAnalytics;
 using Core.TimeSeriesKeys;
+using log4net;
 
 namespace CryptoApp
 {
     public partial class CryptoForm : Form
     {
+        private static readonly ILog _logger = LogManager.GetLogger(typeof(CryptoForm));
+
         public List<ITimeSeriesKey> TimeSeriesKeyList = new List<ITimeSeriesKey>();
         public Currency Fiat { get { return CurrencyPorperties.FromNameToCurrency((string)comboBoxFiat.SelectedItem); } }
         public Frequency Frequency { get { return FrequencyMethods.StringToFrequency((string)comboBoxFrequency.SelectedItem); } }
@@ -44,18 +47,39 @@ namespace CryptoApp
                 if (freq != Frequency.None) comboBoxFrequency.Items.Add(freq.ToString());
             comboBoxFiat.SelectedIndex = 0;
             comboBoxFrequency.SelectedIndex = 5;
-            OnFiatChange(true);
+            dataGridViewAllocation.ColumnCount = 7;
+            dataGridViewAllocation.Columns[0].Name = "Ccy";
+            dataGridViewAllocation.Columns[1].Name = "Pos";
+            dataGridViewAllocation.Columns[2].Name = "Rate";
+            dataGridViewAllocation.Columns[3].Name = "Cost";
+            dataGridViewAllocation.Columns[4].Name = "PnL";
+            dataGridViewAllocation.Columns[5].Name = "Fees";
+            dataGridViewAllocation.Columns[6].Name = "RPnL";
+            OnFiatChange(false); //Internet?
             Loaded = true;
+        }
+
+        private void AllocationTableUpdate()
+        {
+            var data = TSP.LastAllocationToTable();
+            DateTime dateBefore = DateTime.Now;
+            dateBefore = dateBefore.AddDays(- dateBefore.Day + 1).AddHours(- dateBefore.Hour).AddMinutes(-dateBefore.Minute);
+            var databefore = TSP.AllocationToTable(dateBefore);
+            _logger.Info($"{dateBefore} - Ongoing Month PnL: {data.Last().Item2[3] - databefore.Last().Item2[3]} {Fiat.ToFullName()}");
+            dataGridViewAllocation.Rows.Clear();
+            foreach (var item in data)
+                dataGridViewAllocation.Rows.
+                    Add(item.Item1, item.Item2[0], item.Item2[1], item.Item2[2], item.Item2[3], item.Item2[4], item.Item2[5]);
         }
 
         private void OnFiatChange(bool updateKrakrenLedger = false)
         {
             GetCheckedCurrencyPairs();
-            if (TSP != null) TSP = new TimeSeriesProvider(Fiat, TSP.DataProvider, updateKrakrenLedger); 
+            if (TSP != null) TSP = new TimeSeriesProvider(Fiat, TSP.DataProvider, updateKrakrenLedger);
             else { TSP = new TimeSeriesProvider(Fiat, updateKrakrenLedger); }
             TSP.Update(Fiat, TimeSeriesKeyList, useLowerFrequencies: true);
             PrintChart(IsIndex);
-            richTextBoxAllocation.Text = TSP.PriceLastAllocation().ToString();
+            AllocationTableUpdate();
         }
 
         private void GetCheckedCurrencyPairs()

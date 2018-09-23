@@ -3,11 +3,14 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Core.Quotes;
+using log4net;
 
 namespace Core.Markets
 {
     public class FXMarket : ICloneable
     {
+        private static readonly ILog _logger = LogManager.GetLogger(typeof(FXMarket));
+
         public DateTime Date;
         public List<XChangeRate> FX = new List<XChangeRate>();
         public List<Currency> CcyList = new List<Currency>();
@@ -86,13 +89,14 @@ namespace Core.Markets
             }
         }
 
+        public XChangeRate GetQuote(Currency ccy1, Currency ccy2, bool constructNewQuote = true)
+        {
+            return GetQuote(new CurrencyPair(ccy1, ccy2), constructNewQuote);
+        }
+
         private XChangeRate ConstructNewQuote(CurrencyPair curPair)
         {
-            Console.WriteLine($"Constructing New pair: {curPair.ToString}");
-            if (curPair.IsFiatPair)
-            {
-                Console.WriteLine("EURUSD!");
-            }
+            _logger.Debug($"Constructing New pair: {curPair.ToString}");
             IEnumerable<Currency> Ccy1List = FX
                 .Where(x => x.CcyPair.Contains(curPair.Ccy1))
                 .Select(x => (x.CcyPair.Ccy1 == curPair.Ccy1) ? x.CcyPair.Ccy2 : x.CcyPair.Ccy1);
@@ -146,6 +150,7 @@ namespace Core.Markets
 
         public double FXConvert(Price price, Currency curRef)
         {
+            if (price.IsNull) return 0;
             XChangeRate xcr = GetQuote(new CurrencyPair(price.Ccy, curRef));
             return price.Amount * xcr.Rate;
         }

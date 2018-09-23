@@ -8,6 +8,7 @@ using Core.Quotes;
 using Core.Transactions;
 using Core.Interfaces;
 using Core.TimeSeriesKeys;
+using log4net;
 
 namespace Core.Allocations
 {
@@ -24,6 +25,8 @@ namespace Core.Allocations
 
     public class Allocation : ICloneable, ITimeSeriesKey
     {
+        private static readonly ILog _logger = LogManager.GetLogger(typeof(Allocation));
+
         Dictionary<Currency, AllocationElement> Dictionary;
         AllocationElement Fees;
         public Price Total;
@@ -63,7 +66,7 @@ namespace Core.Allocations
                 Total = fxMarket.SumPrices(Total, Dictionary[ccy].Price);
                 if (Total == null)
                 {
-                    Console.WriteLine("Error!");
+                    _logger.Error($"Problem with Price Conversion: {ccy} / {CcyRef}");
                 }
             }
             Total = fxMarket.SumPrices(Total, Fees.Price);
@@ -97,15 +100,13 @@ namespace Core.Allocations
             // Received
             if ((tx.Type == TransactionType.Deposit && tx.Received.Ccy.IsFiat()) || tx.Type == TransactionType.Trade)
             {
-                try
+                if (res.Dictionary.ContainsKey(tx.Received.Ccy))
                 {
                     AllocationElement allocIn = res.Dictionary[tx.Received.Ccy];
                     allocIn.Price.Amount += tx.Received.Amount;
                 }
-                catch
-                {
+                else
                     res.Dictionary[tx.Received.Ccy] = new AllocationElement(tx.Received.Amount, tx.Received.Ccy);
-                }
             }
             if (tx.Type == TransactionType.Deposit && !tx.Received.Ccy.IsFiat())
                 throw new NotImplementedException();
@@ -113,15 +114,13 @@ namespace Core.Allocations
             // Paid
             if (tx.Type == TransactionType.Trade && tx.Paid.Ccy != Currency.None)
             {
-                try
+                if (res.Dictionary.ContainsKey(tx.Paid.Ccy))
                 {
                     AllocationElement alloc = res.Dictionary[tx.Paid.Ccy];
                     alloc.Price.Amount -= tx.Paid.Amount; 
                 }
-                catch
-                {
+                else
                     throw new Exception("Paid in unavailable currency");
-                }
                 if (res.Dictionary[tx.Paid.Ccy].Price.Amount < 0)
                     throw new Exception("Paid more than available");
             }
@@ -129,7 +128,7 @@ namespace Core.Allocations
             // Fees
             if (!tx.Fees.IsNull)
             {
-                try
+                if (res.Dictionary.ContainsKey(tx.Fees.Ccy))
                 {
                     AllocationElement fAlloc = res.Dictionary[tx.Fees.Ccy];
                     fAlloc.Price.Amount -= tx.Fees.Amount;
@@ -137,10 +136,8 @@ namespace Core.Allocations
                         throw new Exception("Paid more than available (fees)");
                     res.Fees = new AllocationElement(tx.Fees.Amount, tx.Fees.Ccy);
                 }
-                catch
-                {
+                else
                     throw new Exception("Paid in unavailable currency (fees)");
-                }
             }
             else res.Fees = new AllocationElement(0, Currency.None);
             //res.Update(fxMarket);

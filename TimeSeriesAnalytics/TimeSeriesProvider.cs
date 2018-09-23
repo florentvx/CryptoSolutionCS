@@ -4,7 +4,8 @@ using Core.Markets;
 using Core.Quotes;
 using Core.TimeSeriesKeys;
 using Core.Transactions;
-using DataLibrary; 
+using DataLibrary;
+using log4net;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -14,6 +15,8 @@ namespace TimeSeriesAnalytics
 {
     public class TimeSeriesProvider
     {
+        private static readonly ILog _logger = LogManager.GetLogger(typeof(TimeSeriesProvider));
+
         public string BasePath = Environment.GetFolderPath(Environment.SpecialFolder.Personal);
         public Currency Fiat;
         public DataProvider DataProvider;
@@ -76,6 +79,23 @@ namespace TimeSeriesAnalytics
             return AS.PriceAllocation(fxMkt);
         }
 
+        public List<Tuple<string,double[]>> AllocationToTable(DateTime date)
+        {
+            AllocationAggregatedPnL AAPnL = new AllocationAggregatedPnL(AS.CcyRef);
+            List<Transaction> txL = DataProvider.GetTransactionList();
+            List<Transaction> txLFiltered = txL.Where(tx => tx.Date <= date).ToList();
+            AAPnL.AddTransactions(txLFiltered, FXMH);
+            return AAPnL.ToTable(FXMH.GetFXMarket(date));
+        }
+
+        public List<Tuple<string,double[]>> LastAllocationToTable()
+        {
+            AllocationAggregatedPnL AAPnL = new AllocationAggregatedPnL(AS.CcyRef);
+            List<Transaction> txL = DataProvider.GetTransactionList();
+            AAPnL.AddTransactions(txL, FXMH);
+            return AAPnL.ToTable(FXMH.GetLastFXMarket());
+        }
+
         public void Update(Currency fiat, List<ITimeSeriesKey> tskl, bool useLowerFrequencies)
         {
             Fiat = fiat;
@@ -93,8 +113,9 @@ namespace TimeSeriesAnalytics
             foreach (Currency cr in cryptoList)
                 foreach (Currency fi in fiatList)
                     cptsL.Add(new CurrencyPairTimeSeries(cr, fi, DataProvider.SavingMinimumFrequency.GetNextFrequency()));
+            _logger.Info("Full Update Started");
             Update(Fiat, cptsL, true);
-            Console.WriteLine("\nFull Update Done!\n");
+            _logger.Info("Full Update Finished");
         }
 
         public ITimeSeriesProvider GetTimeSeriesProvider(ITimeSeriesKey itsk)

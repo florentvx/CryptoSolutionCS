@@ -28,13 +28,12 @@
         /// </summary>
         private void InitializeComponent()
         {
-            System.Windows.Forms.DataVisualization.Charting.ChartArea chartArea1 = new System.Windows.Forms.DataVisualization.Charting.ChartArea();
-            System.Windows.Forms.DataVisualization.Charting.Legend legend1 = new System.Windows.Forms.DataVisualization.Charting.Legend();
-            System.Windows.Forms.DataVisualization.Charting.Series series1 = new System.Windows.Forms.DataVisualization.Charting.Series();
+            System.Windows.Forms.DataVisualization.Charting.ChartArea chartArea4 = new System.Windows.Forms.DataVisualization.Charting.ChartArea();
+            System.Windows.Forms.DataVisualization.Charting.Legend legend4 = new System.Windows.Forms.DataVisualization.Charting.Legend();
+            System.Windows.Forms.DataVisualization.Charting.Series series4 = new System.Windows.Forms.DataVisualization.Charting.Series();
             this.tabControl1 = new System.Windows.Forms.TabControl();
             this.Allocation = new System.Windows.Forms.TabPage();
             this.label3 = new System.Windows.Forms.Label();
-            this.richTextBoxAllocation = new System.Windows.Forms.RichTextBox();
             this.Graphs = new System.Windows.Forms.TabPage();
             this.groupBox1 = new System.Windows.Forms.GroupBox();
             this.buttonShow = new System.Windows.Forms.Button();
@@ -45,11 +44,13 @@
             this.label2 = new System.Windows.Forms.Label();
             this.comboBoxFrequency = new System.Windows.Forms.ComboBox();
             this.buttonFullDataUpdate = new System.Windows.Forms.Button();
+            this.dataGridViewAllocation = new System.Windows.Forms.DataGridView();
             this.tabControl1.SuspendLayout();
             this.Allocation.SuspendLayout();
             this.Graphs.SuspendLayout();
             this.groupBox1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.chart1)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.dataGridViewAllocation)).BeginInit();
             this.SuspendLayout();
             // 
             // tabControl1
@@ -67,8 +68,8 @@
             // 
             // Allocation
             // 
+            this.Allocation.Controls.Add(this.dataGridViewAllocation);
             this.Allocation.Controls.Add(this.label3);
-            this.Allocation.Controls.Add(this.richTextBoxAllocation);
             this.Allocation.Location = new System.Drawing.Point(4, 25);
             this.Allocation.Name = "Allocation";
             this.Allocation.Padding = new System.Windows.Forms.Padding(3);
@@ -85,14 +86,6 @@
             this.label3.Size = new System.Drawing.Size(100, 17);
             this.label3.TabIndex = 2;
             this.label3.Text = "Last Allocation";
-            // 
-            // richTextBoxAllocation
-            // 
-            this.richTextBoxAllocation.Location = new System.Drawing.Point(3, 23);
-            this.richTextBoxAllocation.Name = "richTextBoxAllocation";
-            this.richTextBoxAllocation.Size = new System.Drawing.Size(405, 233);
-            this.richTextBoxAllocation.TabIndex = 1;
-            this.richTextBoxAllocation.Text = "";
             // 
             // Graphs
             // 
@@ -142,16 +135,16 @@
             this.chart1.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            chartArea1.Name = "ChartArea1";
-            this.chart1.ChartAreas.Add(chartArea1);
-            legend1.Name = "Legend1";
-            this.chart1.Legends.Add(legend1);
+            chartArea4.Name = "ChartArea1";
+            this.chart1.ChartAreas.Add(chartArea4);
+            legend4.Name = "Legend1";
+            this.chart1.Legends.Add(legend4);
             this.chart1.Location = new System.Drawing.Point(235, 6);
             this.chart1.Name = "chart1";
-            series1.ChartArea = "ChartArea1";
-            series1.Legend = "Legend1";
-            series1.Name = "Series1";
-            this.chart1.Series.Add(series1);
+            series4.ChartArea = "ChartArea1";
+            series4.Legend = "Legend1";
+            series4.Name = "Series1";
+            this.chart1.Series.Add(series4);
             this.chart1.Size = new System.Drawing.Size(784, 443);
             this.chart1.TabIndex = 0;
             this.chart1.Text = "chart1";
@@ -201,6 +194,18 @@
             this.buttonFullDataUpdate.UseVisualStyleBackColor = true;
             this.buttonFullDataUpdate.Click += new System.EventHandler(this.ButtonFullUpdate_Click);
             // 
+            // dataGridViewAllocation
+            // 
+            this.dataGridViewAllocation.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.dataGridViewAllocation.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            this.dataGridViewAllocation.Location = new System.Drawing.Point(9, 23);
+            this.dataGridViewAllocation.Name = "dataGridViewAllocation";
+            this.dataGridViewAllocation.RowTemplate.Height = 24;
+            this.dataGridViewAllocation.Size = new System.Drawing.Size(1010, 426);
+            this.dataGridViewAllocation.TabIndex = 3;
+            // 
             // CryptoForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
@@ -220,6 +225,7 @@
             this.Graphs.ResumeLayout(false);
             this.groupBox1.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.chart1)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.dataGridViewAllocation)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -238,9 +244,9 @@
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.Label label2;
         private System.Windows.Forms.ComboBox comboBoxFrequency;
-        private System.Windows.Forms.RichTextBox richTextBoxAllocation;
         private System.Windows.Forms.Label label3;
         private System.Windows.Forms.Button buttonFullDataUpdate;
+        private System.Windows.Forms.DataGridView dataGridViewAllocation;
     }
 }
 

@@ -11,12 +11,15 @@ using Core.Interfaces;
 using Core.Markets;
 using Core.TimeSeriesKeys;
 using Core.Allocations;
+using log4net;
 
 namespace DataLibrary
 {
 
     public class DataProvider : ITimeSeriesProvider
     {
+        private static readonly ILog _logger = LogManager.GetLogger(typeof(DataProvider));
+
         public string Path;
         public Kraken KrakenApi = null;
         public Dictionary<string, List<OHLC>> OHLCData = new Dictionary<string, List<OHLC>>();
@@ -64,7 +67,7 @@ namespace DataLibrary
 
         private GetOHLCResult GetKrakenOHLC(CurrencyPair curPair, Frequency freq = Frequency.Hour4, int count = 10)
         {
-            Console.WriteLine($"\nKraken API Request : OHLC {curPair.ToString} - {freq.ToString()}\n");
+            _logger.Debug($"Kraken API Request : OHLC {curPair.ToString} - {freq.ToString()}");
             try { return KrakenApi.GetOHLC(curPair.GetRequestID(), freq.GetFrequency()); }
             catch
             {
@@ -170,7 +173,7 @@ namespace DataLibrary
         private void SaveOHLC_2(CurrencyPairTimeSeries cpts)
         {
             string pathLib = GetOHLCLibraryPath(cpts.CurPair, cpts.Freq);
-            Console.WriteLine($"Saving OHLC: {cpts.CurPair.ToString} {cpts.Freq.ToString()}");
+            _logger.Debug($"Saving OHLC: {cpts.CurPair.ToString} {cpts.Freq.ToString()}");
             StringBuilder sb = new StringBuilder();
             sb.AppendLine("Time,Open,High,Low,Close,Volume,Vwap,Count");
             foreach (OHLC item in OHLCData[cpts.GetTimeSeriesKey()])
@@ -179,7 +182,7 @@ namespace DataLibrary
                 if (StaticLibrary.UnixTimeStampToDateTime(item.Time + cpts.Freq.GetFrequency(true)) < DateTime.UtcNow)
                     sb.AppendLine($"{item.Time},{item.Open},{item.High},{item.Low},{item.Close},{item.Volume},{item.Vwap},{item.Count}");
                 else
-                    Console.WriteLine($"Stopped at line: {StaticLibrary.UnixTimeStampToDateTime(item.Time)}");
+                    _logger.Debug($"Stopped at line: {StaticLibrary.UnixTimeStampToDateTime(item.Time)}");
             }
             File.WriteAllText(pathLib, sb.ToString());
         }
@@ -280,7 +283,7 @@ namespace DataLibrary
 
         private GetLedgerResult GetKrakenLedger(int? offset = null, int count = 10)
         {
-            Console.WriteLine($"\nKraken API Request : Ledger \n");
+            _logger.Debug($"Kraken API Request : Ledger");
             try { return KrakenApi.GetLedgers(ofs: offset); }
             catch
             {
@@ -334,7 +337,7 @@ namespace DataLibrary
         private void SaveLedger(Dictionary<string,LedgerInfo> data)
         {
             string pathLib = GetLedgerLibraryPath();
-            Console.WriteLine($"Saving Ledger");
+            _logger.Debug($"Saving Ledger");
             StringBuilder sb = new StringBuilder();
             sb.AppendLine("Key,Time,Refid,Type,Aclass,Amount,Asset,Balance,Fee");
             foreach (string item in data.Keys)
@@ -434,8 +437,9 @@ namespace DataLibrary
 
         public List<OHLC> GetOHLCTimeSeries(ITimeSeriesKey itsk)
         {
-            try { return OHLCData[itsk.GetTimeSeriesKey()]; }
-            catch
+            if (OHLCData.ContainsKey(itsk.GetTimeSeriesKey()))
+                return OHLCData[itsk.GetTimeSeriesKey()];
+            else
             {
                 LoadOHLC_2(itsk);
                 return OHLCData[itsk.GetTimeSeriesKey()];
