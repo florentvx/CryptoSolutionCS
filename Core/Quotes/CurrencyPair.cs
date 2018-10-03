@@ -33,7 +33,7 @@ namespace Core.Quotes
         
         public bool IsEqual(CurrencyPair cp)
         {
-            return ((cp.Ccy1 == Ccy1 && cp.Ccy2 == Ccy2) || (cp.Ccy1 == Ccy2 && cp.Ccy2 == Ccy1));
+            return (cp.Ccy1 == Ccy1 && cp.Ccy2 == Ccy2);
         }
 
         public bool IsIdentity { get { return Ccy1 == Ccy2; } }

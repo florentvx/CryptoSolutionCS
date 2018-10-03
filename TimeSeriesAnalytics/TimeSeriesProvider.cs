@@ -150,5 +150,32 @@ namespace TimeSeriesAnalytics
             res.DateCutting(isIndex);
             return res;
         }
+
+        public void GetOnGoingPnLs(double pnl)
+        {
+            DateTime dateBefore = DateTime.UtcNow;
+            _logger.Info($"{dateBefore}");
+            DateTime dateMonth = dateBefore
+                .AddDays(-dateBefore.Day + 1)
+                .AddHours(-dateBefore.Hour)
+                .AddMinutes(-dateBefore.Minute)
+                .AddSeconds(-dateBefore.Second);
+            var dataMonth = AllocationToTable(dateMonth);
+            _logger.Debug($"{dateMonth} - Ongoing Month PnL: {Math.Round(pnl - dataMonth.Last().Item2[3],2)} {Fiat.ToFullName()}");
+            DateTime dateWeek = dateBefore
+                .AddDays(-((int)dateBefore.DayOfWeek == 0? 7: (int)dateBefore.DayOfWeek) + 1)
+                .AddHours(-dateBefore.Hour)
+                .AddMinutes(-dateBefore.Minute)
+                .AddSeconds(-dateBefore.Second);
+            var dataWeek = AllocationToTable(dateWeek);
+            _logger.Debug($"{dateWeek} - Ongoing Week PnL: {Math.Round(pnl - dataWeek.Last().Item2[3], 2)} {Fiat.ToFullName()}");
+            DateTime dateDay = dateBefore
+                .AddDays(0)
+                .AddHours(-dateBefore.Hour)
+                .AddMinutes(-dateBefore.Minute)
+                .AddSeconds(-dateBefore.Second);
+            var dataDay = AllocationToTable(dateDay);
+            _logger.Warn($"{dateDay} - Ongoing Day PnL: {Math.Round(pnl - dataDay.Last().Item2[3], 2)} {Fiat.ToFullName()}");
+        }
     }
 }

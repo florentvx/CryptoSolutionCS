@@ -16,12 +16,16 @@ using Core.Markets;
 using TimeSeriesAnalytics;
 using Core.TimeSeriesKeys;
 using log4net;
+using log4net.Repository.Hierarchy;
+using log4net.Appender;
+using log4net.Config;
 
 namespace CryptoApp
 {
     public partial class CryptoForm : Form
     {
         private static readonly ILog _logger = LogManager.GetLogger(typeof(CryptoForm));
+        //private DebugAppender _appender = new DebugAppender();
 
         public List<ITimeSeriesKey> TimeSeriesKeyList = new List<ITimeSeriesKey>();
         public Currency Fiat { get { return CurrencyPorperties.FromNameToCurrency((string)comboBoxFiat.SelectedItem); } }
@@ -32,6 +36,7 @@ namespace CryptoApp
 
         public CryptoForm()
         {
+            XmlConfigurator.Configure();
             InitializeComponent();
             OnLoad();
         }
@@ -55,25 +60,24 @@ namespace CryptoApp
             dataGridViewAllocation.Columns[4].Name = "PnL";
             dataGridViewAllocation.Columns[5].Name = "Fees";
             dataGridViewAllocation.Columns[6].Name = "RPnL";
-            OnFiatChange(false); //Internet?
+            OnFiatChange(true); //Internet?
             Loaded = true;
         }
 
         private void AllocationTableUpdate()
         {
             var data = TSP.LastAllocationToTable();
-            DateTime dateBefore = DateTime.Now;
-            dateBefore = dateBefore.AddDays(- dateBefore.Day + 1).AddHours(- dateBefore.Hour).AddMinutes(-dateBefore.Minute);
-            var databefore = TSP.AllocationToTable(dateBefore);
-            _logger.Info($"{dateBefore} - Ongoing Month PnL: {data.Last().Item2[3] - databefore.Last().Item2[3]} {Fiat.ToFullName()}");
+            double pnl = data.Last().Item2[3];
             dataGridViewAllocation.Rows.Clear();
             foreach (var item in data)
                 dataGridViewAllocation.Rows.
                     Add(item.Item1, item.Item2[0], item.Item2[1], item.Item2[2], item.Item2[3], item.Item2[4], item.Item2[5]);
+            TSP.GetOnGoingPnLs(pnl);
         }
 
         private void OnFiatChange(bool updateKrakrenLedger = false)
         {
+            comboBoxFrequency.SelectedIndex = 5;
             GetCheckedCurrencyPairs();
             if (TSP != null) TSP = new TimeSeriesProvider(Fiat, TSP.DataProvider, updateKrakrenLedger);
             else { TSP = new TimeSeriesProvider(Fiat, updateKrakrenLedger); }

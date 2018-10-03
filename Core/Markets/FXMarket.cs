@@ -77,7 +77,7 @@ namespace Core.Markets
                         CurrencyPair invCurPair = curPair.GetInverse();
                         XChangeRate xRate2 = FX.Where(x => x.CcyPair.IsEqual(invCurPair)).FirstOrDefault();
                         if (xRate2 != null)
-                            return xRate2;
+                            return xRate2.GetInverse();
                         {
                             if (constructNewQuote)
                                 return ConstructNewQuote(curPair);
@@ -113,7 +113,7 @@ namespace Core.Markets
                 {
                     double rate1 = GetQuote(new CurrencyPair(curPair.Ccy1, ccy), false).Rate;
                     double rate2 = GetQuote(new CurrencyPair(ccy, curPair.Ccy2), false).Rate;
-                    res.Rate += rate1 / rate2;
+                    res.Rate += rate1 * rate2;
                     n++;
                 }
                 catch { return null; }

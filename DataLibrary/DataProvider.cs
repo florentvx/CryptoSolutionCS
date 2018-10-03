@@ -67,7 +67,7 @@ namespace DataLibrary
 
         private GetOHLCResult GetKrakenOHLC(CurrencyPair curPair, Frequency freq = Frequency.Hour4, int count = 10)
         {
-            _logger.Debug($"Kraken API Request : OHLC {curPair.ToString} - {freq.ToString()}");
+            _logger.Info($"Kraken API Request : OHLC {curPair.ToString} - {freq.ToString()}");
             try { return KrakenApi.GetOHLC(curPair.GetRequestID(), freq.GetFrequency()); }
             catch
             {
@@ -173,7 +173,7 @@ namespace DataLibrary
         private void SaveOHLC_2(CurrencyPairTimeSeries cpts)
         {
             string pathLib = GetOHLCLibraryPath(cpts.CurPair, cpts.Freq);
-            _logger.Debug($"Saving OHLC: {cpts.CurPair.ToString} {cpts.Freq.ToString()}");
+            _logger.Info($"Saving OHLC: {cpts.CurPair.ToString} {cpts.Freq.ToString()}");
             StringBuilder sb = new StringBuilder();
             sb.AppendLine("Time,Open,High,Low,Close,Volume,Vwap,Count");
             foreach (OHLC item in OHLCData[cpts.GetTimeSeriesKey()])
@@ -182,7 +182,7 @@ namespace DataLibrary
                 if (StaticLibrary.UnixTimeStampToDateTime(item.Time + cpts.Freq.GetFrequency(true)) < DateTime.UtcNow)
                     sb.AppendLine($"{item.Time},{item.Open},{item.High},{item.Low},{item.Close},{item.Volume},{item.Vwap},{item.Count}");
                 else
-                    _logger.Debug($"Stopped at line: {StaticLibrary.UnixTimeStampToDateTime(item.Time)}");
+                    _logger.Info($"Stopped at line: {StaticLibrary.UnixTimeStampToDateTime(item.Time)}");
             }
             File.WriteAllText(pathLib, sb.ToString());
         }
@@ -283,7 +283,7 @@ namespace DataLibrary
 
         private GetLedgerResult GetKrakenLedger(int? offset = null, int count = 10)
         {
-            _logger.Debug($"Kraken API Request : Ledger");
+            _logger.Info($"Kraken API Request : Ledger");
             try { return KrakenApi.GetLedgers(ofs: offset); }
             catch
             {
@@ -295,7 +295,7 @@ namespace DataLibrary
 
         private GetLedgerResult GetFullKrakenLedger()
         {
-            GetLedgerResult res1 = GetKrakenLedger();
+            GetLedgerResult res1 = GetKrakenLedger(0);
             int ofs = res1.Ledger.Count;
             while (ofs < res1.Count)
             {
@@ -337,7 +337,7 @@ namespace DataLibrary
         private void SaveLedger(Dictionary<string,LedgerInfo> data)
         {
             string pathLib = GetLedgerLibraryPath();
-            _logger.Debug($"Saving Ledger");
+            _logger.Info($"Saving Ledger");
             StringBuilder sb = new StringBuilder();
             sb.AppendLine("Key,Time,Refid,Type,Aclass,Amount,Asset,Balance,Fee");
             foreach (string item in data.Keys)
