@@ -15,6 +15,11 @@ namespace Core.Markets
         public List<XChangeRate> FX = new List<XChangeRate>();
         public List<Currency> CcyList = new List<Currency>();
 
+        public FXMarket(DateTime date)
+        {
+            Date = date;
+        }
+
         public FXMarket(DateTime date, XChangeRate quote)
         {
             Date = date;
@@ -29,6 +34,11 @@ namespace Core.Markets
             foreach (XChangeRate xRate in quotes)
                 AddQuote(xRate);
         }
+
+        private bool _isArtificial = false;
+        public bool IsArtificial { get { return _isArtificial; } }
+        public void DefineAsArtificial() { _isArtificial = true; }
+
 
         public List<CurrencyPair> GetCurrencyPairs(Currency ccyRef)
         {
@@ -62,7 +72,7 @@ namespace Core.Markets
             FX.Add(xRate);
         }
 
-        public XChangeRate GetQuote(CurrencyPair curPair, bool constructNewQuote = true)
+        public XChangeRate GetQuote(CurrencyPair curPair, bool constructNewQuote = true, bool useConstructedQuote = true)
         {
             if (curPair.IsIdentity) return new XChangeRate(1, (CurrencyPair)curPair.Clone());
             else
@@ -80,7 +90,7 @@ namespace Core.Markets
                             return xRate2.GetInverse();
                         {
                             if (constructNewQuote)
-                                return ConstructNewQuote(curPair);
+                                return ConstructNewQuote(curPair, useConstructedQuote);
                             else { return null; }
                         }
                     }
@@ -94,9 +104,8 @@ namespace Core.Markets
             return GetQuote(new CurrencyPair(ccy1, ccy2), constructNewQuote);
         }
 
-        private XChangeRate ConstructNewQuote(CurrencyPair curPair)
+        private XChangeRate ConstructNewQuote(CurrencyPair curPair, bool useConstructedQuote)
         {
-            _logger.Debug($"Constructing New pair: {curPair.ToString}");
             IEnumerable<Currency> Ccy1List = FX
                 .Where(x => x.CcyPair.Contains(curPair.Ccy1))
                 .Select(x => (x.CcyPair.Ccy1 == curPair.Ccy1) ? x.CcyPair.Ccy2 : x.CcyPair.Ccy1);
@@ -122,7 +131,11 @@ namespace Core.Markets
             if (n > 0)
             {
                 res.Rate /= Convert.ToDouble(n);
-                AddFXRate(res);
+                if (useConstructedQuote)
+                {
+                    _logger.Info($"{Date}: Constructing New pair: {curPair.ToString}");
+                    AddFXRate(res);
+                }
                 return res;
             }
             else { return null; }
@@ -157,11 +170,15 @@ namespace Core.Markets
 
         public bool FXContains(CurrencyPair cp)
         {
-            bool res = false;
-            foreach (XChangeRate xr in FX)
-                if (xr.CcyPair.IsEqual(cp))
-                    res = true;
-            return res;
+            XChangeRate xcr = GetQuote(cp, true, false);
+            return xcr != null ;
+        }
+
+        public bool FXContains(List<CurrencyPair> cpList)
+        {
+            foreach(CurrencyPair cp in cpList)
+                if (!FXContains(cp)) return false;
+            return true;
         }
 
         public object Clone()

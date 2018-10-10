@@ -12,9 +12,13 @@ namespace Core.Allocations
     public struct PnLElement : ICloneable
     {
         public double Position;
+        public double xChangeRate;
         public double AverageCost;
+        public double OnGoingPnL;
         public double Fees;
         public double RealizedPnL;
+
+        public double TotalPnL { get { return OnGoingPnL + RealizedPnL; } }
 
         public object Clone()
         {
@@ -125,20 +129,14 @@ namespace Core.Allocations
             }
         }
 
-        internal Tuple<string,double[]> ToArray(XChangeRate xChangeRate)
+        internal Tuple<string,PnLElement> ToArray(XChangeRate xChangeRate)
         {
             PnLElement pnl = PnLElements[PnLElements.Keys.Last()];
             int round = Ccy.IsFiat() ? 2 : 8;
-            double[] res = new double[6]
-            {
-                Math.Round(pnl.Position,round),
-                Math.Round(xChangeRate.Rate, 2),
-                Math.Round(pnl.AverageCost, 2),
-                Math.Round(pnl.Position * (xChangeRate.Rate - pnl.AverageCost), 2),
-                Math.Round(pnl.Fees,2),
-                Math.Round(pnl.RealizedPnL,2)
-            };
-            return new Tuple<string, double[]>(Ccy.ToFullName(), res);
+            PnLElement res = (PnLElement)pnl.Clone();
+            res.xChangeRate = xChangeRate.Rate;
+            res.OnGoingPnL = pnl.Position * (xChangeRate.Rate - pnl.AverageCost);
+            return new Tuple<string, PnLElement>(Ccy.ToFullName(), res);
         }
     }
 }

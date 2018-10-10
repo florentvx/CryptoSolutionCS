@@ -66,25 +66,21 @@ namespace Core.Allocations
             }
         }
 
-        public List<Tuple<string,double[]>> ToTable(FXMarket fx)
+        public Dictionary<string,PnLElement> ToTable(FXMarket fx)
         {
             int n = PnLs.Count + 1;
-            List<Tuple<string, double[]>> res = new List<Tuple<string, double[]>> { };
-            double[] total = new double[6];
+            Dictionary<string, PnLElement> res = new Dictionary<string, PnLElement> { };
+            PnLElement total = new PnLElement();
             foreach (Currency ccy in PnLs.Keys)
             {
-                Tuple<string, double[]> item = PnLs[ccy].ToArray(fx.GetQuote(ccy, CcyRef));
-                res.Add(item);
-                total[0] += item.Item2[0] * item.Item2[1];
-                total[3] += item.Item2[3];
-                total[4] += item.Item2[4];
-                total[5] += item.Item2[5];
+                Tuple<string, PnLElement> item = PnLs[ccy].ToArray(fx.GetQuote(ccy,CcyRef));
+                res.Add(item.Item1,item.Item2);
+                total.Position += item.Item2.Position * item.Item2.xChangeRate;
+                total.OnGoingPnL += item.Item2.OnGoingPnL;
+                total.Fees += item.Item2.Fees;
+                total.RealizedPnL += item.Item2.RealizedPnL;
             }
-            for (int i = 0; i < 6; i++)
-            {
-                total[i] = Math.Round(total[i], 2);
-            }
-            res.Add(new Tuple<string, double[]>("Total", total));
+            res.Add("Total", total);
             return res;
         }
 

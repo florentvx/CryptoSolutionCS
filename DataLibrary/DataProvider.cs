@@ -522,34 +522,41 @@ namespace DataLibrary
             foreach (CurrencyPair cp in cpList)
             {
                 CurrencyPairTimeSeries cpts = new CurrencyPairTimeSeries(cp, freq);
-                FillFXMarketHistory_2(fxmh, cpts);
+                FillFXMarketHistory_2(fxmh, cpts, new DateTime(2030,1,1)); // obsolete
             }
             return fxmh;
         }
 
-        public FXMarketHistory GetFXMarketHistory_3(Currency fiat, List<CurrencyPair> cpList, Frequency freq = Frequency.Hour4)
+        public FXMarketHistory GetFXMarketHistory_3(Currency fiat, List<CurrencyPair> cpList, DateTime startDate, 
+            Frequency freq = Frequency.Hour4)
         {
             // Need To Duplicate the market in order to have "clean" dates
             FXMarketHistory fxmh = new FXMarketHistory(fiat);
             foreach (CurrencyPair cp in cpList)
             {
                 CurrencyPairTimeSeries cpts = new CurrencyPairTimeSeries(cp, freq);
-                FillFXMarketHistory_2(fxmh, cpts);
+                FillFXMarketHistory_2(fxmh, cpts, startDate);
                 CryptoFiatPair cfp = cp.GetCryptoFiatPair;
                 if (cfp.Fiat != fiat)
                 {
                     CurrencyPairTimeSeries cpts2 = new CurrencyPairTimeSeries(cfp.Crypto, fiat, freq);
-                    FillFXMarketHistory_2(fxmh, cpts2);
+                    FillFXMarketHistory_2(fxmh, cpts2, startDate);
                 }
             }
             return fxmh;
         }
 
-        private void FillFXMarketHistory_2(FXMarketHistory fxmh, CurrencyPairTimeSeries cpts)
+        private void FillFXMarketHistory_2(FXMarketHistory fxmh, CurrencyPairTimeSeries cpts, DateTime startDate)
         {
             List<Tuple<DateTime, double>> ts = GetTimeSeries(cpts, isIndex: false);
             foreach (Tuple<DateTime, double> item in ts)
                 fxmh.AddQuote(item.Item1, new XChangeRate(item.Item2, cpts.CurPair));
+            if (ts.First().Item1 > startDate)
+            {
+                CurrencyPairTimeSeries newCpts = (CurrencyPairTimeSeries)cpts.Clone();
+                newCpts.IncreaseFreq();
+                FillFXMarketHistory_2(fxmh, newCpts, startDate);
+            }    
         }
 
         private DateTime FillFXMarketHistory(FXMarketHistory fxmh, CurrencyPairTimeSeries cpts, DateTime firstDate)

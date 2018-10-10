@@ -67,11 +67,19 @@ namespace CryptoApp
         private void AllocationTableUpdate()
         {
             var data = TSP.LastAllocationToTable();
-            double pnl = data.Last().Item2[3];
+            double pnl = data["Total"].TotalPnL;
             dataGridViewAllocation.Rows.Clear();
-            foreach (var item in data)
+            foreach (var key in data.Keys)
+            {
+                PnLElement item = data[key];
+                Currency ccy = CurrencyPorperties.FromNameToCurrency(key);
+                if (ccy.IsNone()) ccy = Fiat; 
                 dataGridViewAllocation.Rows.
-                    Add(item.Item1, item.Item2[0], item.Item2[1], item.Item2[2], item.Item2[3], item.Item2[4], item.Item2[5]);
+                    Add(key, Math.Round(item.Position,ccy.IsFiat() ? 2 : 6), 
+                    Math.Round(item.xChangeRate, ccy.IsFiat() ? 4 : 2),
+                    Math.Round(item.AverageCost, ccy.IsFiat() ? 4 : 2), 
+                    Math.Round(item.OnGoingPnL,2), Math.Round(item.Fees,2), Math.Round(item.RealizedPnL,2));
+            }
             TSP.GetOnGoingPnLs(pnl);
         }
 

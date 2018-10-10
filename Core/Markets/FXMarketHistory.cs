@@ -40,6 +40,14 @@ namespace Core.Markets
                 FXMarkets[date] = new FXMarket(date, quote);
         }
 
+        internal void AddFXMarket(DateTime date, FXMarket fX)
+        {
+            foreach (XChangeRate xcr in fX.FX)
+            {
+                AddQuote(date, xcr);
+            }
+        }
+
         private void AddCcy(CurrencyPair ccyPair)
         {
             bool t1 = AddCcy(ccyPair.Ccy1);
@@ -65,6 +73,26 @@ namespace Core.Markets
         public FXMarket GetFXMarket(DateTime date)
         {
             return FXMarkets.Where(x => x.Key <= date).Select(x => x.Value).LastOrDefault();
+        }
+
+        public FXMarket GetArtificialFXMarket(DateTime date, List<CurrencyPair> cpList)
+        {
+            FXMarket res = new FXMarket(date);
+            res = GetFXMarket(date);
+            if (res.FXContains(cpList)) return res; // time saver...
+            foreach (CurrencyPair cp in cpList)
+            {
+                FXMarket beforeFX = FXMarkets.Where(x => x.Key <= date && x.Value.FXContains(cp)).Last().Value;
+                FXMarket afterFX = FXMarkets.Where(x => x.Key >= date && x.Value.FXContains(cp)).First().Value;
+                double w = 0.5;
+                if (afterFX.Date > beforeFX.Date)
+                    w = (date - beforeFX.Date).TotalSeconds/ (double)(afterFX.Date - beforeFX.Date).TotalSeconds;
+                double rate = (1 - w) * beforeFX.GetQuote(cp).Rate + w * afterFX.GetQuote(cp).Rate; //TODO: Update the 50%
+                if (beforeFX.Date != afterFX.Date) res.DefineAsArtificial();
+                XChangeRate xRateCp = new XChangeRate(rate, (CurrencyPair)cp.Clone());
+                res.AddQuote(xRateCp);
+            }
+            return res;
         }
 
         public XChangeRate GetQuote(DateTime dateTime, CurrencyPair currencyPair)
