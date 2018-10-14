@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace TimeSeriesAnalytics
 {
-    public class ChartData
+    public class ChartData : IChartData
     {
         Dictionary<string, TimeSeries> Dictionary = new Dictionary<string, TimeSeries>();
         private Double _globalMin = Double.NaN;
@@ -31,7 +31,7 @@ namespace TimeSeriesAnalytics
             get{ return _globalMax < 100 ? _globalMax + _frame : Math.Round(_globalMax * (1 + _frame) / 100.0, 0) * 100.0; }
         }
 
-        public TimeSeries GetTimeSeries(ITimeSeriesKey itsk)
+        public ITimeSeries GetTimeSeries(ITimeSeriesKey itsk)
         {
             return Dictionary[itsk.GetFullName()];
         }

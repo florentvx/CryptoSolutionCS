@@ -28,9 +28,9 @@
         /// </summary>
         private void InitializeComponent()
         {
-            System.Windows.Forms.DataVisualization.Charting.ChartArea chartArea2 = new System.Windows.Forms.DataVisualization.Charting.ChartArea();
-            System.Windows.Forms.DataVisualization.Charting.Legend legend2 = new System.Windows.Forms.DataVisualization.Charting.Legend();
-            System.Windows.Forms.DataVisualization.Charting.Series series2 = new System.Windows.Forms.DataVisualization.Charting.Series();
+            System.Windows.Forms.DataVisualization.Charting.ChartArea chartArea1 = new System.Windows.Forms.DataVisualization.Charting.ChartArea();
+            System.Windows.Forms.DataVisualization.Charting.Legend legend1 = new System.Windows.Forms.DataVisualization.Charting.Legend();
+            System.Windows.Forms.DataVisualization.Charting.Series series1 = new System.Windows.Forms.DataVisualization.Charting.Series();
             this.tabControl1 = new System.Windows.Forms.TabControl();
             this.Allocation = new System.Windows.Forms.TabPage();
             this.dataGridViewAllocation = new System.Windows.Forms.DataGridView();
@@ -40,12 +40,12 @@
             this.buttonShow = new System.Windows.Forms.Button();
             this.checkedListBox1 = new System.Windows.Forms.CheckedListBox();
             this.chart1 = new System.Windows.Forms.DataVisualization.Charting.Chart();
+            this.richTextBoxLogger = new System.Windows.Forms.RichTextBox();
             this.label1 = new System.Windows.Forms.Label();
             this.comboBoxFiat = new System.Windows.Forms.ComboBox();
             this.label2 = new System.Windows.Forms.Label();
             this.comboBoxFrequency = new System.Windows.Forms.ComboBox();
             this.buttonFullDataUpdate = new System.Windows.Forms.Button();
-            this.richTextBoxLogger = new System.Windows.Forms.RichTextBox();
             this.tabControl1.SuspendLayout();
             this.Allocation.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dataGridViewAllocation)).BeginInit();
@@ -64,18 +64,17 @@
             this.tabControl1.Location = new System.Drawing.Point(12, 59);
             this.tabControl1.Name = "tabControl1";
             this.tabControl1.SelectedIndex = 0;
-            this.tabControl1.Size = new System.Drawing.Size(1064, 525);
+            this.tabControl1.Size = new System.Drawing.Size(1159, 515);
             this.tabControl1.TabIndex = 1;
             // 
             // Allocation
             // 
-            this.Allocation.Controls.Add(this.richTextBoxLogger);
             this.Allocation.Controls.Add(this.dataGridViewAllocation);
             this.Allocation.Controls.Add(this.label3);
             this.Allocation.Location = new System.Drawing.Point(4, 25);
             this.Allocation.Name = "Allocation";
             this.Allocation.Padding = new System.Windows.Forms.Padding(3);
-            this.Allocation.Size = new System.Drawing.Size(1056, 496);
+            this.Allocation.Size = new System.Drawing.Size(1151, 486);
             this.Allocation.TabIndex = 1;
             this.Allocation.Text = "Allocation";
             this.Allocation.UseVisualStyleBackColor = true;
@@ -89,7 +88,7 @@
             this.dataGridViewAllocation.Location = new System.Drawing.Point(9, 23);
             this.dataGridViewAllocation.Name = "dataGridViewAllocation";
             this.dataGridViewAllocation.RowTemplate.Height = 24;
-            this.dataGridViewAllocation.Size = new System.Drawing.Size(1041, 354);
+            this.dataGridViewAllocation.Size = new System.Drawing.Size(1146, 457);
             this.dataGridViewAllocation.TabIndex = 3;
             // 
             // label3
@@ -108,7 +107,7 @@
             this.Graphs.Location = new System.Drawing.Point(4, 25);
             this.Graphs.Name = "Graphs";
             this.Graphs.Padding = new System.Windows.Forms.Padding(3);
-            this.Graphs.Size = new System.Drawing.Size(1025, 455);
+            this.Graphs.Size = new System.Drawing.Size(1151, 486);
             this.Graphs.TabIndex = 0;
             this.Graphs.Text = "Graphs";
             this.Graphs.UseVisualStyleBackColor = true;
@@ -121,7 +120,7 @@
             this.groupBox1.Controls.Add(this.checkedListBox1);
             this.groupBox1.Location = new System.Drawing.Point(6, 6);
             this.groupBox1.Name = "groupBox1";
-            this.groupBox1.Size = new System.Drawing.Size(189, 443);
+            this.groupBox1.Size = new System.Drawing.Size(189, 475);
             this.groupBox1.TabIndex = 1;
             this.groupBox1.TabStop = false;
             this.groupBox1.Text = "Graphs";
@@ -149,19 +148,33 @@
             this.chart1.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            chartArea2.Name = "ChartArea1";
-            this.chart1.ChartAreas.Add(chartArea2);
-            legend2.Name = "Legend1";
-            this.chart1.Legends.Add(legend2);
+            chartArea1.Name = "ChartArea1";
+            this.chart1.ChartAreas.Add(chartArea1);
+            legend1.Name = "Legend1";
+            this.chart1.Legends.Add(legend1);
             this.chart1.Location = new System.Drawing.Point(235, 6);
             this.chart1.Name = "chart1";
-            series2.ChartArea = "ChartArea1";
-            series2.Legend = "Legend1";
-            series2.Name = "Series1";
-            this.chart1.Series.Add(series2);
-            this.chart1.Size = new System.Drawing.Size(784, 443);
+            series1.ChartArea = "ChartArea1";
+            series1.Legend = "Legend1";
+            series1.Name = "Series1";
+            this.chart1.Series.Add(series1);
+            this.chart1.Size = new System.Drawing.Size(910, 465);
             this.chart1.TabIndex = 0;
             this.chart1.Text = "chart1";
+            // 
+            // richTextBoxLogger
+            // 
+            this.richTextBoxLogger.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.richTextBoxLogger.BackColor = System.Drawing.SystemColors.ActiveCaptionText;
+            this.richTextBoxLogger.ForeColor = System.Drawing.SystemColors.Info;
+            this.richTextBoxLogger.Location = new System.Drawing.Point(16, 576);
+            this.richTextBoxLogger.Name = "richTextBoxLogger";
+            this.richTextBoxLogger.ReadOnly = true;
+            this.richTextBoxLogger.Size = new System.Drawing.Size(1155, 109);
+            this.richTextBoxLogger.TabIndex = 4;
+            this.richTextBoxLogger.Text = "";
             // 
             // label1
             // 
@@ -208,23 +221,12 @@
             this.buttonFullDataUpdate.UseVisualStyleBackColor = true;
             this.buttonFullDataUpdate.Click += new System.EventHandler(this.ButtonFullUpdate_Click);
             // 
-            // richTextBoxLogger
-            // 
-            this.richTextBoxLogger.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.richTextBoxLogger.Location = new System.Drawing.Point(9, 383);
-            this.richTextBoxLogger.Name = "richTextBoxLogger";
-            this.richTextBoxLogger.ReadOnly = true;
-            this.richTextBoxLogger.Size = new System.Drawing.Size(1041, 110);
-            this.richTextBoxLogger.TabIndex = 4;
-            this.richTextBoxLogger.Text = "";
-            // 
             // CryptoForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(1088, 596);
+            this.ClientSize = new System.Drawing.Size(1183, 697);
+            this.Controls.Add(this.richTextBoxLogger);
             this.Controls.Add(this.buttonFullDataUpdate);
             this.Controls.Add(this.comboBoxFrequency);
             this.Controls.Add(this.label2);

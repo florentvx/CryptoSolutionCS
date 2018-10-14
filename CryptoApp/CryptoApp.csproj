@@ -55,6 +55,7 @@
     <Compile Include="CryptoForm.Designer.cs">
       <DependentUpon>CryptoForm.cs</DependentUpon>
     </Compile>
+    <Compile Include="Presenter.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <EmbeddedResource Include="CryptoForm.resx">
@@ -70,7 +71,9 @@
       <DependentUpon>Resources.resx</DependentUpon>
       <DesignTime>True</DesignTime>
     </Compile>
-    <None Include="app.config" />
+    <None Include="app.config">
+      <SubType>Designer</SubType>
+    </None>
     <None Include="packages.config" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
@@ -94,6 +97,10 @@
     <ProjectReference Include="..\KrakenApi\KrakenApi.csproj">
       <Project>{F14FBC9A-BB60-4D11-B94D-9D36D621BAC3}</Project>
       <Name>KrakenApi</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Logging\Logging.csproj">
+      <Project>{e73d727d-ca54-4be9-be0c-3f1c6c1ef4fd}</Project>
+      <Name>Logging</Name>
     </ProjectReference>
     <ProjectReference Include="..\TimeSeriesAnalytics\TimeSeriesAnalytics.csproj">
       <Project>{4dbba2a4-8179-443c-8004-977d88dab946}</Project>

@@ -46,7 +46,7 @@
   <ItemGroup>
     <Compile Include="ChartData.cs" />
     <Compile Include="TimeSeries.cs" />
-    <Compile Include="TimeSeriesProvider.cs" />
+    <Compile Include="TimeSeriesManager.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -57,6 +57,10 @@
     <ProjectReference Include="..\DataLibrary\DataLibrary.csproj">
       <Project>{3bd6744b-a4b7-4de0-bf78-93eda8097cde}</Project>
       <Name>DataLibrary</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Logging\Logging.csproj">
+      <Project>{e73d727d-ca54-4be9-be0c-3f1c6c1ef4fd}</Project>
+      <Name>Logging</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

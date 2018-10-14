@@ -4,12 +4,12 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{60600808-2463-40BE-A3CD-1D155508C195}</ProjectGuid>
+    <ProjectGuid>{E73D727D-CA54-4BE9-BE0C-3F1C6C1EF4FD}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Core</RootNamespace>
-    <AssemblyName>Core</AssemblyName>
-    <TargetFrameworkVersion>v4.5.1</TargetFrameworkVersion>
+    <RootNamespace>Logging</RootNamespace>
+    <AssemblyName>Logging</AssemblyName>
+    <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <TargetFrameworkProfile />
   </PropertyGroup>
@@ -33,45 +33,21 @@
     <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="log4net, Version=2.0.8.0, Culture=neutral, PublicKeyToken=669e0ddf0bb1aa2a, processorArchitecture=MSIL">
-      <HintPath>..\packages\log4net.2.0.8\lib\net45-full\log4net.dll</HintPath>
-    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
+    <Reference Include="System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\..\..\..\Program Files (x86)\Reference Assemblies\Microsoft\Framework\.NETFramework\v4.5.2\System.Drawing.dll</HintPath>
+    </Reference>
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Allocations\Allocation.cs" />
-    <Compile Include="Allocations\AllocationAggregatedPnL.cs" />
-    <Compile Include="Allocations\AllocationElement.cs" />
-    <Compile Include="Allocations\AllocationHistory.cs" />
-    <Compile Include="Allocations\AllocationPnL.cs" />
-    <Compile Include="Allocations\AllocationSummary.cs" />
-    <Compile Include="Interfaces\IChartData.cs" />
-    <Compile Include="Interfaces\ITimeSeries.cs" />
-    <Compile Include="Interfaces\ITimeSeriesManager.cs" />
-    <Compile Include="Interfaces\IView.cs" />
-    <Compile Include="TimeSeriesKeys\AllocationSrategy.cs" />
-    <Compile Include="Interfaces\ITimeSeriesKey.cs" />
-    <Compile Include="Interfaces\ITimeSeriesProvider.cs" />
-    <Compile Include="TimeSeriesKeys\CurrencyPairTimeSeries.cs" />
-    <Compile Include="TimeSeriesKeys\Frequency.cs" />
-    <Compile Include="TimeSeriesKeys\TimeSeriesKeyType.cs" />
-    <Compile Include="Markets\FXMarket.cs" />
-    <Compile Include="Markets\FXMarketHistory.cs" />
-    <Compile Include="Quotes\Currency.cs" />
-    <Compile Include="Quotes\CurrencyPair.cs" />
-    <Compile Include="Quotes\Price.cs" />
+    <Compile Include="LoggingCore.cs" />
+    <Compile Include="Logger.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Quotes\XChangeRate.cs" />
-    <Compile Include="Transactions\Transaction.cs" />
-    <Compile Include="Transactions\TransactionType.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="packages.config" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

@@ -4,10 +4,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Core.Interfaces;
 
 namespace TimeSeriesAnalytics
 {
-    public class TimeSeries : IEnumerable<Tuple<DateTime,double>>
+    public class TimeSeries : ITimeSeries
     {
         public List<Tuple<DateTime, double>> Data = new List<Tuple<DateTime, double>>();
         public TimeSeries() {}
@@ -18,12 +19,7 @@ namespace TimeSeriesAnalytics
         private double _IndexStart = 10000.0;
 
 
-        IEnumerator<Tuple<DateTime, double>> IEnumerable<Tuple<DateTime, double>>.GetEnumerator()
-        {
-            return ((IEnumerable<Tuple<DateTime, double>>)Data).GetEnumerator();
-        }
-
-        IEnumerator IEnumerable.GetEnumerator()
+        IEnumerator<Tuple<DateTime, double>> ITimeSeries.GetEnumerator()
         {
             return ((IEnumerable<Tuple<DateTime, double>>)Data).GetEnumerator();
         }

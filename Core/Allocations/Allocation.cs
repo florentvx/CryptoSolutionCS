@@ -48,8 +48,10 @@ namespace Core.Allocations
         {
             var dico = AllocationTools<Currency, AllocationElement>.DeepCopy(Dictionary);
             var fees = (AllocationElement)Fees.Clone();
-            Allocation res =  new Allocation(CcyRef, dico, fees);
-            res.Total = (Price)Total.Clone();
+            Allocation res = new Allocation(CcyRef, dico, fees)
+            {
+                Total = (Price)Total.Clone()
+            };
             return res;
         }
 
