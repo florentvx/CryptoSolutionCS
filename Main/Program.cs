@@ -10,6 +10,7 @@ using KrakenApi;
 using Core.Transactions;
 using Core.Allocations;
 using Core.TimeSeriesKeys;
+using Core.Interfaces;
 
 namespace Main
 {
@@ -37,7 +38,7 @@ namespace Main
 
             // DataLibrary Test
             DataProvider dtl = new DataProvider(path);
-            dtl.LoadOHLC_2(new List<CurrencyPairTimeSeries>
+            dtl.LoadOHLC(new List<ITimeSeriesKey>
             {
                 new CurrencyPairTimeSeries(curPairXBT),
                 new CurrencyPairTimeSeries(curPairXBT)

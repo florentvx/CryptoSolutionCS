@@ -58,25 +58,7 @@ namespace TimeSeriesAnalytics
             DataProvider = dp;
             DataProvider.LoadLedger(useKraken: useKraken);
             SetUpAllocations();
-            //SetUpAllocationHistory();
         }
-
-        //private void SetUpAllocationHistory()
-        //{
-        //    List<Transaction> txL = DataProvider.GetTransactionList();
-        //    List<CurrencyPair> cpList = new List<CurrencyPair>();
-        //    foreach (Transaction item in txL)
-        //    {
-        //        CurrencyPair cp = item.XRate.CcyPair;
-        //        if (!cp.IsIdentity)
-        //            if (cpList.Where(x => x.IsEqual(cp)).Count() == 0) cpList.Add(cp);
-        //    }
-        //    List<Currency> otherFiats = DataProvider.LedgerCurrencies
-        //        .Where(x => x.IsFiat() && x != Fiat)
-        //        .ToList();
-        //    FXMarketHistory fxmh = DataProvider.GetFXMarketHistory(Fiat, cpList, txL.First().Date, otherFiats);
-        //    AH = new AllocationHistory(txL, fxmh);
-        //}
 
         public void SetUpAllocations()
         {
@@ -84,7 +66,7 @@ namespace TimeSeriesAnalytics
             List<Transaction> txList = DataProvider.GetTransactionList();
             AS.LoadTransactionList(txList);
             DateTime startDate = AS.History.First().Key;
-            FXMH = DataProvider.GetFXMarketHistory_3(Fiat, AS.FXMH.CpList, startDate);
+            FXMH = DataProvider.GetFXMarketHistory(Fiat, AS.FXMH.CpList, startDate);
             AH = new AllocationHistory(txList, FXMH);
         }
 
@@ -115,7 +97,7 @@ namespace TimeSeriesAnalytics
         {
             Fiat = fiat;
             TimeSeriesKeyList = tskl;
-            DataProvider.LoadOHLC_2(TimeSeriesKeyList, useLowerFrequencies: useLowerFrequencies);
+            DataProvider.LoadOHLC(TimeSeriesKeyList, useLowerFrequencies: useLowerFrequencies);
             SetUpAllocations();
         }
 

@@ -58,13 +58,25 @@ namespace DataLibrary
 
         #region OHLC
 
-        #region OHLC Main
+        #region OHLC Core
 
+        /// <summary>
+        /// Test: Is data associated to this Frequency saved in CSV locally?
+        /// </summary>
+        /// <param name="freq"></param>
+        /// <returns></returns>
         private bool SaveableFrequency(Frequency freq)
         {
             return freq > SavingMinimumFrequency;
         }
 
+        /// <summary>
+        /// Request the OHLC data from Kraken (looping requests if needed)
+        /// </summary>
+        /// <param name="curPair"></param>
+        /// <param name="freq"></param>
+        /// <param name="count"></param>
+        /// <returns></returns>
         private GetOHLCResult GetKrakenOHLC(CurrencyPair curPair, Frequency freq = Frequency.Hour4, int count = 10)
         {
             _logger.Info($"Kraken API Request : OHLC {curPair.ToString} - {freq.ToString()}");
@@ -77,6 +89,13 @@ namespace DataLibrary
             }
         }
 
+        /// <summary>
+        /// Read already downloaded OHLC data
+        /// </summary>
+        /// <param name="curPair"></param>
+        /// <param name="freq"></param>
+        /// <param name="item"></param>
+        /// <returns></returns>
         private GetOHLCResult ReadOHLC(CurrencyPair curPair, Frequency freq, string item = "Close")
         {
             string pathLib = GetOHLCLibraryPath(curPair, freq);
@@ -98,79 +117,12 @@ namespace DataLibrary
             }
             return res;
         }
-        #endregion
 
-        #region OHLC: Old Way
-
-        //private void UpdateData(GetOHLCResult data, CurrencyPair curPair, Frequency freq)
-        //{
-        //    string cpID = curPair.GetRequestID();
-        //    GetOHLCResult newData = GetKrakenOHLC(curPair, freq);
-        //    List<OHLC> currentData = data.Pairs[cpID];
-        //    int lastDate = currentData.Last().Time;
-        //    foreach (OHLC item in newData.Pairs[cpID])
-        //    {
-        //        if (lastDate < item.Time) currentData.Add(item);
-        //    }
-        //}
-
-        //private void SaveOHLC(CurrencyPair curPair, Frequency freq, GetOHLCResult data)
-        //{
-        //    string pathLib = GetOHLCLibraryPath(curPair, freq);
-        //    Console.WriteLine($"Saving OHLC: {curPair.ToString} {freq.ToString()}");
-        //    StringBuilder sb = new StringBuilder();
-        //    sb.AppendLine("Time,Open,High,Low,Close,Volume,Vwap,Count");
-        //    foreach (OHLC item in data.Pairs[curPair.GetRequestID()])
-        //    {
-        //        //Console.WriteLine($"Saving data: {UnixTimeStampToDateTime(item.Time)}");
-        //        if (StaticLibrary.UnixTimeStampToDateTime(item.Time + freq.GetFrequency(true)) < DateTime.UtcNow)
-        //            sb.AppendLine($"{item.Time},{item.Open},{item.High},{item.Low},{item.Close},{item.Volume},{item.Vwap},{item.Count}");
-        //        else
-        //            Console.WriteLine($"Stopped at line: {StaticLibrary.UnixTimeStampToDateTime(item.Time)}");
-        //    }
-        //    File.WriteAllText(pathLib, sb.ToString());
-        //}
-
-        //public void LoadOHLC(CurrencyPairTimeSeries cpts)
-        //{
-        //    CurrencyPair ccyPair = cpts.CurPair;
-        //    Frequency freq = cpts.Freq;
-        //    // Creating the object result 
-        //    GetOHLCResult res = new GetOHLCResult
-        //    {
-        //        Pairs = new Dictionary<string, List<OHLC>>()
-        //    };
-        //    res.Pairs[ccyPair.GetRequestID()] = new List<OHLC>();
-
-        //    // Creating the csv for the first time (if needed)
-        //    if (!File.Exists(GetOHLCLibraryPath(ccyPair, freq)))
-        //        res.Pairs[ccyPair.GetRequestID()] = GetKrakenOHLC(ccyPair, freq).Pairs[ccyPair.GetRequestID()];
-
-        //    // Updating & Saving
-
-        //    GetOHLCResult resCp;
-        //    bool doSave = true;
-        //    if (res.Pairs[ccyPair.GetRequestID()].Count == 0)
-        //    {
-        //        resCp = ReadOHLC(ccyPair, freq);
-        //        DateTime lastDate = StaticLibrary.UnixTimeStampToDateTime(resCp.Pairs[ccyPair.GetRequestID()].Last().Time);
-        //        if (DateTime.UtcNow.Subtract(lastDate).TotalSeconds > 2 * freq.GetFrequency(inSecs: true)) //INTERNET: 2
-        //            UpdateData(resCp, ccyPair, freq);
-        //        else
-        //            doSave = false;
-        //        res.Pairs[ccyPair.GetRequestID()] = resCp.Pairs[ccyPair.GetRequestID()];
-        //    }
-        //    if (doSave && freq > SavingMinimumFrequency)
-        //        SaveOHLC(ccyPair, freq, res);
-
-        //    OHLCData[cpts.GetTimeSeriesKey()] = res.Pairs[ccyPair.GetRequestID()];
-        //}
-
-        #endregion
-
-        #region OHLC: new Way
-
-        private void SaveOHLC_2(CurrencyPairTimeSeries cpts)
+        /// <summary>
+        /// Write additional OHLC information locally
+        /// </summary>
+        /// <param name="cpts"></param>
+        private void SaveOHLC(CurrencyPairTimeSeries cpts)
         {
             string pathLib = GetOHLCLibraryPath(cpts.CurPair, cpts.Freq);
             _logger.Info($"Saving OHLC: {cpts.CurPair.ToString} {cpts.Freq.ToString()}");
@@ -187,7 +139,11 @@ namespace DataLibrary
             File.WriteAllText(pathLib, sb.ToString());
         }
 
-        private void UpdateData_2(CurrencyPairTimeSeries cpts)
+        /// <summary>
+        /// Add to loaded OHLC data the new information from Kraken
+        /// </summary>
+        /// <param name="cpts"></param>
+        private void UpdateData(CurrencyPairTimeSeries cpts)
         {
             string cpID = cpts.CurPair.GetRequestID();
             List<OHLC> newData = GetKrakenOHLC(cpts.CurPair, cpts.Freq).Pairs[cpts.CurPair.GetRequestID()];
@@ -199,37 +155,43 @@ namespace DataLibrary
             }
         }
 
-        private void UpdateAndSaving_2(CurrencyPairTimeSeries cpts)
+        /// <summary>
+        /// Update and save new OHLC data if needed
+        /// </summary>
+        /// <param name="cpts"></param>
+        private void UpdateAndSaving(CurrencyPairTimeSeries cpts)
         {
             bool doSave = true;
             if (OHLCData.ContainsKey(cpts.GetTimeSeriesKey()))
             {
-                //GetOHLCResult resCp = ReadOHLC(cpts.CurPair, cpts.Freq);
                 DateTime lastDate = StaticLibrary.UnixTimeStampToDateTime(OHLCData[cpts.GetTimeSeriesKey()].Last().Time);
                 if (DateTime.UtcNow.Subtract(lastDate).TotalSeconds > 2 * cpts.Freq.GetFrequency(inSecs: true))
-                    UpdateData_2(cpts);
+                    UpdateData(cpts);
                 else
                     doSave = false;
-                //OHLCData[cpts.GetTimeSeriesKey()] = resCp.Pairs[cpts.CurPair.GetRequestID()];
             }
             else
                 throw new NotImplementedException("You should have loaded the data before you got there (readed from csv or downloaded)");
             if (doSave && SaveableFrequency(cpts.Freq))
-                SaveOHLC_2(cpts);
+                SaveOHLC(cpts);
         }
 
-        public void LoadOHLC_2(CurrencyPairTimeSeries cpts)
+        /// <summary>
+        /// Create, Update and Save OHLC data as much as needed
+        /// </summary>
+        /// <param name="cpts"></param>
+        private void LoadOHLCCore(CurrencyPairTimeSeries cpts)
         {
             CurrencyPair ccyPair = cpts.CurPair;
             Frequency freq = cpts.Freq;
             if (OHLCData.ContainsKey(cpts.GetTimeSeriesKey()))
-                UpdateAndSaving_2(cpts);
+                UpdateAndSaving(cpts);
             else
             {
                 if (SaveableFrequency(freq) && File.Exists(GetOHLCLibraryPath(ccyPair, freq)))
                 {
                     OHLCData[cpts.GetTimeSeriesKey()] = ReadOHLC(ccyPair, freq).Pairs[ccyPair.GetRequestID()];
-                    UpdateAndSaving_2(cpts);
+                    UpdateAndSaving(cpts);
                 }
                 else
                     OHLCData[cpts.GetTimeSeriesKey()] = GetKrakenOHLC(ccyPair, freq).Pairs[ccyPair.GetRequestID()];
@@ -238,15 +200,14 @@ namespace DataLibrary
 
         #endregion
 
-        #region OHLC: different call functions for LoadOHLC
+        #region OHLC: public call functions for LoadOHLC
 
-        public void LoadOHLC_2(List<CurrencyPairTimeSeries> cpList, Frequency freq = Frequency.Hour4)
-        {
-            foreach (CurrencyPairTimeSeries cpts in cpList)
-                LoadOHLC_2(cpts);
-        }
-
-        public void LoadOHLC_2(ITimeSeriesKey itsk, bool useLowerFrequencies = false)
+        /// <summary>
+        /// Create, Update and Save OHLC data (as much as needed)
+        /// </summary>
+        /// <param name="itsk"></param>
+        /// <param name="useLowerFrequencies"></param>
+        public void LoadOHLC(ITimeSeriesKey itsk, bool useLowerFrequencies = false)
         {
             if (itsk.GetKeyType() == TimeSeriesKeyType.CurrencyPair)
             {
@@ -258,16 +219,21 @@ namespace DataLibrary
                     {
                         CurrencyPairTimeSeries newCpts = (CurrencyPairTimeSeries)cpts.Clone();
                         newCpts.Freq = item;
-                        LoadOHLC_2(newCpts);
+                        LoadOHLCCore(newCpts);
                     }
                 }                    
             }
         }
 
-        public void LoadOHLC_2(List<ITimeSeriesKey> timeSeriesKeyList, bool useLowerFrequencies = false)
+        /// <summary>
+        /// Create, Update and Save OHLC data (as much as needed)
+        /// </summary>
+        /// <param name="timeSeriesKeyList"></param>
+        /// <param name="useLowerFrequencies"></param>
+        public void LoadOHLC(List<ITimeSeriesKey> timeSeriesKeyList, bool useLowerFrequencies = false)
         {
             foreach (ITimeSeriesKey item in timeSeriesKeyList)
-                LoadOHLC_2(item, useLowerFrequencies);
+                LoadOHLC(item, useLowerFrequencies);
         }
         #endregion
 
@@ -275,12 +241,18 @@ namespace DataLibrary
 
         #region Ledger
 
-        private void AddLedgerCurrency(Currency ccy)
-        {
-            if (!ccy.IsNone() && LedgerCurrencies.Where(x => x == ccy).Count() == 0)
-                LedgerCurrencies.Add(ccy);
-        }
+        //private void AddLedgerCurrency(Currency ccy)
+        //{
+        //    if (!ccy.IsNone() && LedgerCurrencies.Where(x => x == ccy).Count() == 0)
+        //        LedgerCurrencies.Add(ccy);
+        //}
 
+        /// <summary>
+        /// Request Ledger from Kraken (looping the request if needed)
+        /// </summary>
+        /// <param name="offset"></param>
+        /// <param name="count"></param>
+        /// <returns></returns>
         private GetLedgerResult GetKrakenLedger(int? offset = null, int count = 10)
         {
             _logger.Info($"Kraken API Request : Ledger");
@@ -293,6 +265,10 @@ namespace DataLibrary
             }
         }
 
+        /// <summary>
+        /// Request entire Ledger history from Kraken
+        /// </summary>
+        /// <returns></returns>
         private GetLedgerResult GetFullKrakenLedger()
         {
             GetLedgerResult res1 = GetKrakenLedger(0);
@@ -309,6 +285,10 @@ namespace DataLibrary
             return res1;
         }
 
+        /// <summary>
+        /// Read locally downloaded Ledger
+        /// </summary>
+        /// <returns></returns>
         private GetLedgerResult ReadLedger()
         {
             string pathLib = GetLedgerLibraryPath();
@@ -334,6 +314,10 @@ namespace DataLibrary
             return res;
         }
 
+        /// <summary>
+        /// Writes new Ledger information on your computer
+        /// </summary>
+        /// <param name="data"></param>
         private void SaveLedger(Dictionary<string,LedgerInfo> data)
         {
             string pathLib = GetLedgerLibraryPath();
@@ -348,6 +332,10 @@ namespace DataLibrary
             File.WriteAllText(pathLib, sb.ToString());
         }
 
+        /// <summary>
+        /// Request the Ledger from Kraken and save it locally
+        /// </summary>
+        /// <param name="useKraken"></param>
         public void LoadLedger(bool useKraken = false)
         {
             GetLedgerResult res = ReadLedger();
@@ -367,6 +355,10 @@ namespace DataLibrary
 
         #region TransactionList
 
+        /// <summary>
+        /// Convert the raw Ledger data fromm Kraken to CryptoSolution objects
+        /// </summary>
+        /// <returns></returns>
         public List<Transaction> GetTransactionList()
         {
             List<Transaction> res = new List<Transaction>();
@@ -385,7 +377,7 @@ namespace DataLibrary
                             new Price(0, Currency.None), 
                             new Price((double)item.Amount, ccyDp));
                         res.Add(txDepo);
-                        AddLedgerCurrency(ccyDp);
+                        //AddLedgerCurrency(ccyDp);
                         break;
                     case TransactionType.WithDrawal:
                         Currency ccyWd = CurrencyPorperties.FromNameToCurrency(item.Asset);
@@ -396,7 +388,7 @@ namespace DataLibrary
                             new Price(0, Currency.None),
                             new Price((double)item.Fee, ccyWd));
                         res.Add(txWd);
-                        AddLedgerCurrency(ccyWd);
+                        //AddLedgerCurrency(ccyWd);
                         break;
                     case TransactionType.Trade:
                         if (item.Amount < 0)
@@ -408,8 +400,8 @@ namespace DataLibrary
                             LedgerInfo nextItem = items[i];
                             Price received = new Price(nextItem.Amount, nextItem.Asset);
                             res.Add(new Transaction(TransactionType.Trade, dt, paid, received, fees));
-                            AddLedgerCurrency(ccy);
-                            AddLedgerCurrency(received.Ccy);
+                            //AddLedgerCurrency(ccy);
+                            //AddLedgerCurrency(received.Ccy);
                         }
                         else
                         {
@@ -420,8 +412,8 @@ namespace DataLibrary
                             Price paid = new Price(-(double)nextItem.Amount, ccy);
                             Price fees = new Price((double)nextItem.Fee, ccy);
                             res.Add(new Transaction(TransactionType.Trade, dt, paid, received, fees));
-                            AddLedgerCurrency(ccy);
-                            AddLedgerCurrency(received.Ccy);
+                            //AddLedgerCurrency(ccy);
+                            //AddLedgerCurrency(received.Ccy);
                         }
                         break;
                     default:
@@ -435,17 +427,28 @@ namespace DataLibrary
 
         #region TimeSeries
 
-        public List<OHLC> GetOHLCTimeSeries(ITimeSeriesKey itsk)
+        /// <summary>
+        /// Get OHLC TimeSeries untreated
+        /// </summary>
+        /// <param name="itsk"></param>
+        /// <returns></returns>
+        private List<OHLC> GetOHLCTimeSeries(ITimeSeriesKey itsk)
         {
             if (OHLCData.ContainsKey(itsk.GetTimeSeriesKey()))
                 return OHLCData[itsk.GetTimeSeriesKey()];
             else
             {
-                LoadOHLC_2(itsk);
+                LoadOHLC(itsk);
                 return OHLCData[itsk.GetTimeSeriesKey()];
             }
         }
 
+        /// <summary>
+        /// Get OHLC timeseries (possibly post-processed into an index)
+        /// </summary>
+        /// <param name="itsk"></param>
+        /// <param name="isIndex"></param>
+        /// <returns></returns>
         public List<Tuple<DateTime,double>> GetTimeSeries(ITimeSeriesKey itsk, bool isIndex)
         {
             List<Tuple<DateTime, double>> res = new List<Tuple<DateTime, double>>();
@@ -470,64 +473,15 @@ namespace DataLibrary
 
         #region FXMarketHistory
 
-        public FXMarketHistory GetFXMarketHistory(Currency ccy, List<CurrencyPair> cpList, DateTime firstDate,
-                                                    List<Currency> otherFiats = null, Frequency freq = Frequency.Hour4)
-        {
-            FXMarketHistory fxmh = new FXMarketHistory(ccy);
-            List<CurrencyPair> cpList2 = cpList.ToList();
-            if (otherFiats != null)
-            {
-                foreach(Currency oF in otherFiats)
-                {
-                    foreach (CurrencyPair cp in cpList)
-                    {
-                        if ((cp.Ccy1 == ccy && cp.Ccy2 != oF))
-                            cpList2.Add(new CurrencyPair(cp.Ccy2, oF));
-                        else if ((cp.Ccy1 != oF) && (cp.Ccy2 == ccy))
-                            cpList2.Add(new CurrencyPair(cp.Ccy1, oF));
-                        else if ((cp.Ccy1 == oF && cp.Ccy2 != ccy))
-                            cpList2.Add(new CurrencyPair(ccy, cp.Ccy2));
-                        else if (cp.Ccy1 != ccy && cp.Ccy2 == oF)
-                            cpList2.Add(new CurrencyPair(cp.Ccy1, ccy));
-                    }
-                }
-            }
-            foreach (CurrencyPair cp in cpList2)
-            {
-                CurrencyPairTimeSeries cpts = new CurrencyPairTimeSeries(cp, freq);
-                FillFXMarketHistory(fxmh, cpts, firstDate);
-                //bool test = true; TODO: reactivate those lines
-                //while (test)
-                //{
-                //    DateTime firstDateCp = FillFXMarketHistory(fxmh, cpts, firstDate);
-                //    if (firstDateCp > firstDate)
-                //        cpts.IncreaseFreq();
-                //    else { test = false; }
-                //}
-            }
-            return fxmh;
-        }
-
-        public FXMarketHistory GetFXMarketHistory_2(Currency ccyRef, List<Currency> ccyList, Frequency freq = Frequency.Hour4)
-        {
-            FXMarketHistory fxmh = new FXMarketHistory(ccyRef);
-            List<Currency> cryptos = ccyList.Where(x => !x.IsFiat() && !x.IsNone()).Select(x => x).ToList();
-            List<Currency> fiats = ccyList.Where(x => x.IsFiat()).Select(x => x).ToList();
-            if (!fiats.Contains(ccyRef)) fiats.Add(ccyRef);
-
-            List<CurrencyPair> cpList = new List<CurrencyPair> { };
-            foreach (Currency crypto in cryptos)
-                foreach (Currency fiat in fiats) cpList.Add(new CurrencyPair(crypto,fiat));
-
-            foreach (CurrencyPair cp in cpList)
-            {
-                CurrencyPairTimeSeries cpts = new CurrencyPairTimeSeries(cp, freq);
-                FillFXMarketHistory_2(fxmh, cpts, new DateTime(2030,1,1)); // obsolete
-            }
-            return fxmh;
-        }
-
-        public FXMarketHistory GetFXMarketHistory_3(Currency fiat, List<CurrencyPair> cpList, DateTime startDate, 
+        /// <summary>
+        /// Get the FX Market history implied by the OHLC timeseries
+        /// </summary>
+        /// <param name="fiat"></param>
+        /// <param name="cpList"></param>
+        /// <param name="startDate"></param>
+        /// <param name="freq"></param>
+        /// <returns></returns>
+        public FXMarketHistory GetFXMarketHistory(Currency fiat, List<CurrencyPair> cpList, DateTime startDate, 
             Frequency freq = Frequency.Hour4)
         {
             // Need To Duplicate the market in order to have "clean" dates
@@ -535,18 +489,24 @@ namespace DataLibrary
             foreach (CurrencyPair cp in cpList)
             {
                 CurrencyPairTimeSeries cpts = new CurrencyPairTimeSeries(cp, freq);
-                FillFXMarketHistory_2(fxmh, cpts, startDate);
+                FillFXMarketHistory(fxmh, cpts, startDate);
                 CryptoFiatPair cfp = cp.GetCryptoFiatPair;
                 if (cfp.Fiat != fiat)
                 {
                     CurrencyPairTimeSeries cpts2 = new CurrencyPairTimeSeries(cfp.Crypto, fiat, freq);
-                    FillFXMarketHistory_2(fxmh, cpts2, startDate);
+                    FillFXMarketHistory(fxmh, cpts2, startDate);
                 }
             }
             return fxmh;
         }
 
-        private void FillFXMarketHistory_2(FXMarketHistory fxmh, CurrencyPairTimeSeries cpts, DateTime startDate)
+        /// <summary>
+        /// Auxiliary function in order to fill in the FX Market History (including the increasing Frequency feature)
+        /// </summary>
+        /// <param name="fxmh"></param>
+        /// <param name="cpts"></param>
+        /// <param name="startDate"></param>
+        private void FillFXMarketHistory(FXMarketHistory fxmh, CurrencyPairTimeSeries cpts, DateTime startDate)
         {
             List<Tuple<DateTime, double>> ts = GetTimeSeries(cpts, isIndex: false);
             foreach (Tuple<DateTime, double> item in ts)
@@ -555,18 +515,8 @@ namespace DataLibrary
             {
                 CurrencyPairTimeSeries newCpts = (CurrencyPairTimeSeries)cpts.Clone();
                 newCpts.IncreaseFreq();
-                FillFXMarketHistory_2(fxmh, newCpts, startDate);
+                FillFXMarketHistory(fxmh, newCpts, startDate);
             }    
-        }
-
-        private DateTime FillFXMarketHistory(FXMarketHistory fxmh, CurrencyPairTimeSeries cpts, DateTime firstDate)
-        {
-            List<Tuple<DateTime, double>> ts = GetTimeSeries(cpts, isIndex: false);
-            DateTime firstDateCp = ts.First().Item1;
-            foreach (Tuple<DateTime, double> item in ts)
-                if (true)//(!(firstDate < item.Item1)) TODO: understand why this give crap!
-                    fxmh.AddQuote(item.Item1, new XChangeRate(item.Item2, cpts.CurPair));
-            return firstDateCp;
         }
 
         #endregion
