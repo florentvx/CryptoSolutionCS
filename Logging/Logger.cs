@@ -6,20 +6,24 @@ using System.Threading.Tasks;
 
 namespace Logging
 {
-    public class Logger
+    public interface ILogger
     {
-        private LoggingEventHandler LogEventHandler;
+        LoggingEventHandler LoggingEventHandler { get; }
+    }
 
-        public Logger(LoggingEventHandler logHandler) { LogEventHandler = logHandler; }
 
-        public virtual void PublishEvent(LevelType lvl, string message)
+    public static class Logger
+    {
+        public static void PublishEvent(this ILogger sender, LevelType lvl, string message)
         {
             LogMessageEventArgs lmea = new LogMessageEventArgs { Level = lvl, Message = message };
-            LoggingEventHandler handler = LogEventHandler;
-            LogEventHandler?.Invoke(this, lmea);
+            LoggingEventHandler handler = sender.LoggingEventHandler;
+            handler?.Invoke(sender, lmea);
         }
 
-        public virtual void PublishInfo(string message) { PublishEvent(LevelType.INFO, message); }
-        public virtual void PublishError(string message) { PublishEvent(LevelType.ERROR, message); }
+        public static void PublishInfo(this ILogger sender, string message) { PublishEvent(sender, LevelType.INFO, message); }
+        public static void PublishDebug(this ILogger sender, string message) { PublishEvent(sender, LevelType.DEBUG, message); }
+        public static void PublishWarning(this ILogger sender, string message) { PublishEvent(sender, LevelType.WARNING, message); }
+        public static void PublishError(this ILogger sender, string message) { PublishEvent(sender, LevelType.ERROR, message); }
     }
 }

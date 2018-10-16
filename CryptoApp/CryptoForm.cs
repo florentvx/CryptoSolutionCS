@@ -54,7 +54,7 @@ namespace CryptoApp
             dataGridViewAllocation.Columns[5].Name = "Fees";
             dataGridViewAllocation.Columns[6].Name = "RPnL";
             TSP = new TimeSeriesManager(Fiat, useKraken: true);
-            TSP.LogHandler += PublishLogMessage;
+            TSP.AddLoggingLink(PublishLogMessage);
             CryptoPresenter = new Presenter(this, TSP);
             OnFiatChange();
             Loaded = true;

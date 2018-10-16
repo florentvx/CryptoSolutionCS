@@ -14,7 +14,7 @@ using System.Text;
 
 namespace TimeSeriesAnalytics
 {
-    public class TimeSeriesManager : ITimeSeriesManager
+    public class TimeSeriesManager : ITimeSeriesManager, ILogger
     {
         private static readonly ILog _logger = LogManager.GetLogger(typeof(TimeSeriesManager));
 
@@ -28,18 +28,13 @@ namespace TimeSeriesAnalytics
         public AllocationSummary AS;
         public FXMarketHistory FXMH;
 
-        public event LoggingEventHandler LogHandler;
+        public event LoggingEventHandler _log;
+        public LoggingEventHandler LoggingEventHandler { get { return _log; } }
 
-        protected virtual void PublishEvent(LevelType lvl, string message)
+        public void AddLoggingLink(LoggingEventHandler function)
         {
-            LogMessageEventArgs lmea = new LogMessageEventArgs { Level = lvl, Message = message };
-            LoggingEventHandler handler = LogHandler;
-            LogHandler?.Invoke(this, lmea);
+            _log += function;
         }
-
-        protected virtual void PublishInfo(string message) { PublishEvent(LevelType.INFO, message); }
-        protected virtual void PublishError(string message) { PublishEvent(LevelType.ERROR, message); }
-
 
         public TimeSeriesManager(Currency fiat, bool useKraken, string path = null)
         {
@@ -48,7 +43,6 @@ namespace TimeSeriesAnalytics
             DataProvider = new DataProvider(BasePath);
             DataProvider.LoadLedger(useKraken: useKraken);
             SetUpAllocations();
-            //SetUpAllocationHistory();
         }
 
         public TimeSeriesManager(Currency fiat, DataProvider dp, bool useKraken, string path = null)
@@ -111,11 +105,9 @@ namespace TimeSeriesAnalytics
             foreach (Currency cr in cryptoList)
                 foreach (Currency fi in fiatList)
                     cptsL.Add(new CurrencyPairTimeSeries(cr, fi, DataProvider.SavingMinimumFrequency.GetNextFrequency()));
-            _logger.Info("Full Update Started");
-            PublishInfo("Full Update Started");
+            this.PublishDebug("Full Update Started");
             Update(Fiat, cptsL, true);
-            _logger.Info("Full Update Finished");
-            PublishError("Full Update Finished");
+            this.PublishDebug("Full Update Finished");
         }
 
         public ITimeSeriesProvider GetTimeSeriesProvider(ITimeSeriesKey itsk)
@@ -154,39 +146,35 @@ namespace TimeSeriesAnalytics
         public void GetOnGoingPnLs(double pnl)
         {
             DateTime dateBefore = DateTime.UtcNow;
-            _logger.Info($"{dateBefore}");
+            this.PublishDebug($"PnL Report - {dateBefore}");
             DateTime dateYear = dateBefore
                 .AddDays(-dateBefore.DayOfYear + 1)
                 .AddHours(-dateBefore.Hour)
                 .AddMinutes(-dateBefore.Minute)
                 .AddSeconds(-dateBefore.Second);
             var dataYear = AllocationToTable(dateYear);
-            _logger.Debug($"{dateYear} - Ongoing Year PnL: {Math.Round(pnl - dataYear["Total"].TotalPnL, 2)} {Fiat.ToFullName()}");
-            PublishInfo($"{dateYear} - Ongoing Year PnL: {Math.Round(pnl - dataYear["Total"].TotalPnL, 2)} {Fiat.ToFullName()}");
+            this.PublishInfo($"{dateYear} - Ongoing Year PnL: {Math.Round(pnl - dataYear["Total"].TotalPnL, 2)} {Fiat.ToFullName()}");
             DateTime dateMonth = dateBefore
                 .AddDays(-dateBefore.Day + 1)
                 .AddHours(-dateBefore.Hour)
                 .AddMinutes(-dateBefore.Minute)
                 .AddSeconds(-dateBefore.Second);
             var dataMonth = AllocationToTable(dateMonth);
-            _logger.Debug($"{dateMonth} - Ongoing Month PnL: {Math.Round(pnl - dataMonth["Total"].TotalPnL,2)} {Fiat.ToFullName()}");
-            PublishInfo($"{dateMonth} - Ongoing Month PnL: {Math.Round(pnl - dataMonth["Total"].TotalPnL, 2)} {Fiat.ToFullName()}");
+            this.PublishInfo($"{dateMonth} - Ongoing Month PnL: {Math.Round(pnl - dataMonth["Total"].TotalPnL, 2)} {Fiat.ToFullName()}");
             DateTime dateWeek = dateBefore
                 .AddDays(-((int)dateBefore.DayOfWeek == 0? 7: (int)dateBefore.DayOfWeek) + 1)
                 .AddHours(-dateBefore.Hour)
                 .AddMinutes(-dateBefore.Minute)
                 .AddSeconds(-dateBefore.Second);
             var dataWeek = AllocationToTable(dateWeek);
-            _logger.Debug($"{dateWeek} - Ongoing Week PnL: {Math.Round(pnl - dataWeek["Total"].TotalPnL, 2)} {Fiat.ToFullName()}");
-            PublishInfo($"{dateWeek} - Ongoing Week PnL: {Math.Round(pnl - dataWeek["Total"].TotalPnL, 2)} {Fiat.ToFullName()}");
+            this.PublishInfo($"{dateWeek} - Ongoing Week PnL: {Math.Round(pnl - dataWeek["Total"].TotalPnL, 2)} {Fiat.ToFullName()}");
             DateTime dateDay = dateBefore
                 .AddDays(0)
                 .AddHours(-dateBefore.Hour)
                 .AddMinutes(-dateBefore.Minute)
                 .AddSeconds(-dateBefore.Second);
             var dataDay = AllocationToTable(dateDay);
-            _logger.Warn($"{dateDay} - Ongoing Day PnL: {Math.Round(pnl - dataDay["Total"].TotalPnL, 2)} {Fiat.ToFullName()}");
-            PublishInfo($"{dateDay} - Ongoing Day PnL: {Math.Round(pnl - dataDay["Total"].TotalPnL, 2)} {Fiat.ToFullName()}");
+            this.PublishInfo($"{dateDay} - Ongoing Day PnL: {Math.Round(pnl - dataDay["Total"].TotalPnL, 2)} {Fiat.ToFullName()}");
         }
     }
 }
