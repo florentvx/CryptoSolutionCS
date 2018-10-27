@@ -13,6 +13,7 @@ namespace Core.Allocations
     {
         public double Position;
         public double xChangeRate;
+        public double Weight;
         public double AverageCost;
         public double OnGoingPnL;
         public double Fees;

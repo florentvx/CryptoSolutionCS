@@ -16,7 +16,8 @@ namespace Logging
     {
         public static void PublishEvent(this ILogger sender, LevelType lvl, string message)
         {
-            LogMessageEventArgs lmea = new LogMessageEventArgs { Level = lvl, Message = message };
+            string type = sender.GetType().ToString().Split('.').LastOrDefault();
+            LogMessageEventArgs lmea = new LogMessageEventArgs { Level = lvl, Message = $"{type} - {message}" };
             LoggingEventHandler handler = sender.LoggingEventHandler;
             handler?.Invoke(sender, lmea);
         }

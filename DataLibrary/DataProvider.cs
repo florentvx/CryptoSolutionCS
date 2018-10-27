@@ -5,21 +5,17 @@ using System.Text;
 using KrakenApi;
 using Core.Quotes;
 using System.IO;
-using System.Net;
 using Core.Transactions;
 using Core.Interfaces;
 using Core.Markets;
 using Core.TimeSeriesKeys;
-using Core.Allocations;
-using log4net;
+using Logging;
 
 namespace DataLibrary
 {
 
-    public class DataProvider : ITimeSeriesProvider
+    public class DataProvider : ITimeSeriesProvider, ILogger
     {
-        private static readonly ILog _logger = LogManager.GetLogger(typeof(DataProvider));
-
         public string Path;
         public Kraken KrakenApi = null;
         public Dictionary<string, List<OHLC>> OHLCData = new Dictionary<string, List<OHLC>>();
@@ -27,8 +23,14 @@ namespace DataLibrary
         public List<Currency> LedgerCurrencies = new List<Currency>();
         public Frequency SavingMinimumFrequency { get { return Frequency.Hour1; } }
 
-        public DataProvider(string path, string userName = "", string key = "")
+        // Logging
+        private event LoggingEventHandler _log;
+        public LoggingEventHandler LoggingEventHandler { get { return _log; } }
+        public void AddLoggingLink(LoggingEventHandler function) { _log += function; }
+
+        public DataProvider(string path, IView view = null, string userName = "", string key = "")
         {
+            if (view != null) AddLoggingLink(view.PublishLogMessage);
             Path = path + "\\Library";
             if (!Directory.Exists(Path))
                 Directory.CreateDirectory(Path);
@@ -79,7 +81,7 @@ namespace DataLibrary
         /// <returns></returns>
         private GetOHLCResult GetKrakenOHLC(CurrencyPair curPair, Frequency freq = Frequency.Hour4, int count = 10)
         {
-            _logger.Info($"Kraken API Request : OHLC {curPair.ToString} - {freq.ToString()}");
+            this.PublishInfo($"Kraken API Request : OHLC {curPair.ToString} - {freq.ToString()}");
             try { return KrakenApi.GetOHLC(curPair.GetRequestID(), freq.GetFrequency()); }
             catch
             {
@@ -125,7 +127,7 @@ namespace DataLibrary
         private void SaveOHLC(CurrencyPairTimeSeries cpts)
         {
             string pathLib = GetOHLCLibraryPath(cpts.CurPair, cpts.Freq);
-            _logger.Info($"Saving OHLC: {cpts.CurPair.ToString} {cpts.Freq.ToString()}");
+            this.PublishInfo($"Saving OHLC: {cpts.CurPair.ToString} {cpts.Freq.ToString()}");
             StringBuilder sb = new StringBuilder();
             sb.AppendLine("Time,Open,High,Low,Close,Volume,Vwap,Count");
             foreach (OHLC item in OHLCData[cpts.GetTimeSeriesKey()])
@@ -134,7 +136,7 @@ namespace DataLibrary
                 if (StaticLibrary.UnixTimeStampToDateTime(item.Time + cpts.Freq.GetFrequency(true)) < DateTime.UtcNow)
                     sb.AppendLine($"{item.Time},{item.Open},{item.High},{item.Low},{item.Close},{item.Volume},{item.Vwap},{item.Count}");
                 else
-                    _logger.Info($"Stopped at line: {StaticLibrary.UnixTimeStampToDateTime(item.Time)}");
+                    this.PublishInfo($"Stopped at line: {StaticLibrary.UnixTimeStampToDateTime(item.Time)}");
             }
             File.WriteAllText(pathLib, sb.ToString());
         }
@@ -255,7 +257,7 @@ namespace DataLibrary
         /// <returns></returns>
         private GetLedgerResult GetKrakenLedger(int? offset = null, int count = 10)
         {
-            _logger.Info($"Kraken API Request : Ledger");
+            this.PublishInfo($"Kraken API Request : Ledger");
             try { return KrakenApi.GetLedgers(ofs: offset); }
             catch
             {
@@ -321,7 +323,7 @@ namespace DataLibrary
         private void SaveLedger(Dictionary<string,LedgerInfo> data)
         {
             string pathLib = GetLedgerLibraryPath();
-            _logger.Info($"Saving Ledger");
+            this.PublishInfo($"Saving Ledger");
             StringBuilder sb = new StringBuilder();
             sb.AppendLine("Key,Time,Refid,Type,Aclass,Amount,Asset,Balance,Fee");
             foreach (string item in data.Keys)

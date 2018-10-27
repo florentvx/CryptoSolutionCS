@@ -1,16 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using Core.Quotes;
-using log4net;
 
 namespace Core.Markets
 {
     public class FXMarket : ICloneable
     {
-        private static readonly ILog _logger = LogManager.GetLogger(typeof(FXMarket));
-
         public DateTime Date;
         public List<XChangeRate> FX = new List<XChangeRate>();
         public List<Currency> CcyList = new List<Currency>();
@@ -132,10 +128,7 @@ namespace Core.Markets
             {
                 res.Rate /= Convert.ToDouble(n);
                 if (useConstructedQuote)
-                {
-                    _logger.Info($"{Date}: Constructing New pair: {curPair.ToString}");
                     AddFXRate(res);
-                }
                 return res;
             }
             else { return null; }

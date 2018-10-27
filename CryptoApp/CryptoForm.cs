@@ -45,16 +45,16 @@ namespace CryptoApp
                 if (freq != Frequency.None) comboBoxFrequency.Items.Add(freq.ToString());
             comboBoxFiat.SelectedIndex = 0;
             comboBoxFrequency.SelectedIndex = 5;
-            dataGridViewAllocation.ColumnCount = 7;
+            dataGridViewAllocation.ColumnCount = 8;
             dataGridViewAllocation.Columns[0].Name = "Ccy";
             dataGridViewAllocation.Columns[1].Name = "Pos";
             dataGridViewAllocation.Columns[2].Name = "Rate";
             dataGridViewAllocation.Columns[3].Name = "Cost";
-            dataGridViewAllocation.Columns[4].Name = "PnL";
-            dataGridViewAllocation.Columns[5].Name = "Fees";
-            dataGridViewAllocation.Columns[6].Name = "RPnL";
-            TSP = new TimeSeriesManager(Fiat, useKraken: true);
-            TSP.AddLoggingLink(PublishLogMessage);
+            dataGridViewAllocation.Columns[4].Name = "Weight";
+            dataGridViewAllocation.Columns[5].Name = "PnL";
+            dataGridViewAllocation.Columns[6].Name = "Fees";
+            dataGridViewAllocation.Columns[7].Name = "RPnL";
+            TSP = new TimeSeriesManager(Fiat, useKraken: true, view: this);
             CryptoPresenter = new Presenter(this, TSP);
             OnFiatChange();
             Loaded = true;
@@ -81,6 +81,7 @@ namespace CryptoApp
                         Add(key, Math.Round(item.Position, ccy.IsFiat() ? 2 : 6),
                         Math.Round(item.xChangeRate, ccy.IsFiat() ? 4 : 2),
                         Math.Round(item.AverageCost, ccy.IsFiat() ? 4 : 2),
+                        $"{Math.Round(item.Weight, 4)*100} %",
                         Math.Round(item.OnGoingPnL, 2), Math.Round(item.Fees, 2), Math.Round(item.RealizedPnL, 2));
                 }
                 TSP.GetOnGoingPnLs(pnl);
@@ -93,7 +94,7 @@ namespace CryptoApp
             CryptoPresenter.Update(Fiat, true);
         }
 
-        private void PublishLogMessage(object sender, LogMessageEventArgs e)
+        public void PublishLogMessage(object sender, LogMessageEventArgs e)
         {
             Color color = e.GetMessageColor;
             string message = e.PrintedMessage;

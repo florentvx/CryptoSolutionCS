@@ -87,7 +87,7 @@ namespace Core.Markets
                 double w = 0.5;
                 if (afterFX.Date > beforeFX.Date)
                     w = (date - beforeFX.Date).TotalSeconds/ (double)(afterFX.Date - beforeFX.Date).TotalSeconds;
-                double rate = (1 - w) * beforeFX.GetQuote(cp).Rate + w * afterFX.GetQuote(cp).Rate; //TODO: Update the 50%
+                double rate = (1 - w) * beforeFX.GetQuote(cp).Rate + w * afterFX.GetQuote(cp).Rate;
                 if (beforeFX.Date != afterFX.Date) res.DefineAsArtificial();
                 XChangeRate xRateCp = new XChangeRate(rate, (CurrencyPair)cp.Clone());
                 res.AddQuote(xRateCp);

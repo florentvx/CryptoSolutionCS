@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using Logging;
 
 namespace Core.Interfaces
 {
@@ -15,5 +13,6 @@ namespace Core.Interfaces
         List<ITimeSeriesKey> TimeSeriesKeyList { get; }
         void SetChartData(IChartData icd);
         void AllocationTableUpdate();
+        void PublishLogMessage(object sender, LogMessageEventArgs e);
     }
 }

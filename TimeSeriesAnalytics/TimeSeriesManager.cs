@@ -5,7 +5,6 @@ using Core.Quotes;
 using Core.TimeSeriesKeys;
 using Core.Transactions;
 using DataLibrary;
-using log4net;
 using Logging;
 using System;
 using System.Collections.Generic;
@@ -16,31 +15,28 @@ namespace TimeSeriesAnalytics
 {
     public class TimeSeriesManager : ITimeSeriesManager, ILogger
     {
-        private static readonly ILog _logger = LogManager.GetLogger(typeof(TimeSeriesManager));
-
         public string BasePath = Environment.GetFolderPath(Environment.SpecialFolder.Personal);
         public Currency Fiat;
         public DataProvider DataProvider;
         public AllocationHistory AH;
         public List<ITimeSeriesKey> TimeSeriesKeyList = new List<ITimeSeriesKey>();
 
-        // New version
         public AllocationSummary AS;
         public FXMarketHistory FXMH;
 
-        public event LoggingEventHandler _log;
+        // Logging
+        private event LoggingEventHandler _log;
         public LoggingEventHandler LoggingEventHandler { get { return _log; } }
+        public void AddLoggingLink(LoggingEventHandler function) { _log += function; }
 
-        public void AddLoggingLink(LoggingEventHandler function)
-        {
-            _log += function;
-        }
 
-        public TimeSeriesManager(Currency fiat, bool useKraken, string path = null)
+        public TimeSeriesManager(Currency fiat, bool useKraken, string path = null, IView view = null)
         {
+            if (view != null)
+                AddLoggingLink(view.PublishLogMessage);
             Fiat = fiat;
             if (path != null) BasePath = path;
-            DataProvider = new DataProvider(BasePath);
+            DataProvider = new DataProvider(BasePath,view);
             DataProvider.LoadLedger(useKraken: useKraken);
             SetUpAllocations();
         }

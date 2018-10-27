@@ -26,43 +26,7 @@ namespace Core.Allocations
             CcyRef = FXMH.CcyRef;
             Allocation alloc = new Allocation(fxMH.CcyRef);
             txList.OrderBy(x => x.Date).ToList();
-
-            //List<CurrencyPair> cpList = FXMH.GetLastFXMarket().GetCurrencyPairs(CcyRef);
             List<CurrencyPair> cpList = FXMH.CpList;
-
-            //// Filling old dates with constant FX: TODO Change!
-            //foreach (CurrencyPair cp in cpList)
-            //{
-            //    DateTime dateCp = FXMH.GetFirstFXMarket(cp);
-            //    FXMarket firstCpFX = FXMH.GetFXMarket(dateCp);
-            //    foreach (DateTime date in FXMH.FXMarkets.Keys)
-            //    {
-            //        if (date < dateCp)
-            //            FXMH.AddQuote(date, firstCpFX.GetQuote(cp));
-            //        else { break; }
-            //    }
-            //}
-
-            //// Get First FX Market
-            //FXMarket firstFX = FXMH.GetFirstFXMarket();
-
-            //// Find index of first tx happening after the beginning of the FX history
-            //int iStart = 0;
-            //while (txList[iStart + 1].Date < firstFX.Date)
-            //{
-            //    iStart++;
-            //}
-
-            //// Create artificially the previous FXMarkets (with txs' XRate)
-            //DateTime prevDate = firstFX.Date;
-            //for (int i = iStart; i >= 0; i--)
-            //{
-            //    Transaction tx = txList[i];
-            //    FXMH.CopyMarket(newDate: tx.Date, oldDate: prevDate);
-            //    if (tx.Type == TransactionType.Trade)
-            //        FXMH.AddQuote(tx.Date, tx.XRate);
-            //    prevDate = tx.Date;
-            //}
 
             // Add all tx
             foreach (Transaction tx in txList)
@@ -95,7 +59,7 @@ namespace Core.Allocations
                         newAlloc.CancelFee();
                         FXMarket fx = FXMH.GetArtificialFXMarket(date, FXMH.CpList);
                         if (fx.IsArtificial) FXMH.AddFXMarket(date, fx);
-                        newAlloc.Update(fx);//FXMH.FXMarkets[date]);
+                        newAlloc.Update(fx);
                         History.Add(date, newAlloc);
                     }
                 }

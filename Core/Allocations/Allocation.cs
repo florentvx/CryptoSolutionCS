@@ -1,14 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Core.Markets;
 using Core.Quotes;
 using Core.Transactions;
 using Core.Interfaces;
 using Core.TimeSeriesKeys;
-using log4net;
+
 
 namespace Core.Allocations
 {
@@ -25,8 +22,6 @@ namespace Core.Allocations
 
     public class Allocation : ICloneable, ITimeSeriesKey
     {
-        private static readonly ILog _logger = LogManager.GetLogger(typeof(Allocation));
-
         Dictionary<Currency, AllocationElement> Dictionary;
         AllocationElement Fees;
         public Price Total;
@@ -67,9 +62,7 @@ namespace Core.Allocations
             {
                 Total = fxMarket.SumPrices(Total, Dictionary[ccy].Price);
                 if (Total == null)
-                {
-                    _logger.Error($"Problem with Price Conversion: {ccy} / {CcyRef}");
-                }
+                    throw new Exception($"Problem with Price Conversion: {ccy} / {CcyRef}");
             }
             Total = fxMarket.SumPrices(Total, Fees.Price);
         }

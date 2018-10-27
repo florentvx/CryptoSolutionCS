@@ -80,7 +80,14 @@ namespace Core.Allocations
                 total.Fees += item.Item2.Fees;
                 total.RealizedPnL += item.Item2.RealizedPnL;
             }
+            total.Weight = 1.0;
             res.Add("Total", total);
+            foreach (Currency key in PnLs.Keys)
+            {
+                PnLElement item = res[key.ToFullName()];
+                item.Weight = item.Position * item.xChangeRate / total.Position;
+                res[key.ToFullName()] = item;
+            }
             return res;
         }
 
