@@ -27,6 +27,12 @@ namespace Core.TimeSeriesKeys
             Freq = freq;
         }
 
+        public Currency GetCurrencyRef()
+        {
+            CryptoFiatPair cfp = _curPair.GetCryptoFiatPair;
+            return cfp.Fiat;
+        }
+
         public List<CurrencyPair> GetCurrencyPairs()
         {
             return new List<CurrencyPair> { CurPair };

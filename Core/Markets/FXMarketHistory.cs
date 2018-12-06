@@ -8,22 +8,22 @@ namespace Core.Markets
 {
     public class FXMarketHistory
     {
-        public Currency CcyRef;
+        //public Currency CcyRef;
         public List<Currency> CcyList = new List<Currency>();
         public List<CurrencyPair> CpList = new List<CurrencyPair>();
         public SortedDictionary<DateTime, FXMarket> FXMarkets = new SortedDictionary<DateTime, FXMarket>();
 
-        public FXMarketHistory(Currency ccy)
+        public FXMarketHistory()//Currency ccy)
         {
-            CcyRef = ccy;
-            AddCcy(ccy);
+            //CcyRef = ccy;
+            //AddCcy(ccy);
         }
 
         public new string ToString
         {
             get
             {
-                string res = $"FXMarketHIstory: Currency Ref : {CcyRef.ToFullName()} \n\n";
+                string res = $"FXMarketHIstory: \n\n"; //Currency Ref : {CcyRef.ToFullName()} \n\n";
                 foreach (DateTime date in FXMarkets.Keys)
                     res += $"{date.ToShortDateString()}\n{GetFXMarket(date).ToString}\n";
                 return res;
@@ -83,12 +83,20 @@ namespace Core.Markets
             foreach (CurrencyPair cp in cpList)
             {
                 FXMarket beforeFX = FXMarkets.Where(x => x.Key <= date && x.Value.FXContains(cp)).Last().Value;
-                FXMarket afterFX = FXMarkets.Where(x => x.Key >= date && x.Value.FXContains(cp)).First().Value;
-                double w = 0.5;
-                if (afterFX.Date > beforeFX.Date)
-                    w = (date - beforeFX.Date).TotalSeconds/ (double)(afterFX.Date - beforeFX.Date).TotalSeconds;
-                double rate = (1 - w) * beforeFX.GetQuote(cp).Rate + w * afterFX.GetQuote(cp).Rate;
-                if (beforeFX.Date != afterFX.Date) res.DefineAsArtificial();
+                FXMarket afterFX = FXMarkets.Where(x => x.Key >= date && x.Value.FXContains(cp)).FirstOrDefault().Value;
+                double rate = beforeFX.GetQuote(cp).Rate;
+                if (afterFX != null)
+                {
+                    double w = 0.5;
+                    if (afterFX.Date > beforeFX.Date)
+                        w = (date - beforeFX.Date).TotalSeconds / (double)(afterFX.Date - beforeFX.Date).TotalSeconds;
+                    rate = (1 - w) * beforeFX.GetQuote(cp).Rate + w * afterFX.GetQuote(cp).Rate;
+                    if (beforeFX.Date != afterFX.Date) res.DefineAsArtificial();
+                }
+                else
+                {
+                    if (beforeFX.Date != date) res.DefineAsArtificial();
+                }
                 XChangeRate xRateCp = new XChangeRate(rate, (CurrencyPair)cp.Clone());
                 res.AddQuote(xRateCp);
             }

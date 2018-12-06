@@ -36,16 +36,7 @@ namespace TimeSeriesAnalytics
                 AddLoggingLink(view.PublishLogMessage);
             Fiat = fiat;
             if (path != null) BasePath = path;
-            DataProvider = new DataProvider(BasePath,view);
-            DataProvider.LoadLedger(useKraken: useKraken);
-            SetUpAllocations();
-        }
-
-        public TimeSeriesManager(Currency fiat, DataProvider dp, bool useKraken, string path = null)
-        {
-            Fiat = fiat;
-            if (path != null) BasePath = path;
-            DataProvider = dp;
+            DataProvider = new DataProvider(BasePath, view);
             DataProvider.LoadLedger(useKraken: useKraken);
             SetUpAllocations();
         }
@@ -57,7 +48,15 @@ namespace TimeSeriesAnalytics
             AS.LoadTransactionList(txList);
             DateTime startDate = AS.History.First().Key;
             FXMH = DataProvider.GetFXMarketHistory(Fiat, AS.FXMH.CpList, startDate);
-            AH = new AllocationHistory(txList, FXMH);
+            AH = new AllocationHistory(txList, FXMH, Fiat);
+        }
+
+        public void UpdateAllocations()
+        {
+            AS.CcyRef = Fiat;
+            DataProvider.UpdateFXMarketHistory(AH.FXMH, Fiat, AH.History.First().Key);
+            FXMH = AH.FXMH;
+            AH.Update(Fiat);
         }
 
         public Allocation PriceLastAllocation()
@@ -88,7 +87,7 @@ namespace TimeSeriesAnalytics
             Fiat = fiat;
             TimeSeriesKeyList = tskl;
             DataProvider.LoadOHLC(TimeSeriesKeyList, useLowerFrequencies: useLowerFrequencies);
-            SetUpAllocations();
+            UpdateAllocations();
         }
 
         public void FullUpdate()
@@ -171,6 +170,13 @@ namespace TimeSeriesAnalytics
                 .AddSeconds(-dateBefore.Second);
             var dataDay = AllocationToTable(dateDay);
             this.PublishInfo($"{dateDay} - Ongoing Day PnL: {Math.Round(pnl - dataDay["Total"].TotalPnL, 2)} {Fiat.ToFullName()}");
+            DateTime date30D = dateBefore
+                .AddDays(-30)
+                .AddHours(-dateBefore.Hour)
+                .AddMinutes(-dateBefore.Minute)
+                .AddSeconds(-dateBefore.Second);
+            var data30D = AllocationToTable(date30D);
+            this.PublishInfo($"{date30D} - 30 Days PnL: {Math.Round(pnl - data30D["Total"].TotalPnL, 2)} {Fiat.ToFullName()}");
         }
     }
 }

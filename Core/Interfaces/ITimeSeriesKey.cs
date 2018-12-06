@@ -13,6 +13,7 @@ namespace Core.Interfaces
         string GetTimeSeriesKey();
         string GetFullName();
         TimeSeriesKeyType GetKeyType();
+        Currency GetCurrencyRef();
         List<CurrencyPair> GetCurrencyPairs();
     }
 }

@@ -20,6 +20,8 @@ namespace Core.Allocations
             CcyRef = ccy;
         }
 
+        public Currency GetCurrencyRef() { return CcyRef; }
+
         public List<CurrencyPair> GetCurrencyPairs()
         {
             List<CurrencyPair> cpL = new List<CurrencyPair>();

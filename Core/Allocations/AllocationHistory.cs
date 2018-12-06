@@ -17,14 +17,15 @@ namespace Core.Allocations
         public List<Currency> Currencies;
         public SortedDictionary<DateTime, Allocation> History = new SortedDictionary<DateTime, Allocation>();
         public FXMarketHistory FXMH;
+        public DateTime StartDate { get { return History.Keys.First(); } }
 
 
-        public AllocationHistory(List<Transaction> txList, FXMarketHistory fxMH)
+        public AllocationHistory(List<Transaction> txList, FXMarketHistory fxMH, Currency ccyRef)
         {
             FXMH = fxMH;
             Currencies = FXMH.CcyList;
-            CcyRef = FXMH.CcyRef;
-            Allocation alloc = new Allocation(fxMH.CcyRef);
+            CcyRef = ccyRef;
+            Allocation alloc = new Allocation(ccyRef);
             txList.OrderBy(x => x.Date).ToList();
             List<CurrencyPair> cpList = FXMH.CpList;
 
@@ -66,6 +67,21 @@ namespace Core.Allocations
             }
         }
 
+        public void Update(Currency fiat)
+        {
+            CcyRef = fiat;
+            foreach (DateTime date in FXMH.FXMarkets.Keys)
+            {
+                if (date >= StartDate)
+                {
+                    FXMarket fx = FXMH.GetArtificialFXMarket(date, FXMH.CpList);
+                    if (fx.IsArtificial) FXMH.AddFXMarket(date, fx);
+                    if (History.Keys.Contains(date))
+                        History[date].CalculateTotal(fx, fiat);
+                }
+            }
+        }
+
         public Allocation GetAllocation(DateTime date)
         {
             return History[date];
@@ -85,6 +101,7 @@ namespace Core.Allocations
                 double value;
                 double lastTSValue = Double.NaN;
                 Allocation prevAlloc = null;
+                Currency ccyRef = itsk.GetCurrencyRef();
                 foreach (DateTime date in History.Keys)
                 {
 
@@ -99,7 +116,7 @@ namespace Core.Allocations
                             value = 10000;
                         else
                         {
-                            double returnAlloc = History[date].GetReturn(prevAlloc);
+                            double returnAlloc = History[date].GetReturn(prevAlloc, ccyRef);
                             value = Double.IsNaN(lastTSValue) ? 10000 : lastTSValue * (1 + returnAlloc);
                         }
                         prevAlloc = (Allocation)History[date].Clone();

@@ -26,8 +26,8 @@ namespace CryptoApp
         public bool IsIndex { get { return TimeSeriesKeyList.Count > 1; } } // TODO: include on/off switch
         public double Frame { get { return 0.1; } }
         public TimeSeriesManager TSP;
-        private bool Loaded = false;
         public IChartData _chartData;
+        private bool Loaded = false;
 
         public CryptoForm()
         {
@@ -45,6 +45,11 @@ namespace CryptoApp
                 if (freq != Frequency.None) comboBoxFrequency.Items.Add(freq.ToString());
             comboBoxFiat.SelectedIndex = 0;
             comboBoxFrequency.SelectedIndex = 5;
+            AllocationTableCreation();
+        }
+
+        public void AllocationTableCreation()
+        {
             dataGridViewAllocation.ColumnCount = 8;
             dataGridViewAllocation.Columns[0].Name = "Ccy";
             dataGridViewAllocation.Columns[1].Name = "Pos";
@@ -54,10 +59,6 @@ namespace CryptoApp
             dataGridViewAllocation.Columns[5].Name = "PnL";
             dataGridViewAllocation.Columns[6].Name = "Fees";
             dataGridViewAllocation.Columns[7].Name = "RPnL";
-            TSP = new TimeSeriesManager(Fiat, useKraken: true, view: this);
-            CryptoPresenter = new Presenter(this, TSP);
-            OnFiatChange();
-            Loaded = true;
         }
 
         public void AllocationTableUpdate()
@@ -86,12 +87,6 @@ namespace CryptoApp
                 }
                 TSP.GetOnGoingPnLs(pnl);
             }
-        }
-
-        private void OnFiatChange()
-        {
-            comboBoxFrequency.SelectedIndex = 5;
-            CryptoPresenter.Update(Fiat, true);
         }
 
         public void PublishLogMessage(object sender, LogMessageEventArgs e)
@@ -167,11 +162,6 @@ namespace CryptoApp
             }
         }
 
-        private void ComboBoxFiat_SelectedIndexChanged(object sender, EventArgs e)
-        {
-            if (Loaded) OnFiatChange();
-        }
-
         private void ButtonShow_Click(object sender, EventArgs e)
         {
             CryptoPresenter.Update(Fiat, useLowerFrequencies: true);
@@ -179,7 +169,19 @@ namespace CryptoApp
 
         private void ButtonFullUpdate_Click(object sender, EventArgs e)
         {
-            CryptoPresenter.FullUpdate();
+            if (Loaded) CryptoPresenter.FullUpdate();
+            else PublishLogMessage(this, new LogMessageEventArgs() { Level = LevelType.WARNING, Message = "Load the Market first!" });
+        }
+
+        private void ButtonLoad_Click(object sender, EventArgs e)
+        {
+            if (TSP == null)
+            {
+                TSP = new TimeSeriesManager(Fiat, useKraken: true, view: this);
+                CryptoPresenter = new Presenter(this, TSP);
+            }
+            CryptoPresenter.Update(Fiat, true);
+            Loaded = true;
         }
     }
 

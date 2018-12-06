@@ -487,7 +487,7 @@ namespace DataLibrary
             Frequency freq = Frequency.Hour4)
         {
             // Need To Duplicate the market in order to have "clean" dates
-            FXMarketHistory fxmh = new FXMarketHistory(fiat);
+            FXMarketHistory fxmh = new FXMarketHistory();
             foreach (CurrencyPair cp in cpList)
             {
                 CurrencyPairTimeSeries cpts = new CurrencyPairTimeSeries(cp, freq);
@@ -500,6 +500,35 @@ namespace DataLibrary
                 }
             }
             return fxmh;
+        }
+
+        /// <summary>
+        /// Get the FX Market history implied by the OHLC timeseries
+        /// </summary>
+        /// <param name="fiat"></param>
+        /// <param name="cpList"></param>
+        /// <param name="startDate"></param>
+        /// <param name="freq"></param>
+        /// <returns></returns>
+        public void UpdateFXMarketHistory(FXMarketHistory fxmh, Currency fiat, DateTime startDate,
+            Frequency freq = Frequency.Hour4)
+        {
+            // Need To Duplicate the market in order to have "clean" dates
+            List<CurrencyPair> cpList = new List<CurrencyPair>(fxmh.CpList);
+            foreach (CurrencyPair cp in cpList)
+            {
+                CurrencyPairTimeSeries cpts = new CurrencyPairTimeSeries(cp, freq);
+                try
+                {
+                    CryptoFiatPair cfp = cp.GetCryptoFiatPair;
+                    if (cfp.Fiat != fiat)
+                    {
+                        CurrencyPairTimeSeries cpts2 = new CurrencyPairTimeSeries(cfp.Crypto, fiat, freq);
+                        FillFXMarketHistory(fxmh, cpts2, startDate);
+                    }
+                }
+                catch { }
+            }
         }
 
         /// <summary>

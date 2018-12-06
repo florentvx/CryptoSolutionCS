@@ -39,6 +39,8 @@ namespace Core.Allocations
             Total = new Price(0, Currency.None);
         }
 
+        public Currency GetCurrencyRef() { return CcyRef; }
+
         public object Clone()
         {
             var dico = AllocationTools<Currency, AllocationElement>.DeepCopy(Dictionary);
@@ -55,14 +57,16 @@ namespace Core.Allocations
             Fees = new AllocationElement(0, Currency.None);
         }
 
-        public void CalculateTotal(FXMarket fxMarket)
+        public void CalculateTotal(FXMarket fxMarket, Currency ccyInput = Currency.None)
         {
-            Total = new Price(0, CcyRef);
+            if (ccyInput == Currency.None)
+                ccyInput = CcyRef;
+            Total = new Price(0, ccyInput);
             foreach(Currency ccy in Dictionary.Keys)
             {
                 Total = fxMarket.SumPrices(Total, Dictionary[ccy].Price);
                 if (Total == null)
-                    throw new Exception($"Problem with Price Conversion: {ccy} / {CcyRef}");
+                    throw new Exception($"Problem with Price Conversion: {ccy} / {ccyInput}");
             }
             Total = fxMarket.SumPrices(Total, Fees.Price);
         }
@@ -163,22 +167,18 @@ namespace Core.Allocations
             return rate;
         }
 
-        internal double GetReturn(Allocation prevAlloc)
+        internal double GetReturn(Allocation prevAlloc, Currency ccy = Currency.None)
         {
-            Currency ccyRef = Total.Ccy;
-            if(ccyRef != Currency.None && ccyRef == prevAlloc.Total.Ccy)
+            if (ccy == Currency.None)
+                ccy = CcyRef;
+            double res = 0;
+            foreach(CurrencyPair cp in prevAlloc.GetCurrencyPairs())
             {
-                double res = 0;
-                foreach(CurrencyPair cp in prevAlloc.GetCurrencyPairs())
-                {
-                    double prevXR = prevAlloc.GetImpliedXChangeRate(cp);
-                    double nextXR = GetImpliedXChangeRate(cp);
-                    res += prevAlloc.Dictionary[cp.Ccy1].Share * (nextXR / prevXR - 1);
-                }
-                return res;
+                double prevXR = prevAlloc.GetImpliedXChangeRate(cp);
+                double nextXR = GetImpliedXChangeRate(cp);
+                res += prevAlloc.Dictionary[cp.Ccy1].Share * (nextXR / prevXR - 1);
             }
-            else
-                throw new NotImplementedException();
+            return res;
         }
 
         public override string ToString()

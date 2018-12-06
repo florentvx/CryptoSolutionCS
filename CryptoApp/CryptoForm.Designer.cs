@@ -28,9 +28,9 @@
         /// </summary>
         private void InitializeComponent()
         {
-            System.Windows.Forms.DataVisualization.Charting.ChartArea chartArea1 = new System.Windows.Forms.DataVisualization.Charting.ChartArea();
-            System.Windows.Forms.DataVisualization.Charting.Legend legend1 = new System.Windows.Forms.DataVisualization.Charting.Legend();
-            System.Windows.Forms.DataVisualization.Charting.Series series1 = new System.Windows.Forms.DataVisualization.Charting.Series();
+            System.Windows.Forms.DataVisualization.Charting.ChartArea chartArea3 = new System.Windows.Forms.DataVisualization.Charting.ChartArea();
+            System.Windows.Forms.DataVisualization.Charting.Legend legend3 = new System.Windows.Forms.DataVisualization.Charting.Legend();
+            System.Windows.Forms.DataVisualization.Charting.Series series3 = new System.Windows.Forms.DataVisualization.Charting.Series();
             this.tabControl1 = new System.Windows.Forms.TabControl();
             this.Allocation = new System.Windows.Forms.TabPage();
             this.dataGridViewAllocation = new System.Windows.Forms.DataGridView();
@@ -46,6 +46,7 @@
             this.label2 = new System.Windows.Forms.Label();
             this.comboBoxFrequency = new System.Windows.Forms.ComboBox();
             this.buttonFullDataUpdate = new System.Windows.Forms.Button();
+            this.buttonLoad = new System.Windows.Forms.Button();
             this.tabControl1.SuspendLayout();
             this.Allocation.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dataGridViewAllocation)).BeginInit();
@@ -148,16 +149,16 @@
             this.chart1.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            chartArea1.Name = "ChartArea1";
-            this.chart1.ChartAreas.Add(chartArea1);
-            legend1.Name = "Legend1";
-            this.chart1.Legends.Add(legend1);
+            chartArea3.Name = "ChartArea1";
+            this.chart1.ChartAreas.Add(chartArea3);
+            legend3.Name = "Legend1";
+            this.chart1.Legends.Add(legend3);
             this.chart1.Location = new System.Drawing.Point(235, 6);
             this.chart1.Name = "chart1";
-            series1.ChartArea = "ChartArea1";
-            series1.Legend = "Legend1";
-            series1.Name = "Series1";
-            this.chart1.Series.Add(series1);
+            series3.ChartArea = "ChartArea1";
+            series3.Legend = "Legend1";
+            series3.Name = "Series1";
+            this.chart1.Series.Add(series3);
             this.chart1.Size = new System.Drawing.Size(910, 465);
             this.chart1.TabIndex = 0;
             this.chart1.Text = "chart1";
@@ -192,7 +193,6 @@
             this.comboBoxFiat.Name = "comboBoxFiat";
             this.comboBoxFiat.Size = new System.Drawing.Size(177, 24);
             this.comboBoxFiat.TabIndex = 0;
-            this.comboBoxFiat.SelectedIndexChanged += new System.EventHandler(this.ComboBoxFiat_SelectedIndexChanged);
             // 
             // label2
             // 
@@ -213,7 +213,7 @@
             // 
             // buttonFullDataUpdate
             // 
-            this.buttonFullDataUpdate.Location = new System.Drawing.Point(379, 29);
+            this.buttonFullDataUpdate.Location = new System.Drawing.Point(511, 29);
             this.buttonFullDataUpdate.Name = "buttonFullDataUpdate";
             this.buttonFullDataUpdate.Size = new System.Drawing.Size(127, 24);
             this.buttonFullDataUpdate.TabIndex = 6;
@@ -221,11 +221,22 @@
             this.buttonFullDataUpdate.UseVisualStyleBackColor = true;
             this.buttonFullDataUpdate.Click += new System.EventHandler(this.ButtonFullUpdate_Click);
             // 
+            // buttonLoad
+            // 
+            this.buttonLoad.Location = new System.Drawing.Point(378, 29);
+            this.buttonLoad.Name = "buttonLoad";
+            this.buttonLoad.Size = new System.Drawing.Size(127, 24);
+            this.buttonLoad.TabIndex = 7;
+            this.buttonLoad.Text = "Load";
+            this.buttonLoad.UseVisualStyleBackColor = true;
+            this.buttonLoad.Click += new System.EventHandler(this.ButtonLoad_Click);
+            // 
             // CryptoForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1183, 697);
+            this.Controls.Add(this.buttonLoad);
             this.Controls.Add(this.richTextBoxLogger);
             this.Controls.Add(this.buttonFullDataUpdate);
             this.Controls.Add(this.comboBoxFrequency);
@@ -264,6 +275,7 @@
         private System.Windows.Forms.Button buttonFullDataUpdate;
         private System.Windows.Forms.DataGridView dataGridViewAllocation;
         private System.Windows.Forms.RichTextBox richTextBoxLogger;
+        private System.Windows.Forms.Button buttonLoad;
     }
 }
 

@@ -62,7 +62,7 @@ namespace Core.Allocations
 
         public void LoadTransactionList(List<Transaction> txList)
         {
-            FXMH = new FXMarketHistory(CcyRef);
+            FXMH = new FXMarketHistory();
             FeesHistory = new Dictionary<DateTime, Dictionary<Currency, Allocation>> { };
             Allocation alloc = new Allocation(CcyRef);
             txList.OrderBy(x => x.Date).ToList();

@@ -13,17 +13,17 @@ namespace CryptoApp
     public class Presenter
     {
         private readonly IView _view;
-        private ITimeSeriesManager _TSPManager;
+        private ITimeSeriesManager _TSManager;
 
         public Presenter(IView view, ITimeSeriesManager timeSeriesManager)
         {
             _view = view;
-            _TSPManager = timeSeriesManager;
+            _TSManager = timeSeriesManager;
         }
 
         internal async void FullUpdate()
         {
-            await Task.Run(() => _TSPManager.FullUpdate());
+            await Task.Run(() => _TSManager.FullUpdate());
         }
 
         internal async void Update(Currency fiat, bool useLowerFrequencies)
@@ -31,8 +31,8 @@ namespace CryptoApp
             await Task.Run(() =>
             {
                 _view.GetCheckedCurrencyPairs();
-                _TSPManager.Update(fiat, _view.TimeSeriesKeyList, useLowerFrequencies);
-                _view.SetChartData(_TSPManager.GetChartData(_view.IsIndex, _view.Frame));
+                _TSManager.Update(fiat, _view.TimeSeriesKeyList, useLowerFrequencies);
+                _view.SetChartData(_TSManager.GetChartData(_view.IsIndex, _view.Frame));
                 _view.PrintChart();
                 _view.AllocationTableUpdate();
             });
@@ -40,7 +40,7 @@ namespace CryptoApp
 
         internal async void GetChartData(bool isIndex, double frame)
         {
-            await Task.Run(() => _view.SetChartData(_TSPManager.GetChartData(isIndex, frame))); 
+            await Task.Run(() => _view.SetChartData(_TSManager.GetChartData(isIndex, frame))); 
         }
     }
 }
