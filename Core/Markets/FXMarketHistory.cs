@@ -75,8 +75,9 @@ namespace Core.Markets
             return FXMarkets.Where(x => x.Key <= date).Select(x => x.Value).LastOrDefault();
         }
 
-        public FXMarket GetArtificialFXMarket(DateTime date, List<CurrencyPair> cpList)
+        public FXMarket GetArtificialFXMarket(DateTime date, List<CurrencyPair> cpList = null)
         {
+            if (cpList == null) { cpList = CpList; }
             FXMarket res = new FXMarket(date);
             res = GetFXMarket(date);
             if (res.FXContains(cpList)) return res; // time saver...

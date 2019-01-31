@@ -13,5 +13,6 @@ namespace Core.Interfaces
         void FullUpdate();
         IChartData GetChartData(bool isIndex, double frame);
         void Update(Currency fiat, List<ITimeSeriesKey> tskl, bool useLowerFrequencies);
+        void UpdateLedger(bool useKraken);
     }
 }

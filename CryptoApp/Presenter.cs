@@ -38,6 +38,14 @@ namespace CryptoApp
             });
         }
 
+        internal async void UpdateLedger(bool useKraken)
+        {
+            await Task.Run(() =>
+            {
+                _TSManager.UpdateLedger(useKraken);
+            });
+        }
+
         internal async void GetChartData(bool isIndex, double frame)
         {
             await Task.Run(() => _view.SetChartData(_TSManager.GetChartData(isIndex, frame))); 

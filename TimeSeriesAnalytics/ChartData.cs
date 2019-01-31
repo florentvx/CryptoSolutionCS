@@ -23,12 +23,12 @@ namespace TimeSeriesAnalytics
 
         public double GlobalMin
         {
-            get { return _globalMin < 100 ? _globalMin - _frame : Math.Round(_globalMin * (1 - _frame) / 100.0, 0) * 100.0; }
+            get { return _globalMin < 100 ? Math.Round((_globalMin - _frame) / 10.0, 0) * 10.0 : Math.Round(_globalMin * (1 - _frame) / 100.0, 0) * 100.0; }
         }
 
         public double GlobalMax
         {
-            get{ return _globalMax < 100 ? _globalMax + _frame : Math.Round(_globalMax * (1 + _frame) / 100.0, 0) * 100.0; }
+            get{ return _globalMax < 100 ? Math.Round((_globalMax + _frame) / 10.0, 0) * 10.0 : Math.Round(_globalMax * (1 + _frame) / 100.0, 0) * 100.0; }
         }
 
         public ITimeSeries GetTimeSeries(ITimeSeriesKey itsk)

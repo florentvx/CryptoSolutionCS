@@ -83,8 +83,9 @@ namespace DataLibrary
         {
             this.PublishInfo($"Kraken API Request : OHLC {curPair.ToString} - {freq.ToString()}");
             try { return KrakenApi.GetOHLC(curPair.GetRequestID(), freq.GetFrequency()); }
-            catch
+            catch (System.Net.WebException wex)
             {
+                this.PublishError(wex.Message); // No Internet => wex.Message = "The remote name could not be resolved: 'api.kraken.com'"
                 count--;
                 if (count < 1) throw new Exception($"Unable to Download Krarken OHLC for: {curPair.ToString}");
                 else System.Threading.Thread.Sleep(5000); return GetKrakenOHLC(curPair, freq, count);
@@ -243,12 +244,6 @@ namespace DataLibrary
 
         #region Ledger
 
-        //private void AddLedgerCurrency(Currency ccy)
-        //{
-        //    if (!ccy.IsNone() && LedgerCurrencies.Where(x => x == ccy).Count() == 0)
-        //        LedgerCurrencies.Add(ccy);
-        //}
-
         /// <summary>
         /// Request Ledger from Kraken (looping the request if needed)
         /// </summary>
@@ -357,8 +352,14 @@ namespace DataLibrary
 
         #region TransactionList
 
+
+        public DateTime GetLastTransactionDate()
+        {
+            return StaticLibrary.UnixTimeStampToDateTime(Ledger.OrderBy(x => x.Value.Time).Last().Value.Time);
+        }
+
         /// <summary>
-        /// Convert the raw Ledger data fromm Kraken to CryptoSolution objects
+        /// Convert the raw Ledger data from Kraken to CryptoSolution objects
         /// </summary>
         /// <returns></returns>
         public List<Transaction> GetTransactionList()
@@ -425,6 +426,16 @@ namespace DataLibrary
             return res;
         }
 
+        public List<Transaction> GetTransactionList(DateTime startDate)
+        {
+            List<Transaction> txList = GetTransactionList();
+            List<Transaction> res = new List<Transaction> { };
+            foreach (var tx in txList)
+                if (tx.Date > startDate)
+                    res.Add(tx);
+            return res;
+        }
+
         #endregion
 
         #region TimeSeries
@@ -436,13 +447,8 @@ namespace DataLibrary
         /// <returns></returns>
         private List<OHLC> GetOHLCTimeSeries(ITimeSeriesKey itsk)
         {
-            if (OHLCData.ContainsKey(itsk.GetTimeSeriesKey()))
-                return OHLCData[itsk.GetTimeSeriesKey()];
-            else
-            {
-                LoadOHLC(itsk);
-                return OHLCData[itsk.GetTimeSeriesKey()];
-            }
+            LoadOHLC(itsk);
+            return OHLCData[itsk.GetTimeSeriesKey()];
         }
 
         /// <summary>
@@ -521,6 +527,7 @@ namespace DataLibrary
                 try
                 {
                     CryptoFiatPair cfp = cp.GetCryptoFiatPair;
+                    FillFXMarketHistory(fxmh, cpts, startDate);
                     if (cfp.Fiat != fiat)
                     {
                         CurrencyPairTimeSeries cpts2 = new CurrencyPairTimeSeries(cfp.Crypto, fiat, freq);

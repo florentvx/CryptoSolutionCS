@@ -177,11 +177,16 @@ namespace CryptoApp
         {
             if (TSP == null)
             {
-                TSP = new TimeSeriesManager(Fiat, useKraken: true, view: this);
+                TSP = new TimeSeriesManager(Fiat, useKraken: false, view: this);
                 CryptoPresenter = new Presenter(this, TSP);
             }
             CryptoPresenter.Update(Fiat, true);
             Loaded = true;
+        }
+
+        private void ButtonLedger_Click(object sender, EventArgs e)
+        {
+            CryptoPresenter.UpdateLedger(useKraken: true);
         }
     }
 

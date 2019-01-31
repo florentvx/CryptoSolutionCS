@@ -30,7 +30,7 @@ namespace TimeSeriesAnalytics
         public void AddLoggingLink(LoggingEventHandler function) { _log += function; }
 
 
-        public TimeSeriesManager(Currency fiat, bool useKraken, string path = null, IView view = null)
+        public TimeSeriesManager(Currency fiat, bool useKraken = false, string path = null, IView view = null)
         {
             if (view != null)
                 AddLoggingLink(view.PublishLogMessage);
@@ -38,25 +38,36 @@ namespace TimeSeriesAnalytics
             if (path != null) BasePath = path;
             DataProvider = new DataProvider(BasePath, view);
             DataProvider.LoadLedger(useKraken: useKraken);
-            SetUpAllocations();
-        }
-
-        public void SetUpAllocations()
-        {
-            AS = new AllocationSummary(Fiat);
+            // SetUpAllocations();
             List<Transaction> txList = DataProvider.GetTransactionList();
-            AS.LoadTransactionList(txList);
+            AS = new AllocationSummary(Fiat, txList);
             DateTime startDate = AS.History.First().Key;
             FXMH = DataProvider.GetFXMarketHistory(Fiat, AS.FXMH.CpList, startDate);
             AH = new AllocationHistory(txList, FXMH, Fiat);
+            // SetUpAllocation
         }
 
-        public void UpdateAllocations()
+        public void Update(Currency fiat, List<ITimeSeriesKey> tskl, bool useLowerFrequencies)
         {
+            Fiat = fiat;
+            TimeSeriesKeyList = tskl;
+            DataProvider.LoadOHLC(TimeSeriesKeyList, useLowerFrequencies: useLowerFrequencies);
+            // UpdateAllocations:
             AS.CcyRef = Fiat;
-            DataProvider.UpdateFXMarketHistory(AH.FXMH, Fiat, AH.History.First().Key);
-            FXMH = AH.FXMH;
-            AH.Update(Fiat);
+            DataProvider.UpdateFXMarketHistory(FXMH, Fiat, AH.StartDate);
+            AH.UpdateFiat(Fiat);
+            // UpdateAllocation
+        }
+
+        public void UpdateLedger(bool useKraken)
+        {
+            DateTime lastDate = DataProvider.GetLastTransactionDate();
+            DataProvider.LoadLedger(useKraken);
+            List<Transaction> txList = DataProvider.GetTransactionList(startDate: lastDate);
+            this.PublishWarning($"Number of New Transactions: {txList.Count}");
+            DataProvider.UpdateFXMarketHistory(FXMH, Fiat, AH.StartDate);
+            AS.UpdateTransactions(txList);
+            AH.UpdateTransactions(txList);
         }
 
         public Allocation PriceLastAllocation()
@@ -80,14 +91,6 @@ namespace TimeSeriesAnalytics
             List<Transaction> txL = DataProvider.GetTransactionList();
             AAPnL.AddTransactions(txL, FXMH);
             return AAPnL.ToTable(FXMH.GetLastFXMarket());
-        }
-
-        public void Update(Currency fiat, List<ITimeSeriesKey> tskl, bool useLowerFrequencies)
-        {
-            Fiat = fiat;
-            TimeSeriesKeyList = tskl;
-            DataProvider.LoadOHLC(TimeSeriesKeyList, useLowerFrequencies: useLowerFrequencies);
-            UpdateAllocations();
         }
 
         public void FullUpdate()

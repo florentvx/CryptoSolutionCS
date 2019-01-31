@@ -22,6 +22,12 @@ namespace Core.Allocations
             CcyRef = ccyRef;
         }
 
+        public AllocationSummary(Currency ccyRef, List<Transaction> txList)
+        {
+            CcyRef = ccyRef;
+            LoadTransactionList(txList);
+        }
+
         public void AddFees(Transaction tx)
         {
             Dictionary<Currency, Allocation> newFees = new Dictionary<Currency, Allocation> { };
@@ -75,6 +81,29 @@ namespace Core.Allocations
                 FXMH.AddQuote(tx.Date, tx.XRate);
                 AddFees(tx);
             }
+        }
+
+        public void UpdateTransactions(List<Transaction> txList)
+        {
+            KeyValuePair<DateTime, Allocation> lastKey = GetLastHistory();
+            foreach (Transaction tx in txList)
+            {
+                if (tx.Date > lastKey.Key)
+                {
+                    Allocation alloc = lastKey.Value;
+                    alloc.AddTransaction(tx);
+                    if (History.ContainsKey(tx.Date))
+                        tx.Date = tx.Date.AddSeconds(1);
+                    History.Add(tx.Date, alloc);
+                    FXMH.AddQuote(tx.Date, tx.XRate);
+                    AddFees(tx);
+                }
+            }
+        }
+
+        public KeyValuePair<DateTime,Allocation> GetLastHistory()
+        {
+            return History.Last();
         }
 
         public Allocation GetAllocation(DateTime date)

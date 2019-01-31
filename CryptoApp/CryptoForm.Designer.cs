@@ -28,9 +28,9 @@
         /// </summary>
         private void InitializeComponent()
         {
-            System.Windows.Forms.DataVisualization.Charting.ChartArea chartArea3 = new System.Windows.Forms.DataVisualization.Charting.ChartArea();
-            System.Windows.Forms.DataVisualization.Charting.Legend legend3 = new System.Windows.Forms.DataVisualization.Charting.Legend();
-            System.Windows.Forms.DataVisualization.Charting.Series series3 = new System.Windows.Forms.DataVisualization.Charting.Series();
+            System.Windows.Forms.DataVisualization.Charting.ChartArea chartArea2 = new System.Windows.Forms.DataVisualization.Charting.ChartArea();
+            System.Windows.Forms.DataVisualization.Charting.Legend legend2 = new System.Windows.Forms.DataVisualization.Charting.Legend();
+            System.Windows.Forms.DataVisualization.Charting.Series series2 = new System.Windows.Forms.DataVisualization.Charting.Series();
             this.tabControl1 = new System.Windows.Forms.TabControl();
             this.Allocation = new System.Windows.Forms.TabPage();
             this.dataGridViewAllocation = new System.Windows.Forms.DataGridView();
@@ -47,6 +47,7 @@
             this.comboBoxFrequency = new System.Windows.Forms.ComboBox();
             this.buttonFullDataUpdate = new System.Windows.Forms.Button();
             this.buttonLoad = new System.Windows.Forms.Button();
+            this.ButtonLedger = new System.Windows.Forms.Button();
             this.tabControl1.SuspendLayout();
             this.Allocation.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dataGridViewAllocation)).BeginInit();
@@ -149,16 +150,16 @@
             this.chart1.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            chartArea3.Name = "ChartArea1";
-            this.chart1.ChartAreas.Add(chartArea3);
-            legend3.Name = "Legend1";
-            this.chart1.Legends.Add(legend3);
+            chartArea2.Name = "ChartArea1";
+            this.chart1.ChartAreas.Add(chartArea2);
+            legend2.Name = "Legend1";
+            this.chart1.Legends.Add(legend2);
             this.chart1.Location = new System.Drawing.Point(235, 6);
             this.chart1.Name = "chart1";
-            series3.ChartArea = "ChartArea1";
-            series3.Legend = "Legend1";
-            series3.Name = "Series1";
-            this.chart1.Series.Add(series3);
+            series2.ChartArea = "ChartArea1";
+            series2.Legend = "Legend1";
+            series2.Name = "Series1";
+            this.chart1.Series.Add(series2);
             this.chart1.Size = new System.Drawing.Size(910, 465);
             this.chart1.TabIndex = 0;
             this.chart1.Text = "chart1";
@@ -231,11 +232,22 @@
             this.buttonLoad.UseVisualStyleBackColor = true;
             this.buttonLoad.Click += new System.EventHandler(this.ButtonLoad_Click);
             // 
+            // ButtonLedger
+            // 
+            this.ButtonLedger.Location = new System.Drawing.Point(644, 29);
+            this.ButtonLedger.Name = "ButtonLedger";
+            this.ButtonLedger.Size = new System.Drawing.Size(127, 24);
+            this.ButtonLedger.TabIndex = 8;
+            this.ButtonLedger.Text = "Ledger Update";
+            this.ButtonLedger.UseVisualStyleBackColor = true;
+            this.ButtonLedger.Click += new System.EventHandler(this.ButtonLedger_Click);
+            // 
             // CryptoForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1183, 697);
+            this.Controls.Add(this.ButtonLedger);
             this.Controls.Add(this.buttonLoad);
             this.Controls.Add(this.richTextBoxLogger);
             this.Controls.Add(this.buttonFullDataUpdate);
@@ -276,6 +288,7 @@
         private System.Windows.Forms.DataGridView dataGridViewAllocation;
         private System.Windows.Forms.RichTextBox richTextBoxLogger;
         private System.Windows.Forms.Button buttonLoad;
+        private System.Windows.Forms.Button ButtonLedger;
     }
 }
 
