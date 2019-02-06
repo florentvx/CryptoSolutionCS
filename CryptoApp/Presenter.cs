@@ -21,6 +21,13 @@ namespace CryptoApp
             _TSManager = timeSeriesManager;
         }
 
+        internal void InterfaceUpdate()
+        {
+            _view.SetChartData(_TSManager.GetChartData(_view.IsIndex, _view.Frame));
+            _view.PrintChart();
+            _view.AllocationTableUpdate();
+        }
+
         internal async void FullUpdate()
         {
             await Task.Run(() => _TSManager.FullUpdate());
@@ -32,9 +39,7 @@ namespace CryptoApp
             {
                 _view.GetCheckedCurrencyPairs();
                 _TSManager.Update(fiat, _view.TimeSeriesKeyList, useLowerFrequencies);
-                _view.SetChartData(_TSManager.GetChartData(_view.IsIndex, _view.Frame));
-                _view.PrintChart();
-                _view.AllocationTableUpdate();
+                InterfaceUpdate();
             });
         }
 
@@ -43,6 +48,7 @@ namespace CryptoApp
             await Task.Run(() =>
             {
                 _TSManager.UpdateLedger(useKraken);
+                InterfaceUpdate();
             });
         }
 

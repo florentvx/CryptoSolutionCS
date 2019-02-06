@@ -24,14 +24,20 @@ namespace Core.Allocations
         {
             FXMH = fxMH;
             CcyRef = ccyRef;
-            txList.OrderBy(x => x.Date).ToList();
-            bool isFirstTx = true;
+            UpdateTransactions(txList);
+        }
 
-            // Add all tx
-            foreach (Transaction tx in txList)
+        public void UpdateTransactions(List<Transaction> txList)
+        {
+            if (txList.Count > 0)
             {
-                AddTransaction(tx, isFirstTx);
-                isFirstTx = false;
+                txList.OrderBy(x => x.Date).ToList();
+
+                for (int i = 0; i < txList.Count - 1; i++)
+                {
+                    AddTransaction(txList[i], History.Count == 0, txList[i + 1].Date);
+                }
+                AddTransaction(txList.Last(), txList.Count == 1);
             }
         }
 
@@ -41,7 +47,7 @@ namespace Core.Allocations
             return History.Where(x => x.Key <= date).Last().Value;
         }
 
-        private void AddTransaction(Transaction tx, bool isFirstTx = false)
+        private void AddTransaction(Transaction tx, bool isFirstTx, DateTime nextTxDate)
         {
             Allocation alloc;
             if (!isFirstTx) { alloc = GetTransaction(tx.Date, true); }
@@ -61,7 +67,7 @@ namespace Core.Allocations
             History.Add(tx.Date, alloc);
 
             // update the same allocation for the following days
-            List<DateTime> datesList = FXMH.FXMarkets.Keys.Where(x => x > tx.Date)
+            List<DateTime> datesList = FXMH.FXMarkets.Keys.Where(x => x > tx.Date && x < nextTxDate)
                                                             .Select(x => x).ToList();
             foreach (DateTime date in datesList)
             {
@@ -73,6 +79,11 @@ namespace Core.Allocations
                 if (History.ContainsKey(date)) { History[date] = newAlloc; }
                 else { History.Add(date, newAlloc); }
             }
+        }
+
+        private void AddTransaction(Transaction tx, bool isFirstTx = false)
+        {
+            AddTransaction(tx, isFirstTx, new DateTime(9999, 1, 1));
         }
 
         public void UpdateFiat(Currency fiat)
@@ -88,17 +99,6 @@ namespace Core.Allocations
                         History[date].CalculateTotal(fx, fiat);
                 }
             }
-        }
-
-        public void UpdateTransactions(List<Transaction> txList)
-        {
-            List<Transaction> newTxs = new List<Transaction> { };
-            Allocation alloc = GetLastAllocation();
-            DateTime lastAllocDate = History.Keys.Last();
-            foreach (Transaction tx in txList)
-                if (lastAllocDate < tx.Date)
-                    newTxs.Add(tx);
-            
         }
 
         public Allocation GetAllocation(DateTime date)
