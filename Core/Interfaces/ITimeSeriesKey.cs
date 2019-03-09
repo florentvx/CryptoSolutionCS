@@ -15,5 +15,6 @@ namespace Core.Interfaces
         TimeSeriesKeyType GetKeyType();
         Currency GetCurrencyRef();
         List<CurrencyPair> GetCurrencyPairs();
+        Frequency GetFrequency();
     }
 }

@@ -13,11 +13,13 @@ namespace Core.Allocations
     {
         public string Name;
         public Currency CcyRef;
+        public Frequency Freq;
 
-        public AllocationSrategy(string name, Currency ccy = Currency.USD)
+        public AllocationSrategy(string name, Currency ccy = Currency.USD, Frequency freq = Frequency.Hour4)
         {
             Name = name;
             CcyRef = ccy;
+            Freq = freq;
         }
 
         public Currency GetCurrencyRef() { return CcyRef; }
@@ -37,12 +39,17 @@ namespace Core.Allocations
 
         public string GetTimeSeriesKey()
         {
-            return $"{Name} ({CcyRef.ToString()})";
+            return $"{Name} : {CcyRef.ToString()} - {Freq.ToString()}";
         }
 
         public string GetFullName()
         {
             return GetTimeSeriesKey();
+        }
+
+        public Frequency GetFrequency()
+        {
+            return Freq;
         }
     }
 }

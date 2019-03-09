@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using Core.Interfaces;
 using Core.Quotes;
+using Core.TimeSeriesKeys;
 using TimeSeriesAnalytics;
 
 namespace CryptoApp
@@ -21,25 +22,28 @@ namespace CryptoApp
             _TSManager = timeSeriesManager;
         }
 
-        internal void InterfaceUpdate()
+        internal void UserInterfaceUpdate(bool updateChart = true, bool updateAllocationTable = true)
         {
-            _view.SetChartData(_TSManager.GetChartData(_view.IsIndex, _view.Frame));
-            _view.PrintChart();
-            _view.AllocationTableUpdate();
+            if (updateChart)
+            {
+                _view.SetChartData(_TSManager.GetChartData(_view.IsIndex, _view.Frame));
+                _view.PrintChart();
+            }
+            if (updateAllocationTable) _view.AllocationTableUpdate();
         }
 
-        internal async void FullUpdate()
+        internal async void FullUpdate(Frequency freq)
         {
-            await Task.Run(() => _TSManager.FullUpdate());
+            await Task.Run(() => _TSManager.FullUpdate(freq));
         }
 
-        internal async void Update(Currency fiat, bool useLowerFrequencies)
+        internal async void Update(Currency fiat, Frequency freq, bool useLowerFrequencies = true, bool updateAllocationTable = true)
         {
             await Task.Run(() =>
             {
                 _view.GetCheckedCurrencyPairs();
-                _TSManager.Update(fiat, _view.TimeSeriesKeyList, useLowerFrequencies);
-                InterfaceUpdate();
+                _TSManager.Update(fiat, freq, _view.TimeSeriesKeyList, useLowerFrequencies);
+                UserInterfaceUpdate(updateAllocationTable: updateAllocationTable);
             });
         }
 
@@ -48,7 +52,6 @@ namespace CryptoApp
             await Task.Run(() =>
             {
                 _TSManager.UpdateLedger(useKraken);
-                InterfaceUpdate();
             });
         }
 

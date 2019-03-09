@@ -53,6 +53,13 @@ namespace Core.TimeSeriesKeys
             return $"{CurPair.GetRequestID()}{Sep}{Freq.ToString()}";
         }
 
+        public Frequency GetFrequency()
+        {
+            return Freq;
+        }
+
+        public bool IsFiatPair { get { return CurPair.IsFiatPair; } }
+
         public static CurrencyPairTimeSeries RequestIDToCurrencyPairTimeSeries(string input)
         {
             string[] inputs = input.Split(Sep);

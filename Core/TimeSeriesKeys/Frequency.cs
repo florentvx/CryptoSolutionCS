@@ -94,6 +94,22 @@ namespace Core.TimeSeriesKeys
             }
             return newFreq;
         }
+
+        public static List<DateTime> GetSchedule(this Frequency freq, DateTime Start, DateTime End, bool Adjust = false)
+        {
+            if (Start > End) { throw new Exception($"The Start Date {Start.ToString()} must be before the End Date {End.ToString()}$"); }
+            long DeltaSecs = freq.GetFrequency(inSecs: true);
+            DateTime EffectiveStart = Start;
+            if (Adjust)
+            {
+                long StartSeconds = (long) Start.Ticks / 10000000;
+                EffectiveStart = new DateTime((long) (1 + StartSeconds / DeltaSecs) * (10000000 * DeltaSecs));
+            }
+            List<DateTime> res = new List<DateTime> { EffectiveStart };
+            DateTime temp = EffectiveStart.AddSeconds(DeltaSecs);
+            while (temp < End) { res.Add(temp); temp = temp.AddSeconds(DeltaSecs); }
+            return res;
+        }
     }
     
 }

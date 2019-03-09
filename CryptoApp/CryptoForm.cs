@@ -124,7 +124,7 @@ namespace CryptoApp
                     Currency ccy = CurrencyPorperties.FromNameToCurrency(item);
                     if (!ccy.IsNone()) TimeSeriesKeyList.Add(new CurrencyPairTimeSeries(new CurrencyPair(ccy, Fiat), Frequency));
                     else if (item == "MyStrategy")
-                        TimeSeriesKeyList.Add(new AllocationSrategy(item, Fiat));
+                        TimeSeriesKeyList.Add(new AllocationSrategy(item, Fiat, Frequency));
                 }
             }
         }
@@ -164,12 +164,12 @@ namespace CryptoApp
 
         private void ButtonShow_Click(object sender, EventArgs e)
         {
-            CryptoPresenter.Update(Fiat, useLowerFrequencies: true);
+            CryptoPresenter.Update(Fiat, Frequency, useLowerFrequencies: true, updateAllocationTable: false);
         }
 
         private void ButtonFullUpdate_Click(object sender, EventArgs e)
         {
-            if (Loaded) CryptoPresenter.FullUpdate();
+            if (Loaded) CryptoPresenter.FullUpdate(Frequency);
             else PublishLogMessage(this, new LogMessageEventArgs() { Level = LevelType.WARNING, Message = "Load the Market first!" });
         }
 
@@ -177,10 +177,10 @@ namespace CryptoApp
         {
             if (TSP == null)
             {
-                TSP = new TimeSeriesManager(Fiat, useKraken: false, view: this);
+                TSP = new TimeSeriesManager(Fiat, Frequency, useKraken: false, view: this);
                 CryptoPresenter = new Presenter(this, TSP);
             }
-            CryptoPresenter.Update(Fiat, true);
+            CryptoPresenter.Update(Fiat, Frequency, useLowerFrequencies: false);
             Loaded = true;
         }
 

@@ -41,6 +41,8 @@ namespace Core.Allocations
 
         public Currency GetCurrencyRef() { return CcyRef; }
 
+        public Frequency GetFrequency() { return Frequency.None; }
+
         public object Clone()
         {
             var dico = AllocationTools<Currency, AllocationElement>.DeepCopy(Dictionary);

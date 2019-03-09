@@ -431,7 +431,7 @@ namespace DataLibrary
             List<Transaction> txList = GetTransactionList();
             List<Transaction> res = new List<Transaction> { };
             foreach (var tx in txList)
-                if (tx.Date > startDate)
+                if (tx.Date.Ticks > startDate.AddSeconds(1).Ticks)
                     res.Add(tx);
             return res;
         }
