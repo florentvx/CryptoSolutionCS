@@ -37,9 +37,8 @@ namespace TimeSeriesAnalytics
             Fiat = fiat;
             if (path != null) BasePath = path;
             DataProvider = new DataProvider(BasePath, view);
-            DataProvider.LoadLedger(useKraken: useKraken);
             // SetUpAllocations();
-            List<Transaction> txList = DataProvider.GetTransactionList();
+            List<Transaction> txList = DataProvider.GetTransactionList(useKraken: useKraken);
             AS = new AllocationSummary(Fiat, txList);
             DateTime startDate = AS.History.First().Key;
             FXMH = DataProvider.GetFXMarketHistory(Fiat, AS.FXMH.CpList, startDate, freq);
@@ -51,7 +50,7 @@ namespace TimeSeriesAnalytics
         {
             Fiat = fiat;
             TimeSeriesKeyList = tskl;
-            DataProvider.LoadOHLC(TimeSeriesKeyList, useLowerFrequencies: useLowerFrequencies);
+            DataProvider.LoadPrices(TimeSeriesKeyList, useLowerFrequencies: useLowerFrequencies);
             // UpdateAllocations:
             AS.CcyRef = Fiat;
             DataProvider.UpdateFXMarketHistory(FXMH, Fiat, AH.StartDate, freq);
@@ -62,8 +61,7 @@ namespace TimeSeriesAnalytics
         public void UpdateLedger(bool useKraken)
         {
             DateTime lastDate = DataProvider.GetLastTransactionDate();
-            DataProvider.LoadLedger(useKraken);
-            List<Transaction> txList = DataProvider.GetTransactionList(startDate: lastDate);
+            List<Transaction> txList = DataProvider.GetTransactionList(startDate: lastDate, useKraken: useKraken);
             this.PublishWarning($"Number of New Transactions: {txList.Count}");
             if (txList.Count > 0) this.PublishWarning("Click on Load to update the data !");
             DataProvider.UpdateFXMarketHistory(FXMH, Fiat, AH.StartDate);
@@ -103,7 +101,14 @@ namespace TimeSeriesAnalytics
             List<ITimeSeriesKey> cptsL = new List<ITimeSeriesKey> { };
             foreach (Currency cr in cryptoList)
                 foreach (Currency fi in fiatList)
-                    cptsL.Add(new CurrencyPairTimeSeries(cr, fi, DataProvider.SavingMinimumFrequency.GetNextFrequency()));
+                    cptsL.Add(new CurrencyPairTimeSeries(cr, fi, Frequency.None));
+            for (int i = 0; i < fiatList.Count - 1; i++)
+            {
+                for (int j = i + 1; j < fiatList.Count; j++)
+                {
+                    cptsL.Add(new CurrencyPairTimeSeries(fiatList[i], fiatList[j], Frequency.None));
+                }
+            }
             this.PublishDebug("Full Update Started");
             Update(Fiat, freq, cptsL, true);
             this.PublishDebug("Full Update Finished");

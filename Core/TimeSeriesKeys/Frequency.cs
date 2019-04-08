@@ -95,20 +95,43 @@ namespace Core.TimeSeriesKeys
             return newFreq;
         }
 
-        public static List<DateTime> GetSchedule(this Frequency freq, DateTime Start, DateTime End, bool Adjust = false)
+        public static DateTime Adjust(this Frequency freq, DateTime date, bool isNext = false)
+        {
+            long DeltaSecs = freq.GetFrequency(inSecs: true);
+            long DateSeconds = (long)date.Ticks / 10000000;
+            long x = isNext ? 1 : 0;
+            return new DateTime((long)(x + DateSeconds / DeltaSecs) * (10000000 * DeltaSecs));
+        }
+
+        public static DateTime Add(this Frequency freq, DateTime date, int number = 1)
+        {
+            long DeltaSecs = freq.GetFrequency(inSecs: true);
+            DateTime initialDate = freq.Adjust(date);
+            return initialDate.AddSeconds(number * DeltaSecs);
+        }
+
+        public static DateTime MinimumStartDate = new DateTime(2015, 1, 1);
+
+        public static List<DateTime> GetSchedule(this Frequency freq, DateTime Start, DateTime End, bool Adjust = false, bool IncludeEndDate = true)
         {
             if (Start > End) { throw new Exception($"The Start Date {Start.ToString()} must be before the End Date {End.ToString()}$"); }
             long DeltaSecs = freq.GetFrequency(inSecs: true);
-            DateTime EffectiveStart = Start;
-            if (Adjust)
-            {
-                long StartSeconds = (long) Start.Ticks / 10000000;
-                EffectiveStart = new DateTime((long) (1 + StartSeconds / DeltaSecs) * (10000000 * DeltaSecs));
-            }
+            DateTime EffectiveStart = Start < MinimumStartDate ? MinimumStartDate : Start;
+            if (Adjust) { EffectiveStart = freq.Adjust(Start); }
             List<DateTime> res = new List<DateTime> { EffectiveStart };
             DateTime temp = EffectiveStart.AddSeconds(DeltaSecs);
-            while (temp < End) { res.Add(temp); temp = temp.AddSeconds(DeltaSecs); }
+            if (IncludeEndDate)
+                while (temp <= End) { res.Add(temp); temp = temp.AddSeconds(DeltaSecs); }
+            else
+                while (temp < End) { res.Add(temp); temp = temp.AddSeconds(DeltaSecs); }
             return res;
+        }
+
+        public static List<DateTime> GetSchedule(this Frequency freq, DateTime EndDate, int Depth, bool Adjust = true, bool IncludeEndDate = true)
+        {
+            if (Adjust) { EndDate = freq.Adjust(EndDate, isNext: false); }
+            DateTime startDate = freq.Add(EndDate, -Depth);
+            return freq.GetSchedule(startDate, EndDate, Adjust: Adjust, IncludeEndDate: false);
         }
     }
     

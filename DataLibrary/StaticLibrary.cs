@@ -1,10 +1,10 @@
-﻿using KrakenApi;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Core.Kraken;
 
 namespace DataLibrary
 {
@@ -33,7 +33,12 @@ namespace DataLibrary
             return dtDateTime;
         }
 
-        public  static OHLC ReadOHLCItems(string[] array, string[] headers)
+        public static Int32 DateTimeToUnixTimeStamp(DateTime date)
+        {
+            return (Int32)(date.Subtract(new DateTime(1970, 1, 1))).TotalSeconds;
+        }
+
+        public static OHLC ReadOHLCItems(string[] array, string[] headers)
         {
             OHLC res = new OHLC();
             for (int i = 0; i < headers.Length; i++)

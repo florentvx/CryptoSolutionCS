@@ -18,10 +18,20 @@ namespace Main
     {
         static void Main(string[] args)
         {
-            //string path = Path.GetDirectoryName(Path.GetDirectoryName(Path.GetDirectoryName(Directory.GetCurrentDirectory())));
-            //string path = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + "\\Library";
             string path = Environment.GetFolderPath(Environment.SpecialFolder.Personal);
 
+
+            DataProvider dp = new DataProvider(path);
+            FXDataProvider fxd = dp.FXData;
+            CurrencyPairTimeSeries cpts = new CurrencyPairTimeSeries(new CurrencyPair(Currency.EUR, Currency.USD), Frequency.Day1);
+            var x  = fxd.LoadData(cpts,100);
+            fxd.WriteFXHistory(cpts);
+
+
+
+            //string path = Path.GetDirectoryName(Path.GetDirectoryName(Path.GetDirectoryName(Directory.GetCurrentDirectory())));
+            //string path = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + "\\Library";
+            
             // Core Test
             DateTime endDate = new DateTime(2018, 1, 30);
             CurrencyPair curPairXBT = new CurrencyPair(Currency.XBT, Currency.USD);
@@ -36,14 +46,14 @@ namespace Main
             Price test = FXMH.SumPrices(endDate, new Price(10, Currency.BCH), new Price(1, Currency.XBT));
             Console.WriteLine(test.ToString());
 
-            // DataLibrary Test
-            DataProvider dtl = new DataProvider(path);
-            dtl.LoadOHLC(new List<ITimeSeriesKey>
-            {
-                new CurrencyPairTimeSeries(curPairXBT),
-                new CurrencyPairTimeSeries(curPairXBT)
-            });
-            dtl.LoadLedger(useKraken: true);
+            //// DataLibrary Test
+            //DataProvider dtl = new DataProvider(path);
+            //dtl.LoadOHLC(new List<ITimeSeriesKey>
+            //{
+            //    new CurrencyPairTimeSeries(curPairXBT),
+            //    new CurrencyPairTimeSeries(curPairXBT)
+            //});
+            //dtl.LoadLedger(useKraken: true);
 
             // Allocation
             //List<Transaction> txList = new List<Transaction> { };
@@ -55,15 +65,15 @@ namespace Main
             //Console.WriteLine(AH.ToString());
 
             // Allocation Summary
-            AllocationSummary AS = new AllocationSummary(Currency.EUR);
-            AS.LoadTransactionList(dtl.GetTransactionList());
+            //AllocationSummary AS = new AllocationSummary(Currency.EUR);
+            //AS.LoadTransactionList(dtl.GetTransactionList());
 
-            // DataLibrary Stats
-            List<Transaction> txL = dtl.GetTransactionList();
-            foreach (var tx in txL)
-            {
-                Console.WriteLine(tx.ToString());
-            }
+            //// DataLibrary Stats
+            //List<Transaction> txL = dtl.GetTransactionList();
+            //foreach (var tx in txL)
+            //{
+            //    Console.WriteLine(tx.ToString());
+            //}
             Console.WriteLine("End");
         }
     }

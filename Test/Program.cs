@@ -38,7 +38,7 @@ namespace Test
             //var assets = kraken.GetAssetInfo();
             //var assets = kraken.GetAssetPairs();
             //var ticker = kraken.GetTicker("XXBTZEUR");
-            var ohlc = kraken.GetOHLC("XXBTZEUR", 1440);
+            //var ohlc = kraken.GetOHLC("XXBTZEUR", 1440);
             //var orderbook = kraken.GetOrderBook("XXBTZEUR");
             //var trades = kraken.GetRecentTrades("XXBTZEUR");
             //var spread = kraken.GetRecentSpread("XXBTZEUR");

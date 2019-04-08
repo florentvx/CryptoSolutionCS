@@ -164,7 +164,7 @@ namespace CryptoApp
 
         private void ButtonShow_Click(object sender, EventArgs e)
         {
-            CryptoPresenter.Update(Fiat, Frequency, useLowerFrequencies: true, updateAllocationTable: false);
+            CryptoPresenter.Update(Fiat, Frequency, useLowerFrequencies: false, updateAllocationTable: false);
         }
 
         private void ButtonFullUpdate_Click(object sender, EventArgs e)

@@ -75,7 +75,7 @@ namespace Core.TimeSeriesKeys
 
         public void IncreaseFreq()
         {
-            Freq++;
+            Freq = Freq.GetNextFrequency();
         }
     }
 }

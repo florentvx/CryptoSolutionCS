@@ -32,6 +32,7 @@ using System.Net;
 using System.Security.Cryptography;
 using System.Text;
 using System.Threading;
+using Core.Kraken;
 
 namespace KrakenApi
 {
@@ -241,27 +242,27 @@ namespace KrakenApi
         public Dictionary<string, Ticker> Result;
     }
 
-    public class OHLC
-    {
-        public int Time;
-        public decimal Open;
-        public decimal High;
-        public decimal Low;
-        public decimal Close;
-        public decimal Vwap;
-        public decimal Volume;
-        public int Count;
-    }
+    //public class OHLC
+    //{
+    //    public int Time;
+    //    public decimal Open;
+    //    public decimal High;
+    //    public decimal Low;
+    //    public decimal Close;
+    //    public decimal Vwap;
+    //    public decimal Volume;
+    //    public int Count;
+    //}
 
-    public class GetOHLCResult
-    {
-        public Dictionary<string, List<OHLC>> Pairs;
+    //public class GetOHLCResult
+    //{
+    //    public Dictionary<string, List<OHLC>> Pairs;
 
-        // <summary>
-        /// Id to be used as since when polling for new, committed OHLC data.
-        /// </summary>
-        public long Last;
-    }
+    //    // <summary>
+    //    /// Id to be used as since when polling for new, committed OHLC data.
+    //    /// </summary>
+    //    public long Last;
+    //}
 
     public class GetOHLCResponse : ResponseBase
     {
@@ -750,48 +751,48 @@ namespace KrakenApi
         public Dictionary<string, PositionInfo> Result;
     }
 
-    public class LedgerInfo
-    {
-        /// <summary>
-        /// Reference id.
-        /// </summary>
-        public string Refid;
+    //public class LedgerInfo
+    //{
+    //    /// <summary>
+    //    /// Reference id.
+    //    /// </summary>
+    //    public string Refid;
 
-        /// <summary>
-        /// Unix timestamp of ledger.
-        /// </summary>
-        public double Time;
+    //    /// <summary>
+    //    /// Unix timestamp of ledger.
+    //    /// </summary>
+    //    public double Time;
 
-        /// <summary>
-        /// Type of ledger entry.
-        /// </summary>
-        public string Type;
+    //    /// <summary>
+    //    /// Type of ledger entry.
+    //    /// </summary>
+    //    public string Type;
 
-        /// <summary>
-        /// Asset class.
-        /// </summary>
-        public string Aclass;
+    //    /// <summary>
+    //    /// Asset class.
+    //    /// </summary>
+    //    public string Aclass;
 
-        /// <summary>
-        /// Asset.
-        /// </summary>
-        public string Asset;
+    //    /// <summary>
+    //    /// Asset.
+    //    /// </summary>
+    //    public string Asset;
 
-        /// <summary>
-        /// Transaction amount.
-        /// </summary>
-        public decimal Amount;
+    //    /// <summary>
+    //    /// Transaction amount.
+    //    /// </summary>
+    //    public decimal Amount;
 
-        /// <summary>
-        /// Transaction fee.
-        /// </summary>
-        public decimal Fee;
+    //    /// <summary>
+    //    /// Transaction fee.
+    //    /// </summary>
+    //    public decimal Fee;
 
-        /// <summary>
-        /// Resulting balance.
-        /// </summary>
-        public decimal Balance;
-    }
+    //    /// <summary>
+    //    /// Resulting balance.
+    //    /// </summary>
+    //    public decimal Balance;
+    //}
 
     public class GetLedgerResult
     {

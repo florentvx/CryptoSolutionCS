@@ -68,7 +68,7 @@ namespace Core.Markets
             FX.Add(xRate);
         }
 
-        public XChangeRate GetQuote(CurrencyPair curPair, bool constructNewQuote = true, bool useConstructedQuote = true)
+        public XChangeRate GetQuote(CurrencyPair curPair, bool constructNewQuote = true, bool useConstructedQuote = true) //TODO: Weird Inputs
         {
             if (curPair.IsIdentity) return new XChangeRate(1, (CurrencyPair)curPair.Clone());
             else
@@ -163,7 +163,7 @@ namespace Core.Markets
 
         public bool FXContains(CurrencyPair cp)
         {
-            XChangeRate xcr = GetQuote(cp, true, false);
+            XChangeRate xcr = GetQuote(cp, false, false); //Important change
             return xcr != null ;
         }
 

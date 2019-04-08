@@ -109,10 +109,9 @@ namespace Core.Allocations
                 {
                     FXMarket fx = FXMH.GetArtificialFXMarket(date, FXMH.CpList);
                     if (fx.IsArtificial) FXMH.AddFXMarket(date, fx);
-                    if (History.Keys.Contains(date))
-                        History[date].CalculateTotal(fx, fiat);
-                    else
+                    if (!History.Keys.Contains(date))
                         AddAllocationToHistory(GetClosestAllocation(date), date);
+                    History[date].CalculateTotal(fx, fiat);
                 }
             }
         }

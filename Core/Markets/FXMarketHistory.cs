@@ -27,8 +27,7 @@ namespace Core.Markets
                 foreach (DateTime date in FXMarkets.Keys)
                     res += $"{date.ToShortDateString()}\n{GetFXMarket(date).ToString}\n";
                 return res;
-            }
-            
+            }   
         }
 
         public void AddQuote(DateTime date, XChangeRate quote)
@@ -70,8 +69,9 @@ namespace Core.Markets
             CpList.Add(ccyPair);
         }
 
-        public FXMarket GetFXMarket(DateTime date)
+        public FXMarket GetFXMarket(DateTime date, bool isExactDate = false)
         {
+            if (isExactDate) return FXMarkets[date];
             return FXMarkets.Where(x => x.Key <= date).Select(x => x.Value).LastOrDefault();
         }
 
@@ -83,10 +83,16 @@ namespace Core.Markets
             if (res.FXContains(cpList)) return res; // time saver...
             foreach (CurrencyPair cp in cpList)
             {
-                FXMarket beforeFX = FXMarkets.Where(x => x.Key <= date && x.Value.FXContains(cp)).Last().Value;
+                FXMarket beforeFX = FXMarkets.Where(x => x.Key <= date && x.Value.FXContains(cp)).LastOrDefault().Value;
                 FXMarket afterFX = FXMarkets.Where(x => x.Key >= date && x.Value.FXContains(cp)).FirstOrDefault().Value;
-                double rate = beforeFX.GetQuote(cp).Rate;
-                if (afterFX != null)
+                double rate = 0;
+                bool useBefore = beforeFX != null;
+                bool useAfter = afterFX != null;
+                if (useBefore) rate = beforeFX.GetQuote(cp).Rate;
+                if (useAfter) rate = afterFX.GetQuote(cp).Rate;
+                if (!(useBefore || useAfter))
+                    throw new Exception($"The following Currency Pair was not found: {cp}");
+                if (useAfter && useBefore)
                 {
                     double w = 0.5;
                     if (afterFX.Date > beforeFX.Date)
@@ -96,7 +102,10 @@ namespace Core.Markets
                 }
                 else
                 {
-                    if (beforeFX.Date != date) res.DefineAsArtificial();
+                    if (useBefore)
+                        if (beforeFX.Date != date) res.DefineAsArtificial();
+                    else
+                        if (afterFX.Date != date) res.DefineAsArtificial();
                 }
                 XChangeRate xRateCp = new XChangeRate(rate, (CurrencyPair)cp.Clone());
                 res.AddQuote(xRateCp);
@@ -104,9 +113,14 @@ namespace Core.Markets
             return res;
         }
 
-        public XChangeRate GetQuote(DateTime dateTime, CurrencyPair currencyPair)
+        public IEnumerable<DateTime> GetDates()
         {
-            FXMarket FX = GetFXMarket(dateTime);
+            return FXMarkets.Keys;
+        }
+
+        public XChangeRate GetQuote(DateTime dateTime, CurrencyPair currencyPair, bool isExactQuote = false)
+        {
+            FXMarket FX = GetFXMarket(dateTime, isExactQuote);
             return FX.GetQuote(currencyPair);
         }
 
