@@ -8,7 +8,7 @@ namespace Core.TimeSeriesKeys
 {
     public enum Frequency
     {
-        None,Min1,Min5,Min15,Min30,Hour1,Hour4,Day1,Week1,Day15
+        None, Min1, Min5, Min15, Min30, Hour1, Hour4, Day1, Week1, Day15
     }
     public static class FrequencyMethods
     {
@@ -112,12 +112,12 @@ namespace Core.TimeSeriesKeys
 
         public static DateTime MinimumStartDate = new DateTime(2015, 1, 1);
 
-        public static List<DateTime> GetSchedule(this Frequency freq, DateTime Start, DateTime End, bool Adjust = false, bool IncludeEndDate = true)
+        public static List<DateTime> GetSchedule(this Frequency freq, DateTime Start, DateTime End, bool AdjustStart = false, bool IncludeEndDate = true)
         {
             if (Start > End) { throw new Exception($"The Start Date {Start.ToString()} must be before the End Date {End.ToString()}$"); }
             long DeltaSecs = freq.GetFrequency(inSecs: true);
             DateTime EffectiveStart = Start < MinimumStartDate ? MinimumStartDate : Start;
-            if (Adjust) { EffectiveStart = freq.Adjust(Start); }
+            if (AdjustStart) { EffectiveStart = freq.Adjust(Start); }
             List<DateTime> res = new List<DateTime> { EffectiveStart };
             DateTime temp = EffectiveStart.AddSeconds(DeltaSecs);
             if (IncludeEndDate)
@@ -127,12 +127,20 @@ namespace Core.TimeSeriesKeys
             return res;
         }
 
-        public static List<DateTime> GetSchedule(this Frequency freq, DateTime EndDate, int Depth, bool Adjust = true, bool IncludeEndDate = true)
+        public static List<DateTime> GetSchedule(this Frequency freq, DateTime EndDate, int Depth)
         {
-            if (Adjust) { EndDate = freq.Adjust(EndDate, isNext: false); }
+            EndDate = freq.Adjust(EndDate, isNext: false);
             DateTime startDate = freq.Add(EndDate, -Depth);
-            return freq.GetSchedule(startDate, EndDate, Adjust: Adjust, IncludeEndDate: false);
+            return freq.GetSchedule(startDate, EndDate, IncludeEndDate: true);
         }
     }
-    
+    public static class DateTimeExtensions
+    {
+        public static DateTime Trim(this DateTime date, long ticks = TimeSpan.TicksPerSecond)
+        {
+            return new DateTime(date.Ticks - (date.Ticks % ticks), date.Kind);
+        }
+    }
 }
+
+

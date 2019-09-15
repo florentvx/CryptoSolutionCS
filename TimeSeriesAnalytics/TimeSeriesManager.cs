@@ -1,6 +1,7 @@
 ﻿using Core.Allocations;
 using Core.Interfaces;
 using Core.Markets;
+using Core.PnL;
 using Core.Quotes;
 using Core.TimeSeriesKeys;
 using Core.Transactions;
@@ -21,7 +22,7 @@ namespace TimeSeriesAnalytics
         public AllocationHistory AH;
         public List<ITimeSeriesKey> TimeSeriesKeyList = new List<ITimeSeriesKey>();
 
-        public AllocationSummary AS;
+        //public AllocationSummary AS;
         public FXMarketHistory FXMH;
 
         // Logging
@@ -38,10 +39,10 @@ namespace TimeSeriesAnalytics
             if (path != null) BasePath = path;
             DataProvider = new DataProvider(BasePath, view);
             // SetUpAllocations();
-            List<Transaction> txList = DataProvider.GetTransactionList(useKraken: useKraken);
-            AS = new AllocationSummary(Fiat, txList);
-            DateTime startDate = AS.History.First().Key;
-            FXMH = DataProvider.GetFXMarketHistory(Fiat, AS.FXMH.CpList, startDate, freq);
+            SortedList<DateTime, Transaction> txList = DataProvider.GetTransactionList(useKraken: useKraken);
+            //AS = new AllocationSummary(Fiat, txList);
+            DateTime startDate = txList.First().Key;
+            FXMH = DataProvider.GetFXMarketHistory(Fiat, DataProvider.GetCurrencyPairs(), startDate, freq);
             AH = new AllocationHistory(txList, FXMH, Fiat);
             // SetUpAllocation
         }
@@ -52,7 +53,7 @@ namespace TimeSeriesAnalytics
             TimeSeriesKeyList = tskl;
             DataProvider.LoadPrices(TimeSeriesKeyList, useLowerFrequencies: useLowerFrequencies);
             // UpdateAllocations:
-            AS.CcyRef = Fiat;
+            //AS.CcyRef = Fiat;
             DataProvider.UpdateFXMarketHistory(FXMH, Fiat, AH.StartDate, freq);
             AH.UpdateHistory(Fiat);
             // UpdateAllocation
@@ -61,35 +62,33 @@ namespace TimeSeriesAnalytics
         public void UpdateLedger(bool useKraken)
         {
             DateTime lastDate = DataProvider.GetLastTransactionDate();
-            List<Transaction> txList = DataProvider.GetTransactionList(startDate: lastDate, useKraken: useKraken);
+            SortedList<DateTime, Transaction> txList = DataProvider.GetTransactionList(startDate: lastDate, useKraken: useKraken);
             this.PublishWarning($"Number of New Transactions: {txList.Count}");
             if (txList.Count > 0) this.PublishWarning("Click on Load to update the data !");
             DataProvider.UpdateFXMarketHistory(FXMH, Fiat, AH.StartDate);
-            AS.UpdateTransactions(txList);
+            //AS.UpdateTransactions(txList);
             AH.UpdateTransactions(txList);
         }
 
-        public Allocation PriceLastAllocation()
-        {
-            FXMarket fxMkt = FXMH.GetLastFXMarket();
-            return AS.PriceAllocation(fxMkt);
-        }
+        //public Allocation PriceLastAllocation()
+        //{
+        //    FXMarket fxMkt = FXMH.GetLastFXMarket();
+        //    return AS.PriceAllocation(fxMkt);
+        //}
 
         public Dictionary<string,PnLElement> AllocationToTable(DateTime date)
         {
-            AllocationAggregatedPnL AAPnL = new AllocationAggregatedPnL(AS.CcyRef);
-            List<Transaction> txL = DataProvider.GetTransactionList();
-            List<Transaction> txLFiltered = txL.Where(tx => tx.Date <= date).ToList();
+            AggregatedPnL AAPnL = new AggregatedPnL(AH.CcyRef);
+            SortedList<DateTime, Transaction> txLFiltered = DataProvider.GetTransactionList(startDate: date, isBefore: true);
             AAPnL.AddTransactions(txLFiltered, FXMH);
-            return AAPnL.ToTable(FXMH.GetFXMarket(date));
+            return AAPnL.ToTable(FXMH, date);
         }
 
         public Dictionary<string,PnLElement> LastAllocationToTable()
         {
-            AllocationAggregatedPnL AAPnL = new AllocationAggregatedPnL(AS.CcyRef);
-            List<Transaction> txL = DataProvider.GetTransactionList();
-            AAPnL.AddTransactions(txL, FXMH);
-            return AAPnL.ToTable(FXMH.GetLastFXMarket());
+            AggregatedPnL AAPnL = new AggregatedPnL(AH.CcyRef);
+            AAPnL.AddTransactions(DataProvider.GetTransactionList(), FXMH);
+            return AAPnL.ToTable(FXMH);
         }
 
         public void FullUpdate(Frequency freq)

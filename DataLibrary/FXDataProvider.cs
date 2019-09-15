@@ -99,16 +99,17 @@ namespace DataLibrary
         public void WriteFXHistory(CurrencyPairTimeSeries cpts)
         {
             string pathLib = GetFXLibraryPath(cpts);
-            this.PublishInfo($"Saving FX: {cpts.CurPair.ToString}");
+            this.PublishInfo($"Saving FX: {cpts.CurPair.ToString()}");
             StringBuilder sb = new StringBuilder();
             sb.AppendLine("Time,Close");
-            IEnumerable<DateTime> DateList = Data.GetDates();
+            IEnumerable<DateTime> DateList = Data.GetAllDates();
             //DateList = cpts.Freq.GetSchedule(DateList.First(), DateList.Last(), true);
             foreach (DateTime date in DateList)
             {
-                double close = Data.GetQuote(date, cpts.CurPair).Rate;
+                double close = Data.GetQuote(date, cpts.CurPair).Item2.Rate;
                 Int32 dateUnix = StaticLibrary.DateTimeToUnixTimeStamp(date);
-                if (StaticLibrary.UnixTimeStampToDateTime(dateUnix + FXMinimunFrequency.GetFrequency(true)) < DateTime.UtcNow)
+                //if (StaticLibrary.UnixTimeStampToDateTime(dateUnix + FXMinimunFrequency.GetFrequency(true)) < DateTime.UtcNow)
+                if (StaticLibrary.UnixTimeStampToDateTime(dateUnix) < DateTime.UtcNow)
                     sb.AppendLine($"{dateUnix},{close}");
                 else
                     this.PublishInfo($"Stopped at line: {StaticLibrary.UnixTimeStampToDateTime(dateUnix)}");
@@ -118,7 +119,7 @@ namespace DataLibrary
 
         public double GetFXDataFromApi(CurrencyPair cp, DateTime date)
         {
-            this.PublishInfo($"FX API Request : {cp.ToString} - {date.ToString()}");
+            this.PublishInfo($"FX API Request : {cp.ToString()} - {date.ToString()}");
             string key1 = cp.Ccy1.ToString();
             string key2 = cp.Ccy2.ToString();
             string url = (string)RootAPIRequest.Clone();
@@ -154,7 +155,7 @@ namespace DataLibrary
             DateTime adjustedDate = FXMinimunFrequency.Adjust(date);
             try
             {
-                XChangeRate xr = Data.GetQuote(adjustedDate, cp, isExactQuote: true);
+                XChangeRate xr = Data.GetQuote(adjustedDate, cp, isExactDate: true).Item2;
                 return new Tuple<double, bool> (xr.Rate, false);
             }
             catch
@@ -179,7 +180,7 @@ namespace DataLibrary
             {
                 freq = FXMinimunFrequency;
             }
-            List<DateTime> dateList = freq.GetSchedule(DateTime.Now, depth, Adjust: true, IncludeEndDate: true);
+            List<DateTime> dateList = freq.GetSchedule(DateTime.UtcNow, depth);
             bool doSave = false;
             foreach (DateTime date in dateList)
             {
@@ -196,7 +197,7 @@ namespace DataLibrary
             List<Tuple<DateTime, double>> res = new List<Tuple<DateTime, double>>();
             CurrencyPairTimeSeries cpts = CurrencyPairTimeSeries.RequestIDToCurrencyPairTimeSeries(itsk.GetTimeSeriesKey());
             if (!Data.CpList.Contains(cpts.CurPair)) ReadFXHistory(cpts);
-            List<DateTime> schedule = itsk.GetFrequency().GetSchedule(DateTime.Now, ScheduleDepth, Adjust: true, IncludeEndDate: true);
+            List<DateTime> schedule = itsk.GetFrequency().GetSchedule(DateTime.UtcNow, ScheduleDepth);
             bool doSave = false;
             foreach (DateTime date in schedule)
             {

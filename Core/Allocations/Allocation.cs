@@ -9,31 +9,32 @@ using Core.TimeSeriesKeys;
 
 namespace Core.Allocations
 {
-    static class AllocationTools<T1, T2> where T2: ICloneable
+    static class AllocationTools<T> where T: ICloneable
     {
-        public static Dictionary<T1, T2> DeepCopy(Dictionary<T1, T2> input)
+        public static List<T> DeepCopy(List<T> input)
         {
-            Dictionary<T1, T2> res = new Dictionary<T1, T2> { };
-            foreach (T1 key in input.Keys)
-                res[key] = (T2) input[key].Clone();
+            List<T> res = new List<T> { };
+            foreach (T item in input)
+                res.Add((T)item.Clone());
             return res;
         }
     }
 
     public class Allocation : ICloneable, ITimeSeriesKey
     {
-        Dictionary<Currency, AllocationElement> Dictionary;
-        AllocationElement Fees;
+        private List<AllocationElement> Data;
+        public AllocationElement Fees;
         public Price Total;
         public Currency CcyRef;
         string Name = null;
 
-        public Allocation(Currency ccyRef, Dictionary<Currency, AllocationElement> dictionary = null, AllocationElement fees = null)
+        public Allocation(Currency ccyRef, List<AllocationElement> data = null,
+            AllocationElement fees = null)
         {
             CcyRef = ccyRef;
-            if (dictionary == null)
-                Dictionary = new Dictionary<Currency, AllocationElement>();
-            else { Dictionary = dictionary; }
+            if (data == null)
+                Data = new List<AllocationElement>();
+            else { Data = data; }
             if (fees == null) Fees = new AllocationElement(0, Currency.None);
             else { Fees = fees; }
             Total = new Price(0, Currency.None);
@@ -45,7 +46,7 @@ namespace Core.Allocations
 
         public object Clone()
         {
-            var dico = AllocationTools<Currency, AllocationElement>.DeepCopy(Dictionary);
+            var dico = AllocationTools<AllocationElement>.DeepCopy(Data);
             var fees = (AllocationElement)Fees.Clone();
             Allocation res = new Allocation(CcyRef, dico, fees)
             {
@@ -64,31 +65,41 @@ namespace Core.Allocations
             if (ccyInput == Currency.None)
                 ccyInput = CcyRef;
             Total = new Price(0, ccyInput);
-            foreach(Currency ccy in Dictionary.Keys)
+            foreach(AllocationElement element in Data)
             {
-                Total = fxMarket.SumPrices(Total, Dictionary[ccy].Price);
+                Total = fxMarket.SumPrices(Total, element.Price);
                 if (Total == null)
-                    throw new Exception($"Problem with Price Conversion: {ccy} / {ccyInput}");
+                    throw new Exception($"Problem with Price Conversion: {element.Ccy} / {ccyInput}");
             }
-            Total = fxMarket.SumPrices(Total, Fees.Price);
+            //Total = fxMarket.SumPrices(Total, Fees.Price);
         }
 
         public void Update(FXMarket fxMarket)
         {
             CalculateTotal(fxMarket);
-            foreach (Currency ccy in Dictionary.Keys)
-                Dictionary[ccy].Share = fxMarket.FXConvert(Dictionary[ccy].Price, CcyRef) / Total.Amount;
+            foreach (AllocationElement element in Data)
+                element.Share = fxMarket.FXConvert(element.Price, CcyRef) / Total.Amount;
 
             if (!Fees.IsNull)
                 Fees.Share = fxMarket.FXConvert(Fees.Price, CcyRef) / Total.Amount;
         }
 
-        private Allocation NewAllocation(FXMarket fxMarket)
+        //private Allocation NewAllocation(FXMarket fxMarket)
+        //{
+        //    Allocation newAlloc = (Allocation)Clone();
+        //    newAlloc.CancelFee();
+        //    newAlloc.Update(fxMarket);
+        //    return newAlloc;
+        //}
+
+        public AllocationElement GetElement(Currency ccy)
         {
-            Allocation newAlloc = (Allocation)Clone();
-            newAlloc.CancelFee();
-            newAlloc.Update(fxMarket);
-            return newAlloc;
+            foreach(AllocationElement elemt in Data)
+            {
+                if (elemt.Ccy == ccy)
+                    return elemt;
+            }
+            return null;
         }
 
         public Allocation AddTransaction(Transaction tx)//, FXMarket fxMarket)
@@ -101,39 +112,56 @@ namespace Core.Allocations
             // Received
             if ((tx.Type == TransactionType.Deposit && tx.Received.Ccy.IsFiat()) || tx.Type == TransactionType.Trade)
             {
-                if (res.Dictionary.ContainsKey(tx.Received.Ccy))
+                AllocationElement RecElement = res.GetElement(tx.Received.Ccy);
+                if (RecElement != null)
                 {
-                    AllocationElement allocIn = res.Dictionary[tx.Received.Ccy];
-                    allocIn.Price.Amount += tx.Received.Amount;
+                    //AllocationElement allocIn = res.Dictionary[tx.Received.Ccy];
+                    RecElement.Price.Amount += tx.Received.Amount;
                 }
                 else
-                    res.Dictionary[tx.Received.Ccy] = new AllocationElement(tx.Received.Amount, tx.Received.Ccy);
+                    res.Data.Add(new AllocationElement(tx.Received.Amount, tx.Received.Ccy));
             }
             if (tx.Type == TransactionType.Deposit && !tx.Received.Ccy.IsFiat())
-                throw new NotImplementedException();
+            {
+                //Console.WriteLine("");
+            }
+            //TODO: Find Transaction fees
+            
+            if (tx.Type == TransactionType.WithDrawal && tx.Paid.Ccy.IsFiat())
+            {
+                AllocationElement PaidElmt = res.GetElement(tx.Paid.Ccy);
+                if (PaidElmt != null)
+                    PaidElmt.Price.Amount -= tx.Paid.Amount;
+                else
+                    throw new Exception("Paid in unavailable currency");
+                if (PaidElmt.Price.Amount < 0)
+                    throw new Exception("Paid more than available");
+            }
 
             // Paid
             if (tx.Type == TransactionType.Trade && tx.Paid.Ccy != Currency.None)
             {
-                if (res.Dictionary.ContainsKey(tx.Paid.Ccy))
+                AllocationElement PaidElement = res.GetElement(tx.Paid.Ccy);
+                if (PaidElement != null)
                 {
-                    AllocationElement alloc = res.Dictionary[tx.Paid.Ccy];
-                    alloc.Price.Amount -= tx.Paid.Amount; 
+                    //AllocationElement alloc = res.Dictionary[tx.Paid.Ccy];
+                    PaidElement.Price.Amount -= tx.Paid.Amount; 
                 }
                 else
                     throw new Exception("Paid in unavailable currency");
-                if (res.Dictionary[tx.Paid.Ccy].Price.Amount < 0)
+                if (PaidElement.Price.Amount < 0)
                     throw new Exception("Paid more than available");
             }
 
             // Fees
             if (!tx.Fees.IsNull)
             {
-                if (res.Dictionary.ContainsKey(tx.Fees.Ccy))
+                AllocationElement FeesElement = res.GetElement(tx.Fees.Ccy);
+                if (FeesElement != null)
                 {
-                    AllocationElement fAlloc = res.Dictionary[tx.Fees.Ccy];
-                    fAlloc.Price.Amount -= tx.Fees.Amount;
-                    if (fAlloc.Price.Amount < 0)
+                    //AllocationElement fAlloc = res.Dictionary[tx.Fees.Ccy];
+                    FeesElement.Price.Amount -= tx.Fees.Amount;
+                    if (FeesElement.Price.Amount < 0)
                         throw new Exception("Paid more than available (fees)");
                     res.Fees = new AllocationElement(tx.Fees.Amount, tx.Fees.Ccy);
                 }
@@ -154,22 +182,25 @@ namespace Core.Allocations
 
         public void AddValue(Price price)
         {
-            if (!Dictionary.ContainsKey(price.Ccy))
-                Dictionary.Add(price.Ccy, new AllocationElement(price.Amount, price.Ccy));
+            AllocationElement ccyElemt = GetElement(price.Ccy);
+            if (ccyElemt == null)
+                Data.Add(new AllocationElement(price.Amount, price.Ccy));
             else
-                Dictionary[price.Ccy].AddValue(price.Amount);
+                ccyElemt.AddValue(price.Amount);
         }
 
         internal double GetImpliedXChangeRate(CurrencyPair cp)
         {
+            if (cp.IsIdentity)
+                return 1.0;
             if (Total.Ccy != cp.Ccy2)
                 throw new NotImplementedException();
-            AllocationElement ae = Dictionary[cp.Ccy1];
+            AllocationElement ae = GetElement(cp.Ccy1);
             double rate = Total.Amount * ae.Share / ae.Price.Amount;
             return rate;
         }
 
-        internal double GetReturn(Allocation prevAlloc, Currency ccy = Currency.None)
+        public double GetReturn(Allocation prevAlloc, Currency ccy = Currency.None)
         {
             if (ccy == Currency.None)
                 ccy = CcyRef;
@@ -178,7 +209,7 @@ namespace Core.Allocations
             {
                 double prevXR = prevAlloc.GetImpliedXChangeRate(cp);
                 double nextXR = GetImpliedXChangeRate(cp);
-                res += prevAlloc.Dictionary[cp.Ccy1].Share * (nextXR / prevXR - 1);
+                res += prevAlloc.GetElement(cp.Ccy1).Share * (nextXR / prevXR - 1);
             }
             return res;
         }
@@ -186,8 +217,8 @@ namespace Core.Allocations
         public override string ToString()
         {
             string res = "Allocation: \n";
-            foreach (Currency cur in Dictionary.Keys)
-                res += $"{cur.ToString()} : {Dictionary[cur].ToString()}\n";
+            foreach (AllocationElement elmt in Data)
+                res += $"{elmt.Ccy.ToString()} : {elmt.ToString()}\n";
             if (!Fees.IsNull)
                 res += $"Fees: {Fees.ToString()}\n";
             res += $"Total : {Total.ToString()}\n";
@@ -209,11 +240,18 @@ namespace Core.Allocations
             return TimeSeriesKeyType.Allocation;
         }
 
+        public List<CurrencyPair> GetCurrencyPairs(Currency ccy = Currency.None)
+        {
+            if (ccy == Currency.None)
+                ccy = Total.Ccy;
+            List<CurrencyPair> res = new List<CurrencyPair>();
+            foreach (AllocationElement elmt in Data) res.Add(new CurrencyPair(elmt.Ccy, ccy));
+            return res;
+        }
+
         public List<CurrencyPair> GetCurrencyPairs()
         {
-            List<CurrencyPair> res = new List<CurrencyPair>();
-            foreach (Currency ccy in Dictionary.Keys) res.Add(new CurrencyPair(ccy, Total.Ccy));
-            return res;
+            return GetCurrencyPairs(Currency.None);
         }
     }
 }

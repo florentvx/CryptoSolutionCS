@@ -78,13 +78,13 @@ namespace DataLibrary
         /// <returns></returns>
         private GetOHLCResult GetKrakenOHLC(CurrencyPair curPair, Frequency freq = Frequency.Hour4, int count = 10)
         {
-            this.PublishInfo($"Kraken API Request : OHLC {curPair.ToString} - {freq.ToString()}");
+            this.PublishInfo($"Kraken API Request : OHLC {curPair.ToString()} - {freq.ToString()}");
             try { return KrakenApi.GetOHLC(curPair.GetRequestID(), freq.GetFrequency()); }
             catch (System.Net.WebException wex)
             {
                 this.PublishError(wex.Message); // No Internet => wex.Message = "The remote name could not be resolved: 'api.kraken.com'"
                 count--;
-                if (count < 1) throw new Exception($"Unable to Download Krarken OHLC for: {curPair.ToString}");
+                if (count < 1) throw new Exception($"Unable to Download Krarken OHLC for: {curPair.ToString()}");
                 else System.Threading.Thread.Sleep(5000); return GetKrakenOHLC(curPair, freq, count);
             }
         }
@@ -125,7 +125,7 @@ namespace DataLibrary
         private void SaveOHLC(CurrencyPairTimeSeries cpts)
         {
             string pathLib = GetOHLCLibraryPath(cpts.CurPair, cpts.Freq);
-            this.PublishInfo($"Saving OHLC: {cpts.CurPair.ToString} {cpts.Freq.ToString()}");
+            this.PublishInfo($"Saving OHLC: {cpts.CurPair.ToString()} {cpts.Freq.ToString()}");
             StringBuilder sb = new StringBuilder();
             sb.AppendLine("Time,Open,High,Low,Close,Volume,Vwap,Count");
             foreach (OHLC item in OHLCData[cpts.GetTimeSeriesKey()])
@@ -247,8 +247,15 @@ namespace DataLibrary
         /// <returns></returns>
         private List<OHLC> GetOHLCTimeSeries(ITimeSeriesKey itsk)
         {
-            LoadOHLC(itsk);
-            return OHLCData[itsk.GetTimeSeriesKey()];
+            try
+            {
+                LoadOHLC(itsk);
+                return OHLCData[itsk.GetTimeSeriesKey()];
+            }
+            catch
+            {
+                return new List<OHLC> { };
+            }
         }
 
         public List<Tuple<DateTime,double>> GetTimeSeries(ITimeSeriesKey itsk, bool isIndex)
@@ -390,14 +397,16 @@ namespace DataLibrary
         /// Convert the raw Ledger data from Kraken to CryptoSolution objects
         /// </summary>
         /// <returns></returns>
-        public List<Transaction> GetTransactionList()
+        public SortedList<DateTime, Transaction> GetTransactionList()
         {
-            List<Transaction> res = new List<Transaction>();
+            SortedList<DateTime, Transaction> res = new SortedList<DateTime, Transaction>();
             List<LedgerInfo> items = Ledger.OrderBy(x => x.Value.Time).Select(x => x.Value).ToList();
             for (int i = 0; i < items.Count; i++)
             {
                 LedgerInfo item = items[i];
                 DateTime dt = StaticLibrary.UnixTimeStampToDateTime(item.Time);
+                if (dt < res.LastOrDefault().Key.AddSeconds(1))
+                    dt = res.Last().Key.AddSeconds(1);
                 switch (TransactionTypeProperties.ReadTransactionType(item.Type))
                 {
                     case TransactionType.Deposit:
@@ -407,7 +416,7 @@ namespace DataLibrary
                             dt,
                             new Price(0, Currency.None),
                             new Price((double)item.Amount, ccyDp));
-                        res.Add(txDepo);
+                        res.Add(dt, txDepo);
                         //AddLedgerCurrency(ccyDp);
                         break;
                     case TransactionType.WithDrawal:
@@ -418,7 +427,7 @@ namespace DataLibrary
                             new Price((double)-item.Amount, ccyWd),
                             new Price(0, Currency.None),
                             new Price((double)item.Fee, ccyWd));
-                        res.Add(txWd);
+                        res.Add(dt, txWd);
                         //AddLedgerCurrency(ccyWd);
                         break;
                     case TransactionType.Trade:
@@ -430,7 +439,7 @@ namespace DataLibrary
                             i++;
                             LedgerInfo nextItem = items[i];
                             Price received = new Price(nextItem.Amount, nextItem.Asset);
-                            res.Add(new Transaction(TransactionType.Trade, dt, paid, received, fees));
+                            res.Add(dt, new Transaction(TransactionType.Trade, dt, paid, received, fees));
                             //AddLedgerCurrency(ccy);
                             //AddLedgerCurrency(received.Ccy);
                         }
@@ -442,7 +451,7 @@ namespace DataLibrary
                             Currency ccy = CurrencyPorperties.FromNameToCurrency(nextItem.Asset);
                             Price paid = new Price(-(double)nextItem.Amount, ccy);
                             Price fees = new Price((double)nextItem.Fee, ccy);
-                            res.Add(new Transaction(TransactionType.Trade, dt, paid, received, fees));
+                            res.Add(dt, new Transaction(TransactionType.Trade, dt, paid, received, fees));
                             //AddLedgerCurrency(ccy);
                             //AddLedgerCurrency(received.Ccy);
                         }
@@ -454,13 +463,15 @@ namespace DataLibrary
             return res;
         }
 
-        public List<Transaction> GetTransactionList(DateTime startDate)
+        public SortedList<DateTime, Transaction> GetTransactionList(DateTime startDate, bool isBefore = false)
         {
-            List<Transaction> txList = GetTransactionList();
-            List<Transaction> res = new List<Transaction> { };
-            foreach (var tx in txList)
-                if (tx.Date.Ticks > startDate.AddSeconds(1).Ticks)
-                    res.Add(tx);
+            SortedList<DateTime, Transaction> txList = GetTransactionList();
+            SortedList<DateTime, Transaction> res = new SortedList<DateTime, Transaction>();
+            foreach (var item in txList)
+            {
+                if (isBefore ^ item.Key > startDate)
+                    res.Add(item.Key, item.Value);
+            }
             return res;
         }
 

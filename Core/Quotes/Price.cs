@@ -23,6 +23,11 @@ namespace Core.Quotes
             Ccy = CurrencyPorperties.FromNameToCurrency(ccy);
         }
 
+        public bool Equals(Price p, int precision = 8)
+        {
+            return Ccy == p.Ccy && Math.Abs(Amount - p.Amount) < Math.Pow(10, -precision);
+        }
+
         public object Clone()
         {
             return new Price(Amount, Ccy);

@@ -32,6 +32,9 @@ namespace Core.Transactions
                     double ratio = Convert.ToInt32(paid.Amount / received.Amount * 10000) / 10000.0;
                     XRate = new XChangeRate(ratio, received.Ccy, paid.Ccy);
                     break;
+                case TransactionType.WithDrawal:
+                    XRate = new XChangeRate(1, paid.Ccy, paid.Ccy);
+                    break;
                 default:
                     XRate = new XChangeRate(1, received.Ccy, received.Ccy);
                     break;

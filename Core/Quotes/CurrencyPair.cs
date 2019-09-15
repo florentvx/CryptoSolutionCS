@@ -11,29 +11,73 @@ namespace Core.Quotes
     {
         public Currency Crypto;
         public Currency Fiat;
+
+        public bool IsNone { get { return Crypto.IsNone() || Fiat.IsNone(); } }
     }
 
 
-    public class CurrencyPair: ICloneable//, ITimeSeriesKey
+    public class CurrencyPair: ICloneable, IComparable//, ITimeSeriesKey
     {
         public Currency Ccy1;
         public Currency Ccy2;
         public static char Sep = '/';
+
+        public TimeSeriesKeyType GetKeyType()
+        {
+            return TimeSeriesKeyType.CurrencyPair;
+        }
 
         public CurrencyPair(Currency ccy1, Currency ccy2)
         {
             Ccy1 = ccy1;
             Ccy2 = ccy2;
         }
-        
-        public new string ToString
+
+        #region Tools
+
+        public object Clone() { return new CurrencyPair(Ccy1, Ccy2); }
+
+        public CurrencyPair GetInverse() { return new CurrencyPair(Ccy2, Ccy1); }
+
+        public bool Contains(Currency x)
         {
-            get { return $"{Ccy1.ToFullName()} {Sep} {Ccy2.ToFullName()}"; }
+            return (Ccy1 == x || Ccy2 == x);
         }
-        
-        public bool IsEqual(CurrencyPair cp)
+
+        public List<CurrencyPair> GetCurrencyPairs()
+        {
+            return new List<CurrencyPair> { (CurrencyPair)Clone() };
+        }
+
+        public bool IsInList(IEnumerable<CurrencyPair> cpL)
+        {
+            foreach (CurrencyPair cp in cpL)
+                if (ToString() == cp.ToString()) return true;
+            return false;
+        }
+
+        public void Union(IList<CurrencyPair> cpL)
+        {
+            if (!IsInList(cpL)) cpL.Add((CurrencyPair)Clone());
+        }
+
+        #endregion
+
+        #region Simple Tests
+
+        public bool Equals(CurrencyPair cp)
         {
             return (cp.Ccy1 == Ccy1 && cp.Ccy2 == Ccy2);
+        }
+
+        public bool IsEquivalent(CurrencyPair cp)
+        {
+            return (Equals(cp) || Equals(cp.GetInverse()));
+        }
+
+        public int CompareTo(object obj)
+        {
+            return IsEquivalent((CurrencyPair)obj) ? 0 : 1;
         }
 
         public bool IsIdentity { get { return Ccy1 == Ccy2; } }
@@ -42,36 +86,21 @@ namespace Core.Quotes
 
         public bool IsCryptoPair { get { return !Ccy1.IsFiat() && !Ccy2.IsFiat(); } }
 
-        public CryptoFiatPair GetCryptoFiatPair
+        #endregion
+
+        #region To String Functions
+
+        public override string ToString()
         {
-            get
-            {
-                CryptoFiatPair cfp = new CryptoFiatPair();
-                if (!IsFiatPair && !IsCryptoPair)
-                {
-                    cfp.Crypto = Ccy1.IsFiat() ? Ccy2 : Ccy1;
-                    cfp.Fiat = Ccy1.IsFiat() ? Ccy1 : Ccy2;
-                }
-                else throw new Exception($"This Currency Pair is not a Crypto/Fiat one : {ToString}");
-                return cfp;
-            }
+            return $"{Ccy1.ToFullName()} {Sep} {Ccy2.ToFullName()}";
         }
-
-        public object Clone() { return new CurrencyPair(Ccy1, Ccy2); }
-
-        public CurrencyPair GetInverse() { return new CurrencyPair(Ccy2, Ccy1); }
 
         public string GetRequestID()
         {
-            if (Ccy1 != Currency.BCH)
+            if (!Contains(Currency.BCH))
                 return Ccy1.Prefix() + Ccy1.ID() + Ccy2.Prefix() + Ccy2.ID();
             else
                 return Ccy1.ID() + Ccy2.ID();
-        }
-
-        public bool Contains(Currency x)
-        {
-            return (Ccy1 == x || Ccy2 == x);
         }
 
         public string GetTimeSeriesKey()
@@ -81,7 +110,7 @@ namespace Core.Quotes
 
         public string GetFullName()
         {
-            return ToString;
+            return ToString();
         }
 
         public static CurrencyPair FullNameToCurrencyPair(string input)
@@ -105,26 +134,26 @@ namespace Core.Quotes
             return new CurrencyPair(ccy1, ccy2);
         }
 
-        public TimeSeriesKeyType GetKeyType()
+        #endregion
+
+        public CryptoFiatPair GetCryptoFiatPair
         {
-            return TimeSeriesKeyType.CurrencyPair;
+            get
+            {
+                CryptoFiatPair cfp = new CryptoFiatPair();
+                if (!IsFiatPair && !IsCryptoPair)
+                {
+                    cfp.Crypto = Ccy1.IsFiat() ? Ccy2 : Ccy1;
+                    cfp.Fiat = Ccy1.IsFiat() ? Ccy1 : Ccy2;
+                }
+                else
+                {
+                    cfp.Crypto = Currency.None;
+                    cfp.Fiat = Currency.None;
+                }
+                return cfp;
+            }
         }
 
-        public List<CurrencyPair> GetCurrencyPairs()
-        {
-            return new List<CurrencyPair> { (CurrencyPair)Clone() };
-        }
-
-        public bool IsInList(IEnumerable<CurrencyPair> cpL)
-        {
-            foreach (CurrencyPair cp in cpL)
-                if (ToString == cp.ToString) return true;
-            return false;
-        }
-
-        public void Union(IList<CurrencyPair> cpL)
-        {
-            if (!IsInList(cpL)) cpL.Add((CurrencyPair)Clone());
-        }
     }
 }

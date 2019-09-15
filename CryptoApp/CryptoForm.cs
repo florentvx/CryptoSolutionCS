@@ -4,6 +4,7 @@ using System.Drawing;
 using System.Windows.Forms;
 using Core.Quotes;
 using Core.Interfaces;
+using Core.PnL;
 using System.Windows.Forms.DataVisualization.Charting;
 using Core.Allocations;
 using Core.TimeSeriesKeys;
@@ -80,9 +81,9 @@ namespace CryptoApp
                     if (ccy.IsNone()) ccy = Fiat;
                     dataGridViewAllocation.Rows.
                         Add(key, Math.Round(item.Position, ccy.IsFiat() ? 2 : 6),
-                        Math.Round(item.xChangeRate, ccy.IsFiat() ? 4 : 2),
+                        Math.Round(item.xChangeRate.HasValue ? item.xChangeRate.Value : 0, ccy.IsFiat() ? 4 : 2),
                         Math.Round(item.AverageCost, ccy.IsFiat() ? 4 : 2),
-                        $"{Math.Round(item.Weight, 4)*100} %",
+                        $"{Math.Round(item.Weight.Value, 4)*100} %",
                         Math.Round(item.OnGoingPnL, 2), Math.Round(item.Fees, 2), Math.Round(item.RealizedPnL, 2));
                 }
                 TSP.GetOnGoingPnLs(pnl);

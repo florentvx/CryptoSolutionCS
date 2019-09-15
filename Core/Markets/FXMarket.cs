@@ -11,6 +11,12 @@ namespace Core.Markets
         public List<XChangeRate> FX = new List<XChangeRate>();
         public List<Currency> CcyList = new List<Currency>();
 
+        private bool _isArtificial = false;
+        public bool IsArtificial { get { return _isArtificial; } }
+        public void DefineAsArtificial() { _isArtificial = true; }
+
+        #region Constructors
+
         public FXMarket(DateTime date)
         {
             Date = date;
@@ -31,24 +37,159 @@ namespace Core.Markets
                 AddQuote(xRate);
         }
 
-        private bool _isArtificial = false;
-        public bool IsArtificial { get { return _isArtificial; } }
-        public void DefineAsArtificial() { _isArtificial = true; }
+        #endregion
 
+        #region PrivateTools
 
-        public List<CurrencyPair> GetCurrencyPairs(Currency ccyRef)
+        private void _AddFXRate(XChangeRate xRate)
+        {
+            if (!CcyList.Contains(xRate.CcyPair.Ccy1)) CcyList.Add(xRate.CcyPair.Ccy1);
+            if (!CcyList.Contains(xRate.CcyPair.Ccy2)) CcyList.Add(xRate.CcyPair.Ccy2);
+            FX.Add(xRate);
+        }
+
+        private XChangeRate _GetXChangeRate(CurrencyPair curPair)
+        {
+            if (curPair.IsIdentity) return new XChangeRate(1, (CurrencyPair)curPair.Clone());
+            else
+            {
+                if (CcyList.Contains(curPair.Ccy1) && CcyList.Contains(curPair.Ccy2))
+                {
+                    XChangeRate xRate = FX.Where(x => x.CcyPair.IsEquivalent(curPair)).FirstOrDefault();
+                    if (xRate == null)
+                        return null;
+                    if (xRate.CcyPair.Equals(curPair))
+                        return xRate;
+                    else { return xRate.GetInverse(); }
+                }
+                else { return null; }
+            }
+        }
+
+        private XChangeRate _GetXChangeRate(Currency ccy1, Currency ccy2)
+        {
+            return _GetXChangeRate(new CurrencyPair(ccy1, ccy2));
+        }
+
+        #endregion
+
+        #region CurrencyPairs Management
+
+        public List<CurrencyPair> GetCurrencyPairs()
         {
             List<CurrencyPair> res = new List<CurrencyPair>();
             foreach (var item in FX)
             {
                 CurrencyPair cp = item.CcyPair;
-                if (cp.Ccy1.IsFiat() && cp.Ccy1 != ccyRef) res.Add(new CurrencyPair(ccyRef, cp.Ccy2));
-                if (cp.Ccy2.IsFiat() && cp.Ccy2 != ccyRef) res.Add(new CurrencyPair(cp.Ccy1, ccyRef));
                 res.Add((CurrencyPair)item.CcyPair.Clone());
             }
             return res;
         }
 
+        public bool FXContains(CurrencyPair cp)
+        {
+            XChangeRate xcr = _GetXChangeRate(cp);
+            return xcr != null;
+        }
+
+        public bool FXContains(List<CurrencyPair> cpList)
+        {
+            foreach (CurrencyPair cp in cpList)
+                if (!FXContains(cp)) return false;
+            return true;
+        }
+
+        #endregion
+
+        #region GetQuote
+
+        public XChangeRate GetImpliedNewQuote(CurrencyPair curPair)
+        {
+            IEnumerable<Currency> Ccy1List = FX
+                .Where(x => x.CcyPair.Contains(curPair.Ccy1))
+                .Select(x => (x.CcyPair.Ccy1 == curPair.Ccy1) ? x.CcyPair.Ccy2 : x.CcyPair.Ccy1);
+            IEnumerable<Currency> Ccy2List = FX
+                .Where(x => x.CcyPair.Contains(curPair.Ccy2))
+                .Select(x => (x.CcyPair.Ccy1 == curPair.Ccy2) ? x.CcyPair.Ccy2 : x.CcyPair.Ccy1);
+            IEnumerable<Currency> ThirdCcies = Ccy1List
+                .Where(x => Ccy2List.Contains(x));
+            XChangeRate res = new XChangeRate(0.0, curPair);
+            int n = 0;
+            foreach (Currency ccy in ThirdCcies)
+            {
+                try
+                {
+                    double rate1 = _GetXChangeRate(curPair.Ccy1, ccy).Rate;
+                    double rate2 = _GetXChangeRate(ccy, curPair.Ccy2).Rate;
+                    res.Rate += rate1 * rate2;
+                    n++;
+                }
+                catch { return null; }
+            }
+            if (n > 0)
+            {
+                res.Rate /= Convert.ToDouble(n);
+                return res;
+            }
+            else { return null; }
+        }
+
+        public XChangeRate GetQuote(CurrencyPair curPair, bool constructNewQuote = false, bool useConstructedQuote = false)
+        {
+            XChangeRate xr = _GetXChangeRate(curPair);
+            if (xr != null)
+                return xr;
+            else
+            {
+                if (constructNewQuote)
+                {
+                    XChangeRate impliedXr = GetImpliedNewQuote(curPair);
+                    if (useConstructedQuote)
+                        FX.Add(impliedXr);
+                    return impliedXr;
+                }
+                else
+                    return null;
+            }
+        }
+
+        public XChangeRate GetQuote(Currency ccy1, Currency ccy2, bool constructNewQuote = false, bool useConstructedQuote = false)
+        {
+            return GetQuote(new CurrencyPair(ccy1, ccy2), constructNewQuote, useConstructedQuote);
+        }
+
+        public void AddQuote(XChangeRate xRate)
+        {
+            if (xRate.CcyPair.IsIdentity) return;
+            XChangeRate foundRate = GetQuote(xRate.CcyPair);
+            if (foundRate == null)
+                _AddFXRate(xRate);
+            else
+                foundRate.Update(xRate);
+        }
+
+        #endregion
+
+        #region Mathematics
+
+        public double FXConvert(Price price, Currency curRef)
+        {
+            if (price.IsNull) return 0;
+            XChangeRate xcr = GetQuote(price.Ccy, curRef, true);
+            return price.Amount * xcr.Rate;
+        }
+
+        public Price SumPrices(Price p1, Price p2, Currency outCur = Currency.None)
+        {
+            if (outCur == Currency.None) outCur = p1.Ccy;
+            if (p2.Amount == 0) return p1;
+            XChangeRate xRate1 = GetQuote(p1.Ccy, outCur, constructNewQuote: true);
+            XChangeRate xRate2 = GetQuote(p2.Ccy, outCur, constructNewQuote: true);
+            if (xRate1 == null || xRate2 == null) return null;
+            return new Price(p1.Amount * xRate1.Rate + p2.Amount * xRate2.Rate, outCur);
+        }
+
+        #endregion
 
         public new string ToString
         {
@@ -61,119 +202,6 @@ namespace Core.Markets
             }
         }
 
-        private void AddFXRate(XChangeRate xRate)
-        {
-            if (!CcyList.Contains(xRate.CcyPair.Ccy1)) CcyList.Add(xRate.CcyPair.Ccy1);
-            if (!CcyList.Contains(xRate.CcyPair.Ccy2)) CcyList.Add(xRate.CcyPair.Ccy2);
-            FX.Add(xRate);
-        }
-
-        public XChangeRate GetQuote(CurrencyPair curPair, bool constructNewQuote = true, bool useConstructedQuote = true) //TODO: Weird Inputs
-        {
-            if (curPair.IsIdentity) return new XChangeRate(1, (CurrencyPair)curPair.Clone());
-            else
-            {
-                if (CcyList.Contains(curPair.Ccy1) && CcyList.Contains(curPair.Ccy2))
-                {
-                    XChangeRate xRate = FX.Where(x => x.CcyPair.IsEqual(curPair)).FirstOrDefault();
-                    if (xRate != null)
-                        return xRate;
-                    else
-                    {
-                        CurrencyPair invCurPair = curPair.GetInverse();
-                        XChangeRate xRate2 = FX.Where(x => x.CcyPair.IsEqual(invCurPair)).FirstOrDefault();
-                        if (xRate2 != null)
-                            return xRate2.GetInverse();
-                        {
-                            if (constructNewQuote)
-                                return ConstructNewQuote(curPair, useConstructedQuote);
-                            else { return null; }
-                        }
-                    }
-                }
-                else { return null; }
-            }
-        }
-
-        public XChangeRate GetQuote(Currency ccy1, Currency ccy2, bool constructNewQuote = true)
-        {
-            return GetQuote(new CurrencyPair(ccy1, ccy2), constructNewQuote);
-        }
-
-        private XChangeRate ConstructNewQuote(CurrencyPair curPair, bool useConstructedQuote)
-        {
-            IEnumerable<Currency> Ccy1List = FX
-                .Where(x => x.CcyPair.Contains(curPair.Ccy1))
-                .Select(x => (x.CcyPair.Ccy1 == curPair.Ccy1) ? x.CcyPair.Ccy2 : x.CcyPair.Ccy1);
-            IEnumerable<Currency> Ccy2List = FX
-                .Where(x => x.CcyPair.Contains(curPair.Ccy2))
-                .Select(x => (x.CcyPair.Ccy1 == curPair.Ccy2) ? x.CcyPair.Ccy2 : x.CcyPair.Ccy1);
-            IEnumerable<Currency> ThirdCcies = Ccy1List
-                .Where(x => Ccy2List.Contains(x));
-            XChangeRate res = new XChangeRate(0.0, (CurrencyPair)curPair.Clone());
-            int n = 0;
-            foreach (Currency ccy in ThirdCcies)
-            {
-                try
-                {
-                    double rate1 = GetQuote(new CurrencyPair(curPair.Ccy1, ccy), false).Rate;
-                    double rate2 = GetQuote(new CurrencyPair(ccy, curPair.Ccy2), false).Rate;
-                    res.Rate += rate1 * rate2;
-                    n++;
-                }
-                catch { return null; }
-                
-            }
-            if (n > 0)
-            {
-                res.Rate /= Convert.ToDouble(n);
-                if (useConstructedQuote)
-                    AddFXRate(res);
-                return res;
-            }
-            else { return null; }
-        }
-
-        public void AddQuote(XChangeRate xRate)
-        {
-            if (xRate.CcyPair.IsIdentity) return;
-            XChangeRate find = GetQuote(xRate.CcyPair, false);
-            if (find == null)
-                AddFXRate(xRate);
-            else
-                find.Update(xRate);
-        }
-
-        public Price SumPrices(Price p1, Price p2, Currency outCur = Currency.None)
-        {
-            if (outCur == Currency.None) outCur = p1.Ccy;
-            if (p2.Amount == 0) return p1;
-            XChangeRate xRate1 = GetQuote(new CurrencyPair(p1.Ccy, outCur));
-            XChangeRate xRate2 = GetQuote(new CurrencyPair(p2.Ccy, outCur));
-            if (xRate1 == null || xRate2 == null) return null;
-            return new Price(p1.Amount * xRate1.Rate + p2.Amount * xRate2.Rate, outCur);
-        }
-
-        public double FXConvert(Price price, Currency curRef)
-        {
-            if (price.IsNull) return 0;
-            XChangeRate xcr = GetQuote(new CurrencyPair(price.Ccy, curRef));
-            return price.Amount * xcr.Rate;
-        }
-
-        public bool FXContains(CurrencyPair cp)
-        {
-            XChangeRate xcr = GetQuote(cp, false, false); //Important change
-            return xcr != null ;
-        }
-
-        public bool FXContains(List<CurrencyPair> cpList)
-        {
-            foreach(CurrencyPair cp in cpList)
-                if (!FXContains(cp)) return false;
-            return true;
-        }
-
         public object Clone()
         {
             List<XChangeRate> xcr = new List<XChangeRate>();
@@ -181,6 +209,17 @@ namespace Core.Markets
                 xcr.Add((XChangeRate)item.Clone());
             FXMarket res = new FXMarket(Date, xcr);
             return res;
+        }
+
+        public bool IsEquivalentTo(FXMarket fx, int precision = 8)
+        {
+            foreach (CurrencyPair cp in GetCurrencyPairs())
+            {
+                double rate = GetQuote(cp, true).Rate;
+                double rate2 = fx.GetQuote(cp, true).Rate;
+                if (Math.Abs(rate - rate2) * Math.Pow(10, precision) > 1) return false;
+            }
+            return true;
         }
     }
 }

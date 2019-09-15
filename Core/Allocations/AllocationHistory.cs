@@ -17,6 +17,10 @@ namespace Core.Allocations
         public SortedDictionary<DateTime, Allocation> History = new SortedDictionary<DateTime, Allocation>();
         public FXMarketHistory FXMH;
         public List<Currency> Currencies { get { return FXMH.CcyList; } }
+        public List<CurrencyPair> CurrencyPairs
+        {
+            get { return Currencies.Select(x => new CurrencyPair(x, CcyRef)).ToList(); }
+        }
         public DateTime StartDate { get { return History.Keys.First(); } }
 
         public Allocation GetAllocation(DateTime date)
@@ -40,7 +44,6 @@ namespace Core.Allocations
             Allocation newAlloc = (Allocation)alloc.Clone();
             newAlloc.CancelFee();
             FXMarket fx = FXMH.GetArtificialFXMarket(date, FXMH.CpList);
-            if (fx.IsArtificial) FXMH.AddFXMarket(date, fx);
             newAlloc.Update(fx);
             if (History.ContainsKey(date)) { History[date] = newAlloc; }
             else { History.Add(date, newAlloc); }
@@ -52,21 +55,16 @@ namespace Core.Allocations
             if (!isFirstTx) { alloc = GetClosestAllocation(tx.Date, true); }
             else { alloc = new Allocation(CcyRef); }
             // add transaction
-            FXMarket FX = FXMH.GetArtificialFXMarket(tx.Date);
+            FXMH.AddQuote(tx.Date, tx.XRate);
+            FXMarket FX = FXMH.GetArtificialFXMarket(tx.Date, CurrencyPairs);
             alloc = alloc.AddTransaction(tx, FX);
-            if (FX.Date != tx.Date || FX.IsArtificial) // needed for for most transactions which do not happen exactly on FX dates
-            {
-                FXMH.CopyMarket(tx.Date, FX.Date);
-                FXMH.AddFXMarket(tx.Date, FX);
-            }
-            FXMarket newFX = FXMH.GetFXMarket(tx.Date);
-            alloc.CalculateTotal(newFX);
+            alloc.CalculateTotal(FX);
             if (History.ContainsKey(tx.Date))
                 tx.Date = tx.Date.AddSeconds(1);
             History.Add(tx.Date, alloc);
 
             // update the same allocation for the following days
-            List<DateTime> datesList = FXMH.FXMarkets.Keys.Where(x => x > tx.Date && x < nextTxDate)
+            List<DateTime> datesList = FXMH.ArtificialFXMarkets.Keys.Where(x => x > tx.Date && x < nextTxDate)
                                                             .Select(x => x).ToList();
             foreach (DateTime date in datesList)
             {
@@ -79,11 +77,12 @@ namespace Core.Allocations
             AddTransaction(tx, isFirstTx, new DateTime(9999, 1, 1));
         }
 
-        public void UpdateTransactions(List<Transaction> txList)
+        public void UpdateTransactions(SortedList<DateTime, Transaction> stxList)
         {
+            List<Transaction> txList = stxList.Select(x => x.Value).ToList();
             if (txList.Count > 0)
             {
-                txList.OrderBy(x => x.Date).ToList();
+                //txList.OrderBy(x => x.Date).ToList();
 
                 for (int i = 0; i < txList.Count - 1; i++)
                 {
@@ -93,7 +92,7 @@ namespace Core.Allocations
             }
         }
 
-        public AllocationHistory(List<Transaction> txList, FXMarketHistory fxMH, Currency ccyRef)
+        public AllocationHistory(SortedList<DateTime, Transaction> txList, FXMarketHistory fxMH, Currency ccyRef)
         {
             FXMH = fxMH;
             CcyRef = ccyRef;
@@ -103,12 +102,11 @@ namespace Core.Allocations
         public void UpdateHistory(Currency fiat)
         {
             CcyRef = fiat;
-            foreach (DateTime date in FXMH.FXMarkets.Keys)
+            foreach (DateTime date in FXMH.GetAllDates())
             {
                 if (date >= StartDate)
                 {
-                    FXMarket fx = FXMH.GetArtificialFXMarket(date, FXMH.CpList);
-                    if (fx.IsArtificial) FXMH.AddFXMarket(date, fx);
+                    FXMarket fx = FXMH.GetArtificialFXMarket(date);
                     if (!History.Keys.Contains(date))
                         AddAllocationToHistory(GetClosestAllocation(date), date);
                     History[date].CalculateTotal(fx, fiat);

@@ -42,21 +42,31 @@ namespace DataLibrary
             FXData = new FXDataProvider(Path, CredPath, view: view);
         }
 
-        public List<Transaction> GetTransactionList(bool useKraken = false)
+        public SortedList<DateTime, Transaction> GetTransactionList(bool useKraken = false)
         {
             KrakenData.LoadLedger(useKraken);
             return KrakenData.GetTransactionList();
         }
 
-        public List<Transaction> GetTransactionList(DateTime startDate, bool useKraken)
+        public SortedList<DateTime, Transaction> GetTransactionList(DateTime startDate, bool isBefore = false, bool useKraken = false)
         {
             KrakenData.LoadLedger(useKraken);
-            return KrakenData.GetTransactionList(startDate);
+            return KrakenData.GetTransactionList(startDate, isBefore);
         }
 
         public DateTime GetLastTransactionDate()
         {
             return KrakenData.GetLastTransactionDate();
+        }
+
+        public List<CurrencyPair> GetCurrencyPairs()
+        {
+            FXMarketHistory fxmh = new FXMarketHistory();
+            foreach(var item in GetTransactionList())
+            {
+                fxmh.AddQuote(item.Key, item.Value.XRate);
+            }
+            return fxmh.CpList;
         }
 
         /// <summary>
@@ -150,9 +160,9 @@ namespace DataLibrary
             foreach (CurrencyPair cp in cpList)
             {
                 CurrencyPairTimeSeries cpts = new CurrencyPairTimeSeries(cp, freq);
-                try
+                CryptoFiatPair cfp = cp.GetCryptoFiatPair;
+                if(!cfp.IsNone)
                 {
-                    CryptoFiatPair cfp = cp.GetCryptoFiatPair;
                     FillFXMarketHistory(fxmh, cpts, startDate);
                     if (cfp.Fiat != fiat)
                     {
@@ -161,7 +171,6 @@ namespace DataLibrary
                         if (!fiatList.Contains(cfp.Fiat)) fiatList.Add(cfp.Fiat);
                     }
                 }
-                catch { }
             }
             foreach (Currency fiat_i in fiatList)
             {
@@ -179,15 +188,18 @@ namespace DataLibrary
         private void FillFXMarketHistory(FXMarketHistory fxmh, CurrencyPairTimeSeries cpts, DateTime startDate)
         {
             List<Tuple<DateTime, double>> ts = GetTimeSeries(cpts, isIndex: false);
-            foreach (Tuple<DateTime, double> item in ts)
-                fxmh.AddQuote(item.Item1, new XChangeRate(item.Item2, cpts.CurPair));
-            if (ts.First().Item1 > startDate)
+            if (ts.Count > 0)
             {
-                CurrencyPairTimeSeries newCpts = (CurrencyPairTimeSeries)cpts.Clone();
-                newCpts.IncreaseFreq();
-                if (newCpts.Freq != Frequency.None)
-                    FillFXMarketHistory(fxmh, newCpts, startDate);
-            }    
+                foreach (Tuple<DateTime, double> item in ts)
+                    fxmh.AddQuote(item.Item1, new XChangeRate(item.Item2, cpts.CurPair));
+                if (ts.First().Item1 > startDate)
+                {
+                    CurrencyPairTimeSeries newCpts = (CurrencyPairTimeSeries)cpts.Clone();
+                    newCpts.IncreaseFreq();
+                    if (newCpts.Freq != Frequency.None)
+                        FillFXMarketHistory(fxmh, newCpts, startDate);
+                }
+            }
         }
 
         #endregion

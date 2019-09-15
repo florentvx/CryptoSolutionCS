@@ -45,11 +45,10 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Allocations\Allocation.cs" />
-    <Compile Include="Allocations\AllocationAggregatedPnL.cs" />
+    <Compile Include="PnL\AggregatedPnL.cs" />
     <Compile Include="Allocations\AllocationElement.cs" />
     <Compile Include="Allocations\AllocationHistory.cs" />
-    <Compile Include="Allocations\AllocationPnL.cs" />
-    <Compile Include="Allocations\AllocationSummary.cs" />
+    <Compile Include="PnL\PnL.cs" />
     <Compile Include="Interfaces\IChartData.cs" />
     <Compile Include="Interfaces\ITimeSeries.cs" />
     <Compile Include="Interfaces\ITimeSeriesManager.cs" />
