@@ -159,7 +159,7 @@ namespace Core.Markets
                         continue;
                     if (useAfter && useBefore)
                     {
-                        if (afterFX.Date > beforeFX.Date)
+                        if (afterFX.Date.AddSeconds(1) > beforeFX.Date)
                             w = (date - beforeFX.Date).TotalSeconds / (double)(afterFX.Date - beforeFX.Date).TotalSeconds;
                         else
                             throw new Exception($"The afterFX Market {afterFX.Date} comes before the beforeFX Market {beforeFX.Date}");

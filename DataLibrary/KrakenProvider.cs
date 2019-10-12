@@ -469,7 +469,7 @@ namespace DataLibrary
             SortedList<DateTime, Transaction> res = new SortedList<DateTime, Transaction>();
             foreach (var item in txList)
             {
-                if (isBefore ^ item.Key > startDate)
+                if (isBefore ^ item.Key > startDate.AddSeconds(1))
                     res.Add(item.Key, item.Value);
             }
             return res;
