@@ -13,6 +13,7 @@ namespace Core.Interfaces
         List<ITimeSeriesKey> TimeSeriesKeyList { get; }
         void SetChartData(IChartData icd);
         void AllocationTableUpdate();
+        void PnLTableUpdate();
         void PublishLogMessage(object sender, LogMessageEventArgs e);
     }
 }

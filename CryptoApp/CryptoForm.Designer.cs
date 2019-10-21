@@ -28,9 +28,9 @@
         /// </summary>
         private void InitializeComponent()
         {
-            System.Windows.Forms.DataVisualization.Charting.ChartArea chartArea2 = new System.Windows.Forms.DataVisualization.Charting.ChartArea();
-            System.Windows.Forms.DataVisualization.Charting.Legend legend2 = new System.Windows.Forms.DataVisualization.Charting.Legend();
-            System.Windows.Forms.DataVisualization.Charting.Series series2 = new System.Windows.Forms.DataVisualization.Charting.Series();
+            System.Windows.Forms.DataVisualization.Charting.ChartArea chartArea1 = new System.Windows.Forms.DataVisualization.Charting.ChartArea();
+            System.Windows.Forms.DataVisualization.Charting.Legend legend1 = new System.Windows.Forms.DataVisualization.Charting.Legend();
+            System.Windows.Forms.DataVisualization.Charting.Series series1 = new System.Windows.Forms.DataVisualization.Charting.Series();
             this.tabControl1 = new System.Windows.Forms.TabControl();
             this.Allocation = new System.Windows.Forms.TabPage();
             this.dataGridViewAllocation = new System.Windows.Forms.DataGridView();
@@ -40,6 +40,8 @@
             this.buttonShow = new System.Windows.Forms.Button();
             this.checkedListBox1 = new System.Windows.Forms.CheckedListBox();
             this.chart1 = new System.Windows.Forms.DataVisualization.Charting.Chart();
+            this.tabPage1 = new System.Windows.Forms.TabPage();
+            this.dataGridViewPnL = new System.Windows.Forms.DataGridView();
             this.richTextBoxLogger = new System.Windows.Forms.RichTextBox();
             this.label1 = new System.Windows.Forms.Label();
             this.comboBoxFiat = new System.Windows.Forms.ComboBox();
@@ -48,12 +50,15 @@
             this.buttonFullDataUpdate = new System.Windows.Forms.Button();
             this.buttonLoad = new System.Windows.Forms.Button();
             this.ButtonLedger = new System.Windows.Forms.Button();
+            this.button1 = new System.Windows.Forms.Button();
             this.tabControl1.SuspendLayout();
             this.Allocation.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dataGridViewAllocation)).BeginInit();
             this.Graphs.SuspendLayout();
             this.groupBox1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.chart1)).BeginInit();
+            this.tabPage1.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.dataGridViewPnL)).BeginInit();
             this.SuspendLayout();
             // 
             // tabControl1
@@ -63,6 +68,7 @@
             | System.Windows.Forms.AnchorStyles.Right)));
             this.tabControl1.Controls.Add(this.Allocation);
             this.tabControl1.Controls.Add(this.Graphs);
+            this.tabControl1.Controls.Add(this.tabPage1);
             this.tabControl1.Location = new System.Drawing.Point(12, 59);
             this.tabControl1.Name = "tabControl1";
             this.tabControl1.SelectedIndex = 0;
@@ -150,19 +156,42 @@
             this.chart1.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            chartArea2.Name = "ChartArea1";
-            this.chart1.ChartAreas.Add(chartArea2);
-            legend2.Name = "Legend1";
-            this.chart1.Legends.Add(legend2);
+            chartArea1.Name = "ChartArea1";
+            this.chart1.ChartAreas.Add(chartArea1);
+            legend1.Name = "Legend1";
+            this.chart1.Legends.Add(legend1);
             this.chart1.Location = new System.Drawing.Point(235, 6);
             this.chart1.Name = "chart1";
-            series2.ChartArea = "ChartArea1";
-            series2.Legend = "Legend1";
-            series2.Name = "Series1";
-            this.chart1.Series.Add(series2);
+            series1.ChartArea = "ChartArea1";
+            series1.Legend = "Legend1";
+            series1.Name = "Series1";
+            this.chart1.Series.Add(series1);
             this.chart1.Size = new System.Drawing.Size(910, 465);
             this.chart1.TabIndex = 0;
             this.chart1.Text = "chart1";
+            // 
+            // tabPage1
+            // 
+            this.tabPage1.Controls.Add(this.button1);
+            this.tabPage1.Controls.Add(this.dataGridViewPnL);
+            this.tabPage1.Location = new System.Drawing.Point(4, 25);
+            this.tabPage1.Name = "tabPage1";
+            this.tabPage1.Padding = new System.Windows.Forms.Padding(3);
+            this.tabPage1.Size = new System.Drawing.Size(1151, 486);
+            this.tabPage1.TabIndex = 2;
+            this.tabPage1.Text = "PnL Explain";
+            this.tabPage1.UseVisualStyleBackColor = true;
+            // 
+            // dataGridViewPnL
+            // 
+            this.dataGridViewPnL.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.dataGridViewPnL.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            this.dataGridViewPnL.Location = new System.Drawing.Point(163, 6);
+            this.dataGridViewPnL.Name = "dataGridViewPnL";
+            this.dataGridViewPnL.RowTemplate.Height = 24;
+            this.dataGridViewPnL.Size = new System.Drawing.Size(982, 474);
+            this.dataGridViewPnL.TabIndex = 0;
             // 
             // richTextBoxLogger
             // 
@@ -242,6 +271,16 @@
             this.ButtonLedger.UseVisualStyleBackColor = true;
             this.ButtonLedger.Click += new System.EventHandler(this.ButtonLedger_Click);
             // 
+            // button1
+            // 
+            this.button1.Location = new System.Drawing.Point(7, 7);
+            this.button1.Name = "button1";
+            this.button1.Size = new System.Drawing.Size(150, 31);
+            this.button1.TabIndex = 1;
+            this.button1.Text = "Calculate PnL";
+            this.button1.UseVisualStyleBackColor = true;
+            this.button1.Click += new System.EventHandler(this.ButtonCalculatePnL_Click);
+            // 
             // CryptoForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
@@ -265,6 +304,8 @@
             this.Graphs.ResumeLayout(false);
             this.groupBox1.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.chart1)).EndInit();
+            this.tabPage1.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)(this.dataGridViewPnL)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -289,6 +330,9 @@
         private System.Windows.Forms.RichTextBox richTextBoxLogger;
         private System.Windows.Forms.Button buttonLoad;
         private System.Windows.Forms.Button ButtonLedger;
+        private System.Windows.Forms.TabPage tabPage1;
+        private System.Windows.Forms.DataGridView dataGridViewPnL;
+        private System.Windows.Forms.Button button1;
     }
 }
 

@@ -51,6 +51,7 @@ namespace CryptoApp
 
         public void AllocationTableCreation()
         {
+            /// Allocation Tab
             dataGridViewAllocation.ColumnCount = 8;
             dataGridViewAllocation.Columns[0].Name = "Ccy";
             dataGridViewAllocation.Columns[1].Name = "Pos";
@@ -60,7 +61,28 @@ namespace CryptoApp
             dataGridViewAllocation.Columns[5].Name = "PnL";
             dataGridViewAllocation.Columns[6].Name = "Fees";
             dataGridViewAllocation.Columns[7].Name = "RPnL";
+
+            /// PnL Explain Tab
+            dataGridViewPnL.ColumnCount = 7;
+            dataGridViewPnL.Columns[0].Name = "Ccy";
+            dataGridViewPnL.Columns[1].Name = "Pos";
+            dataGridViewPnL.Columns[2].Name = "Rate";
+            dataGridViewPnL.Columns[3].Name = "Weight";
+            dataGridViewPnL.Columns[4].Name = "Δ Pos";
+            dataGridViewPnL.Columns[5].Name = "Δ Rate";
+            dataGridViewPnL.Columns[6].Name = "Total Δ";
         }
+
+        private string PercentageToString(double? input, string dflt = "")
+        {
+            return input.HasValue ? PercentageToString(input.Value) : dflt;
+        }
+
+        private string PercentageToString(double value)
+        {
+            return $"{Math.Round(value, 4) * 100} %";
+        }
+        
 
         public void AllocationTableUpdate()
         {
@@ -71,7 +93,7 @@ namespace CryptoApp
             }
             else
             {
-                var data = TSP.LastAllocationToTable();
+                var data = TSP.GetLastAllocationToTable();
                 double pnl = data["Total"].TotalPnL;
                 dataGridViewAllocation.Rows.Clear();
                 foreach (var key in data.Keys)
@@ -80,13 +102,64 @@ namespace CryptoApp
                     Currency ccy = CurrencyPorperties.FromNameToCurrency(key);
                     if (ccy.IsNone()) ccy = Fiat;
                     dataGridViewAllocation.Rows.
-                        Add(key, Math.Round(item.Position, ccy.IsFiat() ? 2 : 6),
-                        Math.Round(item.xChangeRate.HasValue ? item.xChangeRate.Value : 0, ccy.IsFiat() ? 4 : 2),
-                        Math.Round(item.AverageCost, ccy.IsFiat() ? 4 : 2),
-                        $"{Math.Round(item.Weight.Value, 4)*100} %",
-                        Math.Round(item.OnGoingPnL, 2), Math.Round(item.Fees, 2), Math.Round(item.RealizedPnL, 2));
+                        Add(key, 
+                        item.Presentation_Position(ccy),
+                        item.Presentation_XChangeRate(ccy),
+                        item.Presentation_AverageCost(ccy),
+                        item.Weight.HasValue ? PercentageToString(item.Weight.Value) : "0",
+                        Math.Round(item.OnGoingPnL, 2), 
+                        Math.Round(item.Fees, 2), 
+                        Math.Round(item.RealizedPnL, 2));
                 }
                 TSP.GetOnGoingPnLs(pnl);
+            }
+        }
+
+        public void PnLTableUpdate()
+        {
+            if (dataGridViewPnL.InvokeRequired)
+            {
+                DelegateTables d = new DelegateTables(PnLTableUpdate);
+                this.Invoke(d, new object[] { });
+            }
+            else
+            {
+                DateTime dateBefore = TSP.AH.LastAllocationDate;
+                DateTime dateDay = dateBefore
+                                        .AddDays(0)
+                                        .AddHours(-dateBefore.Hour)
+                                        .AddMinutes(-dateBefore.Minute)
+                                        .AddSeconds(-dateBefore.Second);
+                var data = TSP.GetAllocationToTable(dateDay);
+                var data2 = TSP.GetLastAllocationToTable();
+                dataGridViewPnL.Rows.Clear();
+                double AbsoluteValueChange = data2["Total"].Position - data["Total"].Position;
+                double RelativeChange = AbsoluteValueChange / data["Total"].Position;
+                foreach (var key in data.Keys)
+                {
+                    PnLElement item = data[key];
+                    PnLElement item2 = data2[key];
+                    Currency ccy = CurrencyPorperties.FromNameToCurrency(key);
+                    if (ccy.IsNone()) ccy = Fiat;
+                    if (key != "Total")
+                        dataGridViewPnL.Rows.
+                            Add(key,
+                            item.Presentation_Position(ccy),
+                            item.Presentation_XChangeRate(ccy),
+                            PercentageToString(item.Weight),
+                            PercentageToString(item2.Position / item.Position - 1),
+                            PercentageToString(item2.xChangeRate / item.xChangeRate - 1),
+                            item.Value != 0 ? PercentageToString(item2.Value / item.Value - 1) : "");
+                    else
+                        dataGridViewPnL.Rows.
+                            Add(key,
+                            item.Presentation_Position(ccy),
+                            item.Presentation_XChangeRate(ccy),
+                            PercentageToString(item.Weight),
+                            0,
+                            Math.Round(AbsoluteValueChange,2),
+                            PercentageToString(RelativeChange));
+                }
             }
         }
 
@@ -188,6 +261,11 @@ namespace CryptoApp
         private void ButtonLedger_Click(object sender, EventArgs e)
         {
             CryptoPresenter.UpdateLedger(useKraken: true);
+        }
+
+        private void ButtonCalculatePnL_Click(object sender, EventArgs e)
+        {
+            CryptoPresenter.CalculatePnL();
         }
     }
 

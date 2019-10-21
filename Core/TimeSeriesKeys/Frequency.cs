@@ -95,6 +95,11 @@ namespace Core.TimeSeriesKeys
             return newFreq;
         }
 
+        public static bool IsInferiorFrequency(this Frequency freq, Frequency freq2)
+        {
+            return freq.GetFrequency() <= freq.GetFrequency(); 
+        }
+
         public static DateTime Adjust(this Frequency freq, DateTime date, bool isNext = false)
         {
             long DeltaSecs = freq.GetFrequency(inSecs: true);

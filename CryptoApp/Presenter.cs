@@ -59,5 +59,10 @@ namespace CryptoApp
         {
             await Task.Run(() => _view.SetChartData(_TSManager.GetChartData(isIndex, frame))); 
         }
+
+        internal async void CalculatePnL()
+        {
+            await Task.Run(() => _view.PnLTableUpdate());
+        }
     }
 }

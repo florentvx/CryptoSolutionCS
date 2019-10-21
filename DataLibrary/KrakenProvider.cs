@@ -463,13 +463,13 @@ namespace DataLibrary
             return res;
         }
 
-        public SortedList<DateTime, Transaction> GetTransactionList(DateTime startDate, bool isBefore = false)
+        public SortedList<DateTime, Transaction> GetTransactionList(DateTime date, bool isBefore = false)
         {
             SortedList<DateTime, Transaction> txList = GetTransactionList();
             SortedList<DateTime, Transaction> res = new SortedList<DateTime, Transaction>();
             foreach (var item in txList)
             {
-                if (isBefore ^ item.Key > startDate.AddSeconds(1))
+                if (isBefore ^ item.Key > date.AddSeconds(1))
                     res.Add(item.Key, item.Value);
             }
             return res;

@@ -28,9 +28,11 @@ namespace Core.Allocations
             return History[date];
         }
 
+        public DateTime LastAllocationDate { get { return History.Keys.Last(); } }
+
         public Allocation GetLastAllocation()
         {
-            return History[History.Keys.Last()];
+            return History[LastAllocationDate];
         }
 
         private Allocation GetClosestAllocation(DateTime date, bool isDateExcluded = false)

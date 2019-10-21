@@ -197,7 +197,9 @@ namespace DataLibrary
             List<Tuple<DateTime, double>> res = new List<Tuple<DateTime, double>>();
             CurrencyPairTimeSeries cpts = CurrencyPairTimeSeries.RequestIDToCurrencyPairTimeSeries(itsk.GetTimeSeriesKey());
             if (!Data.CpList.Contains(cpts.CurPair)) ReadFXHistory(cpts);
-            List<DateTime> schedule = itsk.GetFrequency().GetSchedule(DateTime.UtcNow, ScheduleDepth);
+            Frequency fq = itsk.GetFrequency();
+            if (fq.IsInferiorFrequency(Frequency.Day1)) fq = Frequency.Day1;
+            List<DateTime> schedule = fq.GetSchedule(DateTime.UtcNow, ScheduleDepth);
             bool doSave = false;
             foreach (DateTime date in schedule)
             {

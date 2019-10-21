@@ -33,6 +33,16 @@ namespace Core.PnL
             Weight = null;
         }
 
+        public double Value
+        {
+            get
+            {
+                if (xChangeRate.HasValue)
+                    return Position * xChangeRate.Value;
+                else { return 0; }
+            }
+        }
+
         public object Clone()
         {
             PnLElement res = new PnLElement
@@ -70,6 +80,23 @@ namespace Core.PnL
         public override int GetHashCode()
         {
             return base.GetHashCode();  
+        }
+
+        /// To String Methods
+        
+        public double Presentation_Position(Currency ccy)
+        {
+            return Math.Round(Position, ccy.IsFiat() ? 2 : 6);
+        }
+
+        public double Presentation_XChangeRate(Currency ccy)
+        {
+            return Math.Round(xChangeRate ?? 0, ccy.IsFiat() ? 4 : 2);
+        }
+
+        public double Presentation_AverageCost(Currency ccy)
+        {
+            return Math.Round(AverageCost, ccy.IsFiat() ? 4 : 2);
         }
 
         public override string ToString()

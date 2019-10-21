@@ -76,7 +76,7 @@ namespace TimeSeriesAnalytics
         //    return AS.PriceAllocation(fxMkt);
         //}
 
-        public Dictionary<string,PnLElement> AllocationToTable(DateTime date)
+        public Dictionary<string,PnLElement> GetAllocationToTable(DateTime date)
         {
             AggregatedPnL AAPnL = new AggregatedPnL(AH.CcyRef);
             SortedList<DateTime, Transaction> txLFiltered = DataProvider.GetTransactionList(startDate: date, isBefore: true);
@@ -84,11 +84,9 @@ namespace TimeSeriesAnalytics
             return AAPnL.ToTable(FXMH, date);
         }
 
-        public Dictionary<string,PnLElement> LastAllocationToTable()
+        public Dictionary<string,PnLElement> GetLastAllocationToTable()
         {
-            AggregatedPnL AAPnL = new AggregatedPnL(AH.CcyRef);
-            AAPnL.AddTransactions(DataProvider.GetTransactionList(), FXMH);
-            return AAPnL.ToTable(FXMH);
+            return GetAllocationToTable(AH.LastAllocationDate);
         }
 
         public void FullUpdate(Frequency freq)
@@ -155,35 +153,35 @@ namespace TimeSeriesAnalytics
                 .AddHours(-dateBefore.Hour)
                 .AddMinutes(-dateBefore.Minute)
                 .AddSeconds(-dateBefore.Second);
-            var dataYear = AllocationToTable(dateYear);
+            var dataYear = GetAllocationToTable(dateYear);
             this.PublishInfo($"{dateYear} - Ongoing Year PnL: {Math.Round(pnl - dataYear["Total"].TotalPnL, 2)} {Fiat.ToFullName()}");
             DateTime dateMonth = dateBefore
                 .AddDays(-dateBefore.Day + 1)
                 .AddHours(-dateBefore.Hour)
                 .AddMinutes(-dateBefore.Minute)
                 .AddSeconds(-dateBefore.Second);
-            var dataMonth = AllocationToTable(dateMonth);
+            var dataMonth = GetAllocationToTable(dateMonth);
             this.PublishInfo($"{dateMonth} - Ongoing Month PnL: {Math.Round(pnl - dataMonth["Total"].TotalPnL, 2)} {Fiat.ToFullName()}");
             DateTime dateWeek = dateBefore
                 .AddDays(-((int)dateBefore.DayOfWeek == 0? 7: (int)dateBefore.DayOfWeek) + 1)
                 .AddHours(-dateBefore.Hour)
                 .AddMinutes(-dateBefore.Minute)
                 .AddSeconds(-dateBefore.Second);
-            var dataWeek = AllocationToTable(dateWeek);
+            var dataWeek = GetAllocationToTable(dateWeek);
             this.PublishInfo($"{dateWeek} - Ongoing Week PnL: {Math.Round(pnl - dataWeek["Total"].TotalPnL, 2)} {Fiat.ToFullName()}");
             DateTime dateDay = dateBefore
                 .AddDays(0)
                 .AddHours(-dateBefore.Hour)
                 .AddMinutes(-dateBefore.Minute)
                 .AddSeconds(-dateBefore.Second);
-            var dataDay = AllocationToTable(dateDay);
+            var dataDay = GetAllocationToTable(dateDay);
             this.PublishInfo($"{dateDay} - Ongoing Day PnL: {Math.Round(pnl - dataDay["Total"].TotalPnL, 2)} {Fiat.ToFullName()}");
             DateTime date30D = dateBefore
                 .AddDays(-30)
                 .AddHours(-dateBefore.Hour)
                 .AddMinutes(-dateBefore.Minute)
                 .AddSeconds(-dateBefore.Second);
-            var data30D = AllocationToTable(date30D);
+            var data30D = GetAllocationToTable(date30D);
             this.PublishInfo($"{date30D} - 30 Days PnL: {Math.Round(pnl - data30D["Total"].TotalPnL, 2)} {Fiat.ToFullName()}");
         }
     }
