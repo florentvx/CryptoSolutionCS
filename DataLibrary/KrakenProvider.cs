@@ -8,6 +8,7 @@ using Core.Interfaces;
 using Core.Kraken;
 using Core.Quotes;
 using Core.TimeSeriesKeys;
+using Core.Date;
 using Core.Transactions;
 using KrakenApi;
 using Logging;

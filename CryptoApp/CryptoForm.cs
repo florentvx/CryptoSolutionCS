@@ -8,6 +8,7 @@ using Core.PnL;
 using System.Windows.Forms.DataVisualization.Charting;
 using Core.Allocations;
 using Core.TimeSeriesKeys;
+using Core.Date;
 using TimeSeriesAnalytics;
 using log4net;
 using Logging;

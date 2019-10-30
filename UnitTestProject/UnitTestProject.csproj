@@ -52,6 +52,7 @@
     <Compile Include="TestsCore\MarketsTests.cs" />
     <Compile Include="TestsCore\QuotesTests.cs" />
     <Compile Include="TestsCore\PnLTests.cs" />
+    <Compile Include="TestsCore\TenorTests.cs" />
     <Compile Include="TestTools.cs" />
     <Compile Include="TestsCore\TimeSeriesKeysUnitTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

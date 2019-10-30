@@ -10,6 +10,7 @@ using KrakenApi;
 using Core.Transactions;
 using Core.Allocations;
 using Core.TimeSeriesKeys;
+using Core.Date;
 using Core.Interfaces;
 
 namespace Main

@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using Core.Interfaces;
 using Core.Quotes;
-using Core.TimeSeriesKeys;
+using Core.Date;
 using TimeSeriesAnalytics;
 
 namespace CryptoApp

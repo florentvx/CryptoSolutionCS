@@ -45,6 +45,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Allocations\Allocation.cs" />
+    <Compile Include="Date\Tenor.cs" />
     <Compile Include="PnL\AggregatedPnL.cs" />
     <Compile Include="Allocations\AllocationElement.cs" />
     <Compile Include="Allocations\AllocationHistory.cs" />
@@ -58,7 +59,7 @@
     <Compile Include="Interfaces\ITimeSeriesKey.cs" />
     <Compile Include="Interfaces\ITimeSeriesProvider.cs" />
     <Compile Include="TimeSeriesKeys\CurrencyPairTimeSeries.cs" />
-    <Compile Include="TimeSeriesKeys\Frequency.cs" />
+    <Compile Include="Date\Frequency.cs" />
     <Compile Include="TimeSeriesKeys\TimeSeriesKeyType.cs" />
     <Compile Include="Markets\FXMarket.cs" />
     <Compile Include="Markets\FXMarketHistory.cs" />
