@@ -133,7 +133,11 @@ namespace Core.Date
         public static DateTime GetRoundDate(this DateTime dt, TenorUnit tu)
         {
             if (tu == TenorUnit.Week)
-                throw new Exception("Cannot round a date by the unit: Week");
+            {
+                int daysOffset = ((int)dt.DayOfWeek == 0 ? 7 : (int)dt.DayOfWeek) - 1;
+                DateTime newDate = dt.AddDays(-daysOffset);
+                return newDate.Aux_GetRoundDate(TenorUnit.Hour);
+            }
             return dt.Aux_GetRoundDate(tu.GetLowerUnit(skipWeek: true));
         }
 

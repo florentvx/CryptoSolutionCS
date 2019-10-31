@@ -28,6 +28,13 @@ namespace UnitTestProject.TestsCore
         }
 
         [TestMethod]
+        public void Tenor_GetRoundDateWeek()
+        {
+            DateTime newDate = TenorTestsTools.DateRef.GetRoundDate(TenorUnit.Week);
+            Assert.IsTrue(newDate == new DateTime(2019, 5, 20, 0, 0, 0));
+        }
+
+        [TestMethod]
         public void Tenor_AddTenor()
         {
             Tenor tnr = new Tenor("-3M");

@@ -126,11 +126,7 @@ namespace CryptoApp
             else
             {
                 DateTime dateBefore = TSP.AH.LastAllocationDate;
-                DateTime dateDay = dateBefore
-                                        .AddDays(0)
-                                        .AddHours(-dateBefore.Hour)
-                                        .AddMinutes(-dateBefore.Minute)
-                                        .AddSeconds(-dateBefore.Second);
+                DateTime dateDay = dateBefore.GetRoundDate(TenorUnit.Day);
                 var data = TSP.GetAllocationToTable(dateDay);
                 var data2 = TSP.GetLastAllocationToTable();
                 dataGridViewPnL.Rows.Clear();

@@ -149,39 +149,19 @@ namespace TimeSeriesAnalytics
         {
             DateTime dateBefore = DateTime.UtcNow;
             this.PublishDebug($"PnL Report - {dateBefore}");
-            DateTime dateYear = dateBefore
-                .AddDays(-dateBefore.DayOfYear + 1)
-                .AddHours(-dateBefore.Hour)
-                .AddMinutes(-dateBefore.Minute)
-                .AddSeconds(-dateBefore.Second);
+            DateTime dateYear = dateBefore.GetRoundDate(TenorUnit.Year);
             var dataYear = GetAllocationToTable(dateYear);
             this.PublishInfo($"{dateYear} - Ongoing Year PnL: {Math.Round(pnl - dataYear["Total"].TotalPnL, 2)} {Fiat.ToFullName()}");
-            DateTime dateMonth = dateBefore
-                .AddDays(-dateBefore.Day + 1)
-                .AddHours(-dateBefore.Hour)
-                .AddMinutes(-dateBefore.Minute)
-                .AddSeconds(-dateBefore.Second);
+            DateTime dateMonth = dateBefore.GetRoundDate(TenorUnit.Month);
             var dataMonth = GetAllocationToTable(dateMonth);
             this.PublishInfo($"{dateMonth} - Ongoing Month PnL: {Math.Round(pnl - dataMonth["Total"].TotalPnL, 2)} {Fiat.ToFullName()}");
-            DateTime dateWeek = dateBefore
-                .AddDays(-((int)dateBefore.DayOfWeek == 0? 7: (int)dateBefore.DayOfWeek) + 1)
-                .AddHours(-dateBefore.Hour)
-                .AddMinutes(-dateBefore.Minute)
-                .AddSeconds(-dateBefore.Second);
+            DateTime dateWeek = dateBefore.GetRoundDate(TenorUnit.Week);
             var dataWeek = GetAllocationToTable(dateWeek);
             this.PublishInfo($"{dateWeek} - Ongoing Week PnL: {Math.Round(pnl - dataWeek["Total"].TotalPnL, 2)} {Fiat.ToFullName()}");
-            DateTime dateDay = dateBefore
-                .AddDays(0)
-                .AddHours(-dateBefore.Hour)
-                .AddMinutes(-dateBefore.Minute)
-                .AddSeconds(-dateBefore.Second);
+            DateTime dateDay = dateBefore.GetRoundDate(TenorUnit.Day);
             var dataDay = GetAllocationToTable(dateDay);
             this.PublishInfo($"{dateDay} - Ongoing Day PnL: {Math.Round(pnl - dataDay["Total"].TotalPnL, 2)} {Fiat.ToFullName()}");
-            DateTime date30D = dateBefore
-                .AddDays(-30)
-                .AddHours(-dateBefore.Hour)
-                .AddMinutes(-dateBefore.Minute)
-                .AddSeconds(-dateBefore.Second);
+            DateTime date30D = dateBefore.AddTenor(new Tenor("-30D"), isRounded: true);
             var data30D = GetAllocationToTable(date30D);
             this.PublishInfo($"{date30D} - 30 Days PnL: {Math.Round(pnl - data30D["Total"].TotalPnL, 2)} {Fiat.ToFullName()}");
         }
