@@ -9,14 +9,15 @@ namespace Core.Markets
 {
     public class FXMarketHistory
     {
-
+        private Frequency _Freq;
+        public Frequency Freq {get { return _Freq; } }
         public List<Currency> CcyList = new List<Currency>();
         public List<CurrencyPair> CpList = new List<CurrencyPair>();
         public SortedDictionary<DateTime, FXMarket> RealFXMarkets = new SortedDictionary<DateTime, FXMarket>();
         public SortedDictionary<DateTime, FXMarket> ArtificialFXMarkets = new SortedDictionary<DateTime, FXMarket>();
         public DateTime LastRealDate { get { return RealFXMarkets.LastOrDefault().Key; }}
 
-        public FXMarketHistory() { }
+        public FXMarketHistory(Frequency freq = Frequency.Day1) { _Freq = freq; }
 
         #region Ccy Management
 
@@ -51,7 +52,7 @@ namespace Core.Markets
 
         #endregion
 
-        #region Get Real Data
+        #region Get Simple Information
 
         public IEnumerable<DateTime> GetRealDates()
         {
@@ -70,37 +71,34 @@ namespace Core.Markets
             return rDts.Union(aDts).OrderBy(x => x);
         }
 
-        //public DateTime GetFirstRealFXMarketDate()
-        //{
-        //    return RealFXMarkets.First().Key;
-        //}
-
-        //public DateTime GetFirstRealFXMarketDate(CurrencyPair cp)
-        //{
-        //    foreach (DateTime date in RealFXMarkets.Keys)
-        //    {
-        //        if (RealFXMarkets[date].FXContains(cp)) { return date; }
-        //    }
-        //    return RealFXMarkets.LastOrDefault().Key;
-        //}
+        private FXMarket GetRealFXMarketSimple(DateTime date)
+        {
+            FXMarket fxRes = null;
+            RealFXMarkets.TryGetValue(date, out fxRes);
+            return fxRes;
+        }
 
         public FXMarket GetRealFXMarket(DateTime date, bool isExactDate = false)
         {
             if (isExactDate)
-            {
-                try { return RealFXMarkets[date.Trim()]; }
-                catch { return null; }
-            }
+                return GetRealFXMarketSimple(Freq.Adjust(date));
             else
                 return RealFXMarkets.Where(x => x.Key <= date)
                                     .Select(x => x.Value)
                                     .LastOrDefault();
         }
 
-        public FXMarket GetArtificialMarket(DateTime date)
+        private FXMarket GetArtificialFXMarketSimple(DateTime date)
         {
-            try { return RealFXMarkets[date.Trim()]; }
-            catch { return null; }
+            if (date != Freq.Adjust(date))
+                throw new Exception($"Your date is not Freq adjusted {date} != {Freq.Adjust(date)}");
+            try { return ArtificialFXMarkets[date]; }
+            catch
+            {
+                FXMarket FX = new FXMarket(date);
+                ArtificialFXMarkets[date] = FX;
+                return FX;
+            }
         }
 
         #endregion
@@ -111,12 +109,15 @@ namespace Core.Markets
         {
             if (quote.IsIdentity) return;
             AddCcyPair(quote.CcyPair);
-            if (RealFXMarkets.ContainsKey(date))
-                RealFXMarkets[date].AddQuote(quote);
+            DateTime AdjustedDate = Freq.Adjust(date);
+            FXMarket FX = GetRealFXMarketSimple(AdjustedDate);
+            if (FX != null)
+                FX.AddQuote(quote);
             else
-                RealFXMarkets[date] = new FXMarket(date, quote);
+                RealFXMarkets[AdjustedDate] = new FXMarket(AdjustedDate, quote);
         }
 
+        // Unit Test Function
         public void AddFXMarket(FXMarket fX)
         {
             DateTime date = fX.Date;
@@ -132,13 +133,12 @@ namespace Core.Markets
 
         private FXMarket _CreateArtificialFXMarket(DateTime date, List<CurrencyPair> cpList)
         {
+            if (date != Freq.Adjust(date))
+                throw new Exception($"Your date is not Freq adjusted {date} != {Freq.Adjust(date)}");
             if (cpList.Count == 0) { cpList = CpList; }
             FXMarket res = GetRealFXMarket(date, isExactDate: true);
             if (res == null)
-            {
-                try { res = ArtificialFXMarkets[date.Trim()]; }
-                catch { res = new FXMarket(date); }
-            }
+                res = GetArtificialFXMarketSimple(date);
             if (!res.FXContains(cpList))
             {
                 foreach (CurrencyPair cp in cpList)
@@ -175,20 +175,24 @@ namespace Core.Markets
                     res.DefineAsArtificial();
                 }
             }
-            ArtificialFXMarkets[date.Trim()] = res;
+            if (res.FXContains(cpList))
+                ArtificialFXMarkets[date] = res;
+            else
+                res = _CreateArtificialFXMarket(date, new List<CurrencyPair> { });
             return res;
         }
 
         public FXMarket GetArtificialFXMarket(DateTime date, List<CurrencyPair> cpList)
         {
-            return _CreateArtificialFXMarket(date, cpList);
+            return _CreateArtificialFXMarket(Freq.Adjust(date), cpList);
         }
 
         public FXMarket GetArtificialFXMarket(DateTime date, CurrencyPair cp = null)
         {
-            if (cp == null) return GetArtificialFXMarket(date, new List<CurrencyPair> { });
-            List<CurrencyPair> cpL = new List<CurrencyPair> { cp };
-            return GetArtificialFXMarket(date, cpL);
+            if (cp == null)
+                return GetArtificialFXMarket(date, new List<CurrencyPair> { });
+            else
+                return GetArtificialFXMarket(date, new List<CurrencyPair> { cp });
         }
 
         public FXMarket GetLastArtificialFXMarket(List<CurrencyPair> cpList)

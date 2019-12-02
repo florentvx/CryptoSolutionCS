@@ -38,7 +38,7 @@ namespace Main
             CurrencyPair curPairXBT = new CurrencyPair(Currency.XBT, Currency.USD);
             CurrencyPair curPairBCH = new CurrencyPair(Currency.BCH, Currency.USD);
             Console.WriteLine(Currency.USD.ID());
-            FXMarketHistory FXMH = new FXMarketHistory();
+            FXMarketHistory FXMH = new FXMarketHistory(Frequency.Day1);
             FXMH.AddQuote(new DateTime(2018, 1, 1), new XChangeRate(7000, curPairXBT));
             FXMH.AddQuote(new DateTime(2018, 1, 15), new XChangeRate(8000, curPairXBT));
             FXMH.AddQuote(endDate, new XChangeRate(8500, curPairXBT));

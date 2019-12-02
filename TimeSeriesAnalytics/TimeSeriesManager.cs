@@ -31,6 +31,13 @@ namespace TimeSeriesAnalytics
         public LoggingEventHandler LoggingEventHandler { get { return _log; } }
         public void AddLoggingLink(LoggingEventHandler function) { _log += function; }
 
+        public void SetUpAllHistory(Frequency freq, bool useKraken = false)
+        {
+            SortedList<DateTime, Transaction> txList = DataProvider.GetTransactionList(useKraken: useKraken);
+            DateTime startDate = txList.First().Key;
+            FXMH = DataProvider.GetFXMarketHistory(Fiat, DataProvider.GetCurrencyPairs(txList), startDate, freq);
+            AH = new AllocationHistory(txList, FXMH, Fiat);
+        }
 
         public TimeSeriesManager(Currency fiat, Frequency freq = Frequency.Hour4, bool useKraken = false, string path = null, IView view = null)
         {
@@ -39,13 +46,7 @@ namespace TimeSeriesAnalytics
             Fiat = fiat;
             if (path != null) BasePath = path;
             DataProvider = new DataProvider(BasePath, view);
-            // SetUpAllocations();
-            SortedList<DateTime, Transaction> txList = DataProvider.GetTransactionList(useKraken: useKraken);
-            //AS = new AllocationSummary(Fiat, txList);
-            DateTime startDate = txList.First().Key;
-            FXMH = DataProvider.GetFXMarketHistory(Fiat, DataProvider.GetCurrencyPairs(), startDate, freq);
-            AH = new AllocationHistory(txList, FXMH, Fiat);
-            // SetUpAllocation
+            SetUpAllHistory(freq, useKraken);
         }
 
         public void Update(Currency fiat, Frequency freq, List<ITimeSeriesKey> tskl, bool useLowerFrequencies)
@@ -53,11 +54,10 @@ namespace TimeSeriesAnalytics
             Fiat = fiat;
             TimeSeriesKeyList = tskl;
             DataProvider.LoadPrices(TimeSeriesKeyList, useLowerFrequencies: useLowerFrequencies);
-            // UpdateAllocations:
-            //AS.CcyRef = Fiat;
+            if (FXMH.Freq != freq)
+                SetUpAllHistory(freq);
             DataProvider.UpdateFXMarketHistory(FXMH, Fiat, AH.StartDate, freq);
             AH.UpdateHistory(Fiat);
-            // UpdateAllocation
         }
 
         public void UpdateLedger(bool useKraken)

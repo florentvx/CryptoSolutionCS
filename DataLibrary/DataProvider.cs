@@ -60,12 +60,13 @@ namespace DataLibrary
             return KrakenData.GetLastTransactionDate();
         }
 
-        public List<CurrencyPair> GetCurrencyPairs()
+        //TODO: To replace by Set up already defined Ccy Pairs
+        public List<CurrencyPair> GetCurrencyPairs(SortedList<DateTime, Transaction> txList)
         {
             FXMarketHistory fxmh = new FXMarketHistory();
-            foreach(var item in GetTransactionList())
+            foreach(var item in txList)
             {
-                fxmh.AddQuote(item.Key, item.Value.XRate);
+                fxmh.AddQuote(item.Value.Date, item.Value.XRate);
             }
             return fxmh.CpList;
         }
@@ -122,7 +123,7 @@ namespace DataLibrary
             Frequency freq = Frequency.Hour4)
         {
             // Need To Duplicate the market in order to have "clean" dates
-            FXMarketHistory fxmh = new FXMarketHistory();
+            FXMarketHistory fxmh = new FXMarketHistory(freq);
             List<Currency> fiatList = new List<Currency> { };
             foreach (CurrencyPair cp in cpList)
             {

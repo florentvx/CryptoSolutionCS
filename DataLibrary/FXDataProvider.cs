@@ -32,7 +32,7 @@ namespace DataLibrary
         private string APIKey;
         private static string RootAPIRequest = "https://openexchangerates.org/api/historical/{Date}.json?app_id={APIKey}&base={Base}&symbols={FX}&show_alternative=false&prettyprint=false";
         private static readonly HttpClient Client = new HttpClient();
-        private FXMarketHistory Data = new FXMarketHistory();
+        private FXMarketHistory Data = new FXMarketHistory(Frequency.Day1);
         Frequency FXMinimunFrequency = Frequency.Day1;
         int ScheduleDepth = 50;
 

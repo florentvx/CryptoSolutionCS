@@ -38,6 +38,7 @@ namespace Core.Allocations
 
         private Allocation GetClosestAllocation(DateTime date, bool isDateExcluded = false)
         {
+            if (History.Count == 0) { return new Allocation(CcyRef); }
             if (isDateExcluded) return History.Where(x => x.Key < date).Last().Value;
             return History.Where(x => x.Key <= date).Last().Value;
         }
@@ -52,13 +53,11 @@ namespace Core.Allocations
             else { History.Add(date, newAlloc); }
         }
 
-        private void AddTransaction(Transaction tx, bool isFirstTx, DateTime nextTxDate)
+        private void AddTransaction(Transaction tx, DateTime nextTxDate)
         {
-            Allocation alloc;
-            if (!isFirstTx) { alloc = GetClosestAllocation(tx.Date, true); }
-            else { alloc = new Allocation(CcyRef); }
+            Allocation alloc = GetClosestAllocation(tx.Date, true);
             // add transaction
-            FXMH.AddQuote(tx.Date, tx.XRate);
+            //FXMH.AddQuote(tx.Date, tx.XRate);
             FXMarket FX = FXMH.GetArtificialFXMarket(tx.Date, CurrencyPairs);
             alloc = alloc.AddTransaction(tx, FX);
             alloc.CalculateTotal(FX);
@@ -75,9 +74,9 @@ namespace Core.Allocations
             }
         }
 
-        private void AddTransaction(Transaction tx, bool isFirstTx = false)
+        private void AddTransaction(Transaction tx)
         {
-            AddTransaction(tx, isFirstTx, new DateTime(9999, 1, 1));
+            AddTransaction(tx, new DateTime(9999, 1, 1));
         }
 
         public void UpdateTransactions(SortedList<DateTime, Transaction> stxList)
@@ -89,9 +88,9 @@ namespace Core.Allocations
 
                 for (int i = 0; i < txList.Count - 1; i++)
                 {
-                    AddTransaction(txList[i], History.Count == 0, txList[i + 1].Date);
+                    AddTransaction(txList[i], txList[i + 1].Date);
                 }
-                AddTransaction(txList.Last(), History.Count == 0 && txList.Count == 1);
+                AddTransaction(txList.Last());
             }
         }
 

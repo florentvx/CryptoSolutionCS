@@ -1,4 +1,5 @@
-﻿using Core.Quotes;
+﻿using Core.Date;
+using Core.Quotes;
 using Core.Markets;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
@@ -11,6 +12,8 @@ namespace UnitTestProject.TestsCore
 {
     public static class MarketTestTools
     {
+        public static Frequency FrequencyRef = Frequency.Day1;
+
         public static XChangeRate EthXbtRefRate =
             new XChangeRate(0.5 * (0.1 + 1 / (1.1 * 9.0)), Currency.ETH, Currency.XBT);
 
@@ -53,7 +56,7 @@ namespace UnitTestProject.TestsCore
 
         public static FXMarketHistory CreateMktHistory()
         {
-            FXMarketHistory fxmh = new FXMarketHistory();
+            FXMarketHistory fxmh = new FXMarketHistory(FrequencyRef);
             fxmh.AddFXMarket(CreateMarket());
             fxmh.AddFXMarket(CreateMarket2());
             return fxmh;
@@ -186,7 +189,7 @@ namespace UnitTestProject.TestsCore
         public void FXMktHist_GetArtificialFXMarket()
         {
             FXMarketHistory fxMH = MarketTestTools.CreateMktHistory();
-            FXMarket fxArt = fxMH.GetArtificialFXMarket(MarketTestTools.dateArt);
+            FXMarket fxArt = fxMH.GetArtificialFXMarket(MarketTestTools.dateArt, new CurrencyPair(Currency.EUR, Currency.USD));
             XChangeRate xr = fxArt.GetQuote(Currency.EUR, Currency.USD, true);
             Assert.AreEqual(MarketTestTools.EurUsdArtRate.Rate, xr.Rate, Math.Pow(10,-6));
         }
