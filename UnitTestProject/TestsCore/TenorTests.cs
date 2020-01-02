@@ -7,6 +7,7 @@ namespace UnitTestProject.TestsCore
     public static class TenorTestsTools
     {
         public static DateTime DateRef = new DateTime(2019, 5, 23, 5, 26, 15);
+        public static DateTime DateRef2 = new DateTime(2020, 1, 2, 0, 0, 0);
     }
 
     [TestClass]
@@ -21,7 +22,7 @@ namespace UnitTestProject.TestsCore
         }
 
         [TestMethod]
-        public void Tenor_GetRoundDate()
+        public void Tenor_GetRoundDateMonth()
         {
             DateTime newDate = TenorTestsTools.DateRef.GetRoundDate(TenorUnit.Month);
             Assert.IsTrue(newDate == new DateTime(2019,5,1,0,0,0));
@@ -32,6 +33,15 @@ namespace UnitTestProject.TestsCore
         {
             DateTime newDate = TenorTestsTools.DateRef.GetRoundDate(TenorUnit.Week);
             Assert.IsTrue(newDate == new DateTime(2019, 5, 20, 0, 0, 0));
+        }
+
+        [TestMethod]
+        public void Tenor_GetRoundDateDay()
+        {
+            DateTime newDate = TenorTestsTools.DateRef.GetRoundDate(TenorUnit.Day);
+            DateTime newDate2 = TenorTestsTools.DateRef2.GetRoundDate(TenorUnit.Day);
+            Assert.IsTrue(newDate == new DateTime(2019, 5, 23, 0, 0, 0)
+                && newDate2 == new DateTime(2020, 1, 1, 0, 0, 0));
         }
 
         [TestMethod]

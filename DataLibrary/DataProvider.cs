@@ -29,7 +29,7 @@ namespace DataLibrary
         public LoggingEventHandler LoggingEventHandler { get { return _log; } }
         public void AddLoggingLink(LoggingEventHandler function) { _log += function; }
 
-        public DataProvider(string path, IView view = null)
+        public DataProvider(string path, IView view = null, bool useInternet = true)
         {
             if (view != null) AddLoggingLink(view.PublishLogMessage);
             Path = path + "\\Library\\";
@@ -39,8 +39,8 @@ namespace DataLibrary
             if (!Directory.Exists(CredPath))
                 Directory.CreateDirectory(CredPath);
 
-            KrakenData = new KrakenProvider(Path, CredPath, view: view);
-            FXData = new FXDataProvider(Path, CredPath, view: view);
+            KrakenData = new KrakenProvider(Path, CredPath, view: view, useInternet: useInternet);
+            FXData = new FXDataProvider(Path, CredPath, view: view, useInternet: useInternet);
         }
 
         public SortedList<DateTime, Transaction> GetTransactionList(bool useKraken = false)

@@ -248,7 +248,9 @@ namespace CryptoApp
         {
             if (TSP == null)
             {
-                TSP = new TimeSeriesManager(Fiat, Frequency, useKraken: false, view: this);
+                TSP = new TimeSeriesManager(Fiat, Frequency, 
+                                            useKraken: false, useInternet: false, 
+                                            view: this);
                 CryptoPresenter = new Presenter(this, TSP);
             }
             CryptoPresenter.Update(Fiat, Frequency, useLowerFrequencies: false);

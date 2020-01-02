@@ -29,6 +29,7 @@ namespace DataLibrary
     public class FXDataProvider : ILogger, ITimeSeriesProvider
     {
         public string FXPath;
+        public bool UseInternet;
         private string APIKey;
         private static string RootAPIRequest = "https://openexchangerates.org/api/historical/{Date}.json?app_id={APIKey}&base={Base}&symbols={FX}&show_alternative=false&prettyprint=false";
         private static readonly HttpClient Client = new HttpClient();
@@ -42,7 +43,7 @@ namespace DataLibrary
         public void AddLoggingLink(LoggingEventHandler function) { _log += function; }
 
 
-        public FXDataProvider(string path, string credPath = "", string key = "", IView view = null)
+        public FXDataProvider(string path, string credPath = "", string key = "", IView view = null, bool useInternet = true)
         {
             if (view != null) AddLoggingLink(view.PublishLogMessage);
             FXPath = path + "\\FXData";
@@ -55,7 +56,7 @@ namespace DataLibrary
                 key = FXcreds[0][0];
             }
             APIKey = key;
-
+            UseInternet = useInternet;
         }
 
         public bool FXSaveableFrequency(Frequency freq)
@@ -161,7 +162,14 @@ namespace DataLibrary
             }
             catch
             {
-                double value = GetFXDataFromApi(cp, adjustedDate);
+                double value = 0;
+                if (UseInternet)
+                    value = GetFXDataFromApi(cp, adjustedDate);
+                else
+                {
+                    XChangeRate xr = Data.GetQuote(Data.LastRealDate, cp, isExactDate: true).Item2;
+                    value = xr.Rate;
+                }
                 Data.AddQuote(adjustedDate, new XChangeRate(value, cp));
                 return new Tuple<double, bool>(value, true);
             }

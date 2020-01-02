@@ -39,13 +39,15 @@ namespace TimeSeriesAnalytics
             AH = new AllocationHistory(txList, FXMH, Fiat);
         }
 
-        public TimeSeriesManager(Currency fiat, Frequency freq = Frequency.Hour4, bool useKraken = false, string path = null, IView view = null)
+        public TimeSeriesManager(   Currency fiat, Frequency freq = Frequency.Hour4, 
+                                    bool useKraken = false, bool useInternet = true,
+                                    string path = null, IView view = null)
         {
             if (view != null)
                 AddLoggingLink(view.PublishLogMessage);
             Fiat = fiat;
             if (path != null) BasePath = path;
-            DataProvider = new DataProvider(BasePath, view);
+            DataProvider = new DataProvider(BasePath, view, useInternet: useInternet);
             SetUpAllHistory(freq, useKraken);
         }
 

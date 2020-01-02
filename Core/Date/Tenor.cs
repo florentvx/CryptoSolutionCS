@@ -138,6 +138,11 @@ namespace Core.Date
                 DateTime newDate = dt.AddDays(-daysOffset);
                 return newDate.Aux_GetRoundDate(TenorUnit.Hour);
             }
+            else if (tu == TenorUnit.Day)
+            {
+                if (dt.Hour == 0 && dt.Minute == 0 && dt.Second == 0)
+                    return dt.AddDays(-1);
+            }
             return dt.Aux_GetRoundDate(tu.GetLowerUnit(skipWeek: true));
         }
 

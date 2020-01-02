@@ -22,13 +22,14 @@ namespace DataLibrary
         public Dictionary<string, List<OHLC>> OHLCData = new Dictionary<string, List<OHLC>>();
         public Dictionary<string, LedgerInfo> Ledger = new Dictionary<string, LedgerInfo>();
         public Frequency SavingMinimumFrequency { get { return Frequency.Hour1; } }
+        public bool UseInternet;
 
         // Logging
         private event LoggingEventHandler _log;
         public LoggingEventHandler LoggingEventHandler { get { return _log; } }
         public void AddLoggingLink(LoggingEventHandler function) { _log += function; }
 
-        public KrakenProvider(string path, string credPath = "", string userName = "", string key = "", IView view = null)
+        public KrakenProvider(string path, string credPath = "", string userName = "", string key = "", IView view = null, bool useInternet = true)
         {
             if (view != null) AddLoggingLink(view.PublishLogMessage);
             Path = path + "Kraken\\";
@@ -40,6 +41,7 @@ namespace DataLibrary
                 key = creds[1][0];
             }
             KrakenApi = new Kraken(userName, key);
+            UseInternet = useInternet;
         }
 
         #region Path Management
@@ -167,7 +169,8 @@ namespace DataLibrary
             {
                 DateTime lastDate = StaticLibrary.UnixTimeStampToDateTime(OHLCData[cpts.GetTimeSeriesKey()].Last().Time);
                 if (DateTime.UtcNow.Subtract(lastDate).TotalSeconds > 2 * cpts.Freq.GetFrequency(inSecs: true))
-                    UpdateData(cpts);
+                    if (UseInternet)
+                        UpdateData(cpts);
                 else
                     doSave = false;
             }
@@ -274,7 +277,12 @@ namespace DataLibrary
                     lastItemValue = (double)item.Close;
                     lastTSValue = value;
                 }
-                res.Add(new Tuple<DateTime, double>(StaticLibrary.UnixTimeStampToDateTime(item.Time), value));
+                DateTime itemTime = StaticLibrary.UnixTimeStampToDateTime(item.Time);
+                itemTime = itsk.GetFrequency().Add(itemTime);
+                if (itemTime > DateTime.UtcNow)
+                    //itemTime = DateTime.UtcNow.GetRoundDate(TenorUnit.Hour);
+                    itemTime = new DateTime(9999, 1, 1);
+                res.Add(new Tuple<DateTime, double>(itemTime, value));
             }
             return res;
         }
