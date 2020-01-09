@@ -31,6 +31,11 @@ namespace Core.Allocations
 
         public DateTime LastAllocationDate { get { return History.Keys.Last(); } }
 
+        public DateTime LastAllocationDate_NoLive
+        {
+            get { return History.Keys.Where(x => x.Year < 9999).Last(); }
+        }
+
         public Allocation GetLastAllocation()
         {
             return History[LastAllocationDate];

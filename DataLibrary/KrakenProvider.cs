@@ -169,8 +169,10 @@ namespace DataLibrary
             {
                 DateTime lastDate = StaticLibrary.UnixTimeStampToDateTime(OHLCData[cpts.GetTimeSeriesKey()].Last().Time);
                 if (DateTime.UtcNow.Subtract(lastDate).TotalSeconds > 2 * cpts.Freq.GetFrequency(inSecs: true))
+                {
                     if (UseInternet)
                         UpdateData(cpts);
+                }
                 else
                     doSave = false;
             }

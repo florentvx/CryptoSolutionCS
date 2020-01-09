@@ -28,9 +28,9 @@
         /// </summary>
         private void InitializeComponent()
         {
-            System.Windows.Forms.DataVisualization.Charting.ChartArea chartArea1 = new System.Windows.Forms.DataVisualization.Charting.ChartArea();
-            System.Windows.Forms.DataVisualization.Charting.Legend legend1 = new System.Windows.Forms.DataVisualization.Charting.Legend();
-            System.Windows.Forms.DataVisualization.Charting.Series series1 = new System.Windows.Forms.DataVisualization.Charting.Series();
+            System.Windows.Forms.DataVisualization.Charting.ChartArea chartArea4 = new System.Windows.Forms.DataVisualization.Charting.ChartArea();
+            System.Windows.Forms.DataVisualization.Charting.Legend legend4 = new System.Windows.Forms.DataVisualization.Charting.Legend();
+            System.Windows.Forms.DataVisualization.Charting.Series series4 = new System.Windows.Forms.DataVisualization.Charting.Series();
             this.tabControl1 = new System.Windows.Forms.TabControl();
             this.Allocation = new System.Windows.Forms.TabPage();
             this.dataGridViewAllocation = new System.Windows.Forms.DataGridView();
@@ -41,6 +41,11 @@
             this.checkedListBox1 = new System.Windows.Forms.CheckedListBox();
             this.chart1 = new System.Windows.Forms.DataVisualization.Charting.Chart();
             this.tabPage1 = new System.Windows.Forms.TabPage();
+            this.groupBox2 = new System.Windows.Forms.GroupBox();
+            this.DateSelectorCheckBox = new System.Windows.Forms.CheckBox();
+            this.DateSelectorTenor = new System.Windows.Forms.TextBox();
+            this.DateSelectorDate = new System.Windows.Forms.DateTimePicker();
+            this.button1 = new System.Windows.Forms.Button();
             this.dataGridViewPnL = new System.Windows.Forms.DataGridView();
             this.richTextBoxLogger = new System.Windows.Forms.RichTextBox();
             this.label1 = new System.Windows.Forms.Label();
@@ -50,7 +55,6 @@
             this.buttonFullDataUpdate = new System.Windows.Forms.Button();
             this.buttonLoad = new System.Windows.Forms.Button();
             this.ButtonLedger = new System.Windows.Forms.Button();
-            this.button1 = new System.Windows.Forms.Button();
             this.tabControl1.SuspendLayout();
             this.Allocation.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dataGridViewAllocation)).BeginInit();
@@ -58,6 +62,7 @@
             this.groupBox1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.chart1)).BeginInit();
             this.tabPage1.SuspendLayout();
+            this.groupBox2.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dataGridViewPnL)).BeginInit();
             this.SuspendLayout();
             // 
@@ -156,22 +161,23 @@
             this.chart1.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            chartArea1.Name = "ChartArea1";
-            this.chart1.ChartAreas.Add(chartArea1);
-            legend1.Name = "Legend1";
-            this.chart1.Legends.Add(legend1);
+            chartArea4.Name = "ChartArea1";
+            this.chart1.ChartAreas.Add(chartArea4);
+            legend4.Name = "Legend1";
+            this.chart1.Legends.Add(legend4);
             this.chart1.Location = new System.Drawing.Point(235, 6);
             this.chart1.Name = "chart1";
-            series1.ChartArea = "ChartArea1";
-            series1.Legend = "Legend1";
-            series1.Name = "Series1";
-            this.chart1.Series.Add(series1);
+            series4.ChartArea = "ChartArea1";
+            series4.Legend = "Legend1";
+            series4.Name = "Series1";
+            this.chart1.Series.Add(series4);
             this.chart1.Size = new System.Drawing.Size(910, 465);
             this.chart1.TabIndex = 0;
             this.chart1.Text = "chart1";
             // 
             // tabPage1
             // 
+            this.tabPage1.Controls.Add(this.groupBox2);
             this.tabPage1.Controls.Add(this.button1);
             this.tabPage1.Controls.Add(this.dataGridViewPnL);
             this.tabPage1.Location = new System.Drawing.Point(4, 25);
@@ -182,15 +188,66 @@
             this.tabPage1.Text = "PnL Explain";
             this.tabPage1.UseVisualStyleBackColor = true;
             // 
+            // groupBox2
+            // 
+            this.groupBox2.Controls.Add(this.DateSelectorCheckBox);
+            this.groupBox2.Controls.Add(this.DateSelectorTenor);
+            this.groupBox2.Controls.Add(this.DateSelectorDate);
+            this.groupBox2.Location = new System.Drawing.Point(163, 0);
+            this.groupBox2.Name = "groupBox2";
+            this.groupBox2.Size = new System.Drawing.Size(371, 67);
+            this.groupBox2.TabIndex = 2;
+            this.groupBox2.TabStop = false;
+            this.groupBox2.Text = "Date Selector";
+            // 
+            // DateSelectorCheckBox
+            // 
+            this.DateSelectorCheckBox.AutoSize = true;
+            this.DateSelectorCheckBox.Checked = true;
+            this.DateSelectorCheckBox.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.DateSelectorCheckBox.Location = new System.Drawing.Point(6, 17);
+            this.DateSelectorCheckBox.Name = "DateSelectorCheckBox";
+            this.DateSelectorCheckBox.Size = new System.Drawing.Size(99, 21);
+            this.DateSelectorCheckBox.TabIndex = 3;
+            this.DateSelectorCheckBox.Text = "TenorInput";
+            this.DateSelectorCheckBox.UseVisualStyleBackColor = true;
+            this.DateSelectorCheckBox.CheckedChanged += new System.EventHandler(this.TenorInputCheckBox_CheckedChanged);
+            // 
+            // DateSelectorTenor
+            // 
+            this.DateSelectorTenor.Location = new System.Drawing.Point(7, 39);
+            this.DateSelectorTenor.Name = "DateSelectorTenor";
+            this.DateSelectorTenor.Size = new System.Drawing.Size(173, 22);
+            this.DateSelectorTenor.TabIndex = 2;
+            this.DateSelectorTenor.Text = "1D";
+            this.DateSelectorTenor.TextChanged += new System.EventHandler(this.DateSelectorTenor_TextChanged);
+            // 
+            // DateSelectorDate
+            // 
+            this.DateSelectorDate.Location = new System.Drawing.Point(186, 39);
+            this.DateSelectorDate.Name = "DateSelectorDate";
+            this.DateSelectorDate.Size = new System.Drawing.Size(179, 22);
+            this.DateSelectorDate.TabIndex = 1;
+            // 
+            // button1
+            // 
+            this.button1.Location = new System.Drawing.Point(7, 7);
+            this.button1.Name = "button1";
+            this.button1.Size = new System.Drawing.Size(150, 31);
+            this.button1.TabIndex = 1;
+            this.button1.Text = "Calculate PnL";
+            this.button1.UseVisualStyleBackColor = true;
+            this.button1.Click += new System.EventHandler(this.ButtonCalculatePnL_Click);
+            // 
             // dataGridViewPnL
             // 
             this.dataGridViewPnL.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.dataGridViewPnL.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            this.dataGridViewPnL.Location = new System.Drawing.Point(163, 6);
+            this.dataGridViewPnL.Location = new System.Drawing.Point(7, 73);
             this.dataGridViewPnL.Name = "dataGridViewPnL";
             this.dataGridViewPnL.RowTemplate.Height = 24;
-            this.dataGridViewPnL.Size = new System.Drawing.Size(982, 474);
+            this.dataGridViewPnL.Size = new System.Drawing.Size(1138, 407);
             this.dataGridViewPnL.TabIndex = 0;
             // 
             // richTextBoxLogger
@@ -271,16 +328,6 @@
             this.ButtonLedger.UseVisualStyleBackColor = true;
             this.ButtonLedger.Click += new System.EventHandler(this.ButtonLedger_Click);
             // 
-            // button1
-            // 
-            this.button1.Location = new System.Drawing.Point(7, 7);
-            this.button1.Name = "button1";
-            this.button1.Size = new System.Drawing.Size(150, 31);
-            this.button1.TabIndex = 1;
-            this.button1.Text = "Calculate PnL";
-            this.button1.UseVisualStyleBackColor = true;
-            this.button1.Click += new System.EventHandler(this.ButtonCalculatePnL_Click);
-            // 
             // CryptoForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
@@ -305,6 +352,8 @@
             this.groupBox1.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.chart1)).EndInit();
             this.tabPage1.ResumeLayout(false);
+            this.groupBox2.ResumeLayout(false);
+            this.groupBox2.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dataGridViewPnL)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
@@ -333,6 +382,10 @@
         private System.Windows.Forms.TabPage tabPage1;
         private System.Windows.Forms.DataGridView dataGridViewPnL;
         private System.Windows.Forms.Button button1;
+        private System.Windows.Forms.GroupBox groupBox2;
+        private System.Windows.Forms.DateTimePicker DateSelectorDate;
+        private System.Windows.Forms.TextBox DateSelectorTenor;
+        private System.Windows.Forms.CheckBox DateSelectorCheckBox;
     }
 }
 

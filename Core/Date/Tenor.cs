@@ -74,8 +74,20 @@ namespace Core.Date
 
         public Tenor(string tenorInput)
         {
-            _Number = Int32.Parse(tenorInput.Substring(0, tenorInput.Length - 1));
-            _Unit = TenorUnitTools.GetTenorUnitFromChar(tenorInput.LastOrDefault());
+            if (tenorInput == "") _Unit = TenorUnit.None;
+            else
+            {
+                Int32.TryParse(tenorInput.Substring(0, tenorInput.Length - 1), out _Number);
+                _Unit = TenorUnitTools.GetTenorUnitFromChar(tenorInput.LastOrDefault());
+            }
+        }
+
+        public bool IsTenor
+        {
+            get
+            {
+                return _Number != 0 && _Unit != TenorUnit.None;
+            }
         }
     }
 
@@ -179,5 +191,9 @@ namespace Core.Date
             }
         }
 
+        public static DateTime AddTenor(this DateTime dt, string tnrString, bool isRounded = false)
+        {
+            return dt.AddTenor(new Tenor(tnrString), isRounded);
+        }
     }
 }

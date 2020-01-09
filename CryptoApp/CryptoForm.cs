@@ -48,6 +48,8 @@ namespace CryptoApp
             comboBoxFiat.SelectedIndex = 0;
             comboBoxFrequency.SelectedIndex = 5;
             AllocationTableCreation();
+            DateSelectorDate.Enabled = !DateSelectorCheckBox.Checked;
+            DateSelectorTenor_TextChanged(null,null);
         }
 
         public void AllocationTableCreation()
@@ -125,9 +127,9 @@ namespace CryptoApp
             }
             else
             {
-                DateTime dateBefore = TSP.AH.LastAllocationDate;
-                DateTime dateDay = dateBefore.GetRoundDate(TenorUnit.Day);
-                var data = TSP.GetAllocationToTable(dateDay);
+                DateTime dateNow = TSP.AH.LastAllocationDate_NoLive;
+                DateTime dateBefore = DateSelectorDate.Value.GetRoundDate(TenorUnit.Day);
+                var data = TSP.GetAllocationToTable(dateBefore);
                 var data2 = TSP.GetLastAllocationToTable();
                 dataGridViewPnL.Rows.Clear();
                 double AbsoluteValueChange = data2["Total"].Position - data["Total"].Position;
@@ -249,7 +251,7 @@ namespace CryptoApp
             if (TSP == null)
             {
                 TSP = new TimeSeriesManager(Fiat, Frequency, 
-                                            useKraken: false, useInternet: false, 
+                                            useKraken: false, useInternet: true, 
                                             view: this);
                 CryptoPresenter = new Presenter(this, TSP);
             }
@@ -265,6 +267,19 @@ namespace CryptoApp
         private void ButtonCalculatePnL_Click(object sender, EventArgs e)
         {
             CryptoPresenter.CalculatePnL();
+        }
+
+        private void TenorInputCheckBox_CheckedChanged(object sender, EventArgs e)
+        {
+            DateSelectorTenor.ReadOnly = !DateSelectorCheckBox.Checked;
+            DateSelectorDate.Enabled = !DateSelectorCheckBox.Checked;
+        }
+
+        private void DateSelectorTenor_TextChanged(object sender, EventArgs e)
+        {
+            Tenor tnr = new Tenor(DateSelectorTenor.Text);
+            if (tnr.IsTenor)
+                DateSelectorDate.Value = DateTime.UtcNow.AddTenor("-" + DateSelectorTenor.Text);
         }
     }
 

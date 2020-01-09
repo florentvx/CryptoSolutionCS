@@ -149,7 +149,7 @@ namespace TimeSeriesAnalytics
 
         public void GetOnGoingPnLs(double pnl)
         {
-            DateTime dateBefore = DateTime.UtcNow;
+            DateTime dateBefore = AH.LastAllocationDate_NoLive;
             this.PublishDebug($"PnL Report - {dateBefore}");
             DateTime dateYear = dateBefore.GetRoundDate(TenorUnit.Year);
             var dataYear = GetAllocationToTable(dateYear);
