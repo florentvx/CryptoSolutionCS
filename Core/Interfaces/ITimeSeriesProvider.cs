@@ -8,6 +8,6 @@ namespace Core.Interfaces
 {
     public interface ITimeSeriesProvider
     {
-        List<Tuple<DateTime, double>> GetTimeSeries(ITimeSeriesKey itsk, bool isIndex);
+        List<Tuple<DateTime, double>> GetTimeSeries(ITimeSeriesKey itsk, bool isIndex, DateTime startDate);
     }
 }

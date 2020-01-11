@@ -94,6 +94,10 @@
       <Project>{60600808-2463-40be-a3cd-1d155508c195}</Project>
       <Name>Core</Name>
     </ProjectReference>
+    <ProjectReference Include="..\CustomControls\CustomControls.csproj">
+      <Project>{75ba1699-7f26-4129-8733-7a5500462260}</Project>
+      <Name>CustomControls</Name>
+    </ProjectReference>
     <ProjectReference Include="..\DataLibrary\DataLibrary.csproj">
       <Project>{3bd6744b-a4b7-4de0-bf78-93eda8097cde}</Project>
       <Name>DataLibrary</Name>

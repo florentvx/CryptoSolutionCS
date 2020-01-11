@@ -77,16 +77,16 @@ namespace DataLibrary
         /// <param name="itsk"></param>
         /// <param name="isIndex"></param>
         /// <returns></returns>
-        public List<Tuple<DateTime,double>> GetTimeSeries(ITimeSeriesKey itsk, bool isIndex)
+        public List<Tuple<DateTime,double>> GetTimeSeries(ITimeSeriesKey itsk, bool isIndex, DateTime startDate)
         {
             TimeSeriesKeyType type = itsk.GetKeyType();
             if (type == TimeSeriesKeyType.CurrencyPair)
             {
                 CurrencyPairTimeSeries cpts = CurrencyPairTimeSeries.RequestIDToCurrencyPairTimeSeries(itsk.GetTimeSeriesKey());
                 if (!cpts.IsFiatPair)
-                    return KrakenData.GetTimeSeries(itsk, isIndex);
+                    return KrakenData.GetTimeSeries(itsk, isIndex, startDate);
                 else
-                    return FXData.GetFXTimeSeries(itsk);
+                    return FXData.GetFXTimeSeries(itsk, startDate);
             }
             throw new NotImplementedException();
         }
@@ -189,7 +189,7 @@ namespace DataLibrary
         /// <param name="startDate"></param>
         private void FillFXMarketHistory(FXMarketHistory fxmh, CurrencyPairTimeSeries cpts, DateTime startDate)
         {
-            List<Tuple<DateTime, double>> ts = GetTimeSeries(cpts, isIndex: false);
+            List<Tuple<DateTime, double>> ts = GetTimeSeries(cpts, isIndex: false, startDate: startDate);
             if (ts.Count > 0)
             {
                 foreach (Tuple<DateTime, double> item in ts)

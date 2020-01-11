@@ -134,13 +134,13 @@ namespace TimeSeriesAnalytics
             return iTSP;
         }
 
-        public IChartData GetChartData(bool isIndex, double frame)
+        public IChartData GetChartData(bool isIndex, double frame, DateTime startDate)
         {
             ChartData res = new ChartData(frame);
             foreach (ITimeSeriesKey itsk in TimeSeriesKeyList)
             {
                 ITimeSeriesProvider iTSP = GetTimeSeriesProvider(itsk);
-                TimeSeries ts = new TimeSeries(iTSP.GetTimeSeries(itsk, isIndex));
+                TimeSeries ts = new TimeSeries(iTSP.GetTimeSeries(itsk, isIndex, startDate));
                 res.AddTimeSeries(itsk,ts);
             }
             res.DateCutting(isIndex);

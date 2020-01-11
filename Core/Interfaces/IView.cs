@@ -9,6 +9,7 @@ namespace Core.Interfaces
         void GetCheckedCurrencyPairs();
         bool IsIndex { get; }
         double Frame { get; }
+        DateTime ChartDataStartDate { get; }
         void PrintChart(bool isIndex = true, double frame = 0.1);
         List<ITimeSeriesKey> TimeSeriesKeyList { get; }
         void SetChartData(IChartData icd);

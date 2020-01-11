@@ -29,6 +29,7 @@ namespace CryptoApp
         public double Frame { get { return 0.1; } }
         public TimeSeriesManager TSP;
         public IChartData _chartData;
+        public DateTime ChartDataStartDate { get { return dateSelectorControlGraph.Date; } }
         private bool Loaded = false;
 
         public CryptoForm()
@@ -48,8 +49,8 @@ namespace CryptoApp
             comboBoxFiat.SelectedIndex = 0;
             comboBoxFrequency.SelectedIndex = 5;
             AllocationTableCreation();
-            DateSelectorDate.Enabled = !DateSelectorCheckBox.Checked;
-            DateSelectorTenor_TextChanged(null,null);
+            dateSelectorControl1.SetInitialInput("1D");
+            dateSelectorControlGraph.SetInitialInput("10Y");
         }
 
         public void AllocationTableCreation()
@@ -128,7 +129,7 @@ namespace CryptoApp
             else
             {
                 DateTime dateNow = TSP.AH.LastAllocationDate_NoLive;
-                DateTime dateBefore = DateSelectorDate.Value.GetRoundDate(TenorUnit.Day);
+                DateTime dateBefore = dateSelectorControl1.Date.GetRoundDate(TenorUnit.Day);
                 var data = TSP.GetAllocationToTable(dateBefore);
                 var data2 = TSP.GetLastAllocationToTable();
                 dataGridViewPnL.Rows.Clear();
@@ -267,19 +268,6 @@ namespace CryptoApp
         private void ButtonCalculatePnL_Click(object sender, EventArgs e)
         {
             CryptoPresenter.CalculatePnL();
-        }
-
-        private void TenorInputCheckBox_CheckedChanged(object sender, EventArgs e)
-        {
-            DateSelectorTenor.ReadOnly = !DateSelectorCheckBox.Checked;
-            DateSelectorDate.Enabled = !DateSelectorCheckBox.Checked;
-        }
-
-        private void DateSelectorTenor_TextChanged(object sender, EventArgs e)
-        {
-            Tenor tnr = new Tenor(DateSelectorTenor.Text);
-            if (tnr.IsTenor)
-                DateSelectorDate.Value = DateTime.UtcNow.AddTenor("-" + DateSelectorTenor.Text);
         }
     }
 

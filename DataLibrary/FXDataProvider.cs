@@ -201,14 +201,14 @@ namespace DataLibrary
             return dict;
         }
 
-        public List<Tuple<DateTime,double>> GetFXTimeSeries(ITimeSeriesKey itsk)
+        public List<Tuple<DateTime,double>> GetFXTimeSeries(ITimeSeriesKey itsk, DateTime startDate)
         {
             List<Tuple<DateTime, double>> res = new List<Tuple<DateTime, double>>();
             CurrencyPairTimeSeries cpts = CurrencyPairTimeSeries.RequestIDToCurrencyPairTimeSeries(itsk.GetTimeSeriesKey());
             if (!Data.CpList.Contains(cpts.CurPair)) ReadFXHistory(cpts);
             Frequency fq = itsk.GetFrequency();
             if (fq.IsInferiorFrequency(Frequency.Day1)) fq = Frequency.Day1;
-            List<DateTime> schedule = fq.GetSchedule(DateTime.UtcNow, ScheduleDepth);
+            List<DateTime> schedule = fq.GetSchedule(DateTime.UtcNow, ScheduleDepth).Where(x => x > startDate).ToList();
             bool doSave = false;
             foreach (DateTime date in schedule)
             {
@@ -220,13 +220,13 @@ namespace DataLibrary
             return res;
         }
 
-        public List<Tuple<DateTime, double>> GetTimeSeries(ITimeSeriesKey itsk, bool isIndex)
+        public List<Tuple<DateTime, double>> GetTimeSeries(ITimeSeriesKey itsk, bool isIndex, DateTime startDate)
         {
             List<Tuple<DateTime, double>> res = new List<Tuple<DateTime, double>>();
             double value;
             double lastItemValue = Double.NaN;
             double lastTSValue = 10000;
-            foreach (Tuple<DateTime,double> item in GetFXTimeSeries(itsk))
+            foreach (Tuple<DateTime,double> item in GetFXTimeSeries(itsk, startDate))
             {
                 if (!isIndex) value = item.Item2;
                 else

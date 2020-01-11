@@ -121,7 +121,7 @@ namespace Core.Allocations
             }
         }
 
-        public List<Tuple<DateTime, double>> GetTimeSeries(ITimeSeriesKey itsk, bool isIndex)
+        public List<Tuple<DateTime, double>> GetTimeSeries(ITimeSeriesKey itsk, bool isIndex, DateTime startDate)
         {
             List<Tuple<DateTime, double>> res = new List<Tuple<DateTime, double>>();
             if (itsk.GetKeyType() == TimeSeriesKeyType.AllocationHistory)
@@ -130,7 +130,7 @@ namespace Core.Allocations
                 double lastTSValue = Double.NaN;
                 Allocation prevAlloc = null;
                 Currency ccyRef = itsk.GetCurrencyRef();
-                IEnumerable<DateTime> DateList = History.Keys;
+                IEnumerable<DateTime> DateList = History.Keys.Where(x => x >= startDate);
                 DateList = itsk.GetFrequency().GetSchedule(DateList.First(), DateList.Last(), true);
                 foreach (DateTime date in DateList)
                 {

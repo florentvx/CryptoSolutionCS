@@ -264,7 +264,7 @@ namespace DataLibrary
             }
         }
 
-        public List<Tuple<DateTime,double>> GetTimeSeries(ITimeSeriesKey itsk, bool isIndex)
+        public List<Tuple<DateTime,double>> GetTimeSeries(ITimeSeriesKey itsk, bool isIndex, DateTime startDate)
         {
             List<Tuple<DateTime, double>> res = new List<Tuple<DateTime, double>>();
             double value;
@@ -272,19 +272,21 @@ namespace DataLibrary
             double lastTSValue = 10000;
             foreach (OHLC item in GetOHLCTimeSeries(itsk))
             {
-                if (!isIndex) value = (double)item.Close;
-                else
-                {
-                    value = Double.IsNaN(lastItemValue) ? lastTSValue : lastTSValue * (double)item.Close / lastItemValue;
-                    lastItemValue = (double)item.Close;
-                    lastTSValue = value;
-                }
                 DateTime itemTime = StaticLibrary.UnixTimeStampToDateTime(item.Time);
                 itemTime = itsk.GetFrequency().Add(itemTime);
                 if (itemTime > DateTime.UtcNow)
-                    //itemTime = DateTime.UtcNow.GetRoundDate(TenorUnit.Hour);
                     itemTime = new DateTime(9999, 1, 1);
-                res.Add(new Tuple<DateTime, double>(itemTime, value));
+                if (itemTime > startDate)
+                {
+                    if (!isIndex) value = (double)item.Close;
+                    else
+                    {
+                        value = Double.IsNaN(lastItemValue) ? lastTSValue : lastTSValue * (double)item.Close / lastItemValue;
+                        lastItemValue = (double)item.Close;
+                        lastTSValue = value;
+                    }
+                    res.Add(new Tuple<DateTime, double>(itemTime, value));
+                }
             }
             return res;
         }
