@@ -102,7 +102,10 @@ namespace Core.Date
 
         public static DateTime Adjust(this Frequency freq, DateTime date, bool isNext = false)
         {
-            long DeltaSecs = freq.GetFrequency(inSecs: true);
+            Frequency freqToUse = freq;
+            if (freq == Frequency.Week1 || freq == Frequency.Day15)
+                freqToUse = Frequency.Day1;
+            long DeltaSecs = freqToUse.GetFrequency(inSecs: true);
             long DateSeconds = (long)date.Ticks / 10000000;
             long x = isNext ? 1 : 0;
             return new DateTime((long)(x + DateSeconds / DeltaSecs) * (10000000 * DeltaSecs));

@@ -9,13 +9,26 @@ namespace UnitTestProject.TestsCore
     public class TimeSeriesKeysUnitTests
     {
         [TestMethod]
-        public void Freq_Adjust()
+        public void Freq_Adjust_Hour4()
         {
             DateTime date0 = new DateTime(2019, 5, 21, 19, 50, 20);
             DateTime date1 = FrequencyMethods.Adjust(Frequency.Hour4, date0);
             DateTime date2 = FrequencyMethods.Adjust(Frequency.Hour4, date0, true);
             Assert.IsTrue(date1 == new DateTime(2019, 5, 21, 16, 0, 0) &&
                           date2 == new DateTime(2019, 5, 21, 20, 0, 0));
+        }
+
+        [TestMethod]
+        public void Freq_Adjust_MoreThan1Day()
+        {
+            DateTime date0 = new DateTime(2019, 5, 21, 19, 50, 20);
+            DateTime dateRef = new DateTime(2019, 5, 21, 0, 0, 0);
+            DateTime dateD = FrequencyMethods.Adjust(Frequency.Day1, date0);
+            DateTime dateW = FrequencyMethods.Adjust(Frequency.Week1, date0);
+            DateTime date15D = FrequencyMethods.Adjust(Frequency.Day15, date0);
+            Assert.IsTrue(dateD == dateRef &&
+                          dateW == dateRef &&
+                          date15D == dateRef);
         }
 
         [TestMethod]
