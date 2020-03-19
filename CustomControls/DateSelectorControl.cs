@@ -13,6 +13,8 @@ namespace CustomControls
 {
     public partial class DateSelectorControl : UserControl
     {
+        private Frequency ControlFreq = Frequency.Day1;
+
         public DateSelectorControl()
         {
             InitializeComponent();
@@ -38,7 +40,7 @@ namespace CustomControls
         {
             Tenor tnr = new Tenor(TenorTextBox.Text);
             if (tnr.IsTenor)
-                DateTimePicker.Value = DateTime.UtcNow.AddTenor("-" + TenorTextBox.Text);
+                DateTimePicker.Value = ControlFreq.Adjust(DateTime.UtcNow.AddTenor("-" + TenorTextBox.Text));
         }
     }
 }

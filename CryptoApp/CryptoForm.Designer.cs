@@ -132,7 +132,6 @@
             // 
             // groupBox1
             // 
-            this.groupBox1.Anchor = System.Windows.Forms.AnchorStyles.None;
             this.groupBox1.Controls.Add(this.buttonShow);
             this.groupBox1.Controls.Add(this.checkedListBox1);
             this.groupBox1.Location = new System.Drawing.Point(11, 90);
@@ -211,7 +210,8 @@
             // 
             // dataGridViewPnL
             // 
-            this.dataGridViewPnL.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            this.dataGridViewPnL.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.dataGridViewPnL.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             this.dataGridViewPnL.Location = new System.Drawing.Point(7, 87);
@@ -222,15 +222,13 @@
             // 
             // richTextBoxLogger
             // 
-            this.richTextBoxLogger.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
             this.richTextBoxLogger.BackColor = System.Drawing.SystemColors.ActiveCaptionText;
+            this.richTextBoxLogger.Dock = System.Windows.Forms.DockStyle.Bottom;
             this.richTextBoxLogger.ForeColor = System.Drawing.SystemColors.Info;
-            this.richTextBoxLogger.Location = new System.Drawing.Point(16, 651);
+            this.richTextBoxLogger.Location = new System.Drawing.Point(0, 663);
             this.richTextBoxLogger.Name = "richTextBoxLogger";
             this.richTextBoxLogger.ReadOnly = true;
-            this.richTextBoxLogger.Size = new System.Drawing.Size(1265, 130);
+            this.richTextBoxLogger.Size = new System.Drawing.Size(1293, 130);
             this.richTextBoxLogger.TabIndex = 4;
             this.richTextBoxLogger.Text = "";
             // 

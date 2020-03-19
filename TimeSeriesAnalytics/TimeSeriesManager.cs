@@ -53,9 +53,10 @@ namespace TimeSeriesAnalytics
 
         public void Update(Currency fiat, Frequency freq, List<ITimeSeriesKey> tskl, bool useLowerFrequencies)
         {
-            Fiat = fiat;
             TimeSeriesKeyList = tskl;
             DataProvider.LoadPrices(TimeSeriesKeyList, useLowerFrequencies: useLowerFrequencies);
+            this.PublishInfo($"Loading Data {fiat} - {freq} ...");
+            Fiat = fiat;
             if (FXMH.Freq != freq)
                 SetUpAllHistory(freq);
             DataProvider.UpdateFXMarketHistory(FXMH, Fiat, AH.StartDate, freq);
