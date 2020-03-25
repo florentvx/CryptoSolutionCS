@@ -41,7 +41,7 @@ namespace UnitTestProject.TestsCore
             DateTime newDate = TenorTestsTools.DateRef.GetRoundDate(TenorUnit.Day);
             DateTime newDate2 = TenorTestsTools.DateRef2.GetRoundDate(TenorUnit.Day);
             Assert.IsTrue(newDate == new DateTime(2019, 5, 23, 0, 0, 0)
-                && newDate2 == new DateTime(2020, 1, 1, 0, 0, 0));
+                && newDate2 == new DateTime(2020, 1, 2, 0, 0, 0));
         }
 
         [TestMethod]

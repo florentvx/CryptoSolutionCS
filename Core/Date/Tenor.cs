@@ -75,6 +75,7 @@ namespace Core.Date
         public Tenor(string tenorInput)
         {
             if (tenorInput == "") _Unit = TenorUnit.None;
+            else if (tenorInput.Length == 1) _Unit = TenorUnit.None;
             else
             {
                 Int32.TryParse(tenorInput.Substring(0, tenorInput.Length - 1), out _Number);
@@ -86,7 +87,7 @@ namespace Core.Date
         {
             get
             {
-                return _Number != 0 && _Unit != TenorUnit.None;
+                return _Unit != TenorUnit.None;
             }
         }
     }

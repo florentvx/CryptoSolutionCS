@@ -148,25 +148,25 @@ namespace TimeSeriesAnalytics
             return res;
         }
 
-        public void GetOnGoingPnLs(double pnl)
+        public void GetOnGoingPnLs(double position)
         {
             DateTime dateBefore = AH.LastAllocationDate_NoLive;
             this.PublishDebug($"PnL Report - {dateBefore}");
             DateTime dateYear = dateBefore.GetRoundDate(TenorUnit.Year);
             var dataYear = GetAllocationToTable(dateYear);
-            this.PublishInfo($"{dateYear} - Ongoing Year PnL: {Math.Round(pnl - dataYear["Total"].TotalPnL, 2)} {Fiat.ToFullName()}");
+            this.PublishInfo($"{dateYear} - Ongoing Year PnL: {Math.Round(position - dataYear["Total"].Position, 2)} {Fiat.ToFullName()}");
             DateTime dateMonth = dateBefore.GetRoundDate(TenorUnit.Month);
             var dataMonth = GetAllocationToTable(dateMonth);
-            this.PublishInfo($"{dateMonth} - Ongoing Month PnL: {Math.Round(pnl - dataMonth["Total"].TotalPnL, 2)} {Fiat.ToFullName()}");
+            this.PublishInfo($"{dateMonth} - Ongoing Month PnL: {Math.Round(position - dataMonth["Total"].Position, 2)} {Fiat.ToFullName()}");
             DateTime dateWeek = dateBefore.GetRoundDate(TenorUnit.Week);
             var dataWeek = GetAllocationToTable(dateWeek);
-            this.PublishInfo($"{dateWeek} - Ongoing Week PnL: {Math.Round(pnl - dataWeek["Total"].TotalPnL, 2)} {Fiat.ToFullName()}");
+            this.PublishInfo($"{dateWeek} - Ongoing Week PnL: {Math.Round(position - dataWeek["Total"].Position, 2)} {Fiat.ToFullName()}");
             DateTime dateDay = dateBefore.GetRoundDate(TenorUnit.Day);
             var dataDay = GetAllocationToTable(dateDay);
-            this.PublishInfo($"{dateDay} - Ongoing Day PnL: {Math.Round(pnl - dataDay["Total"].TotalPnL, 2)} {Fiat.ToFullName()}");
+            this.PublishInfo($"{dateDay} - Ongoing Day PnL: {Math.Round(position - dataDay["Total"].Position, 2)} {Fiat.ToFullName()}");
             DateTime date30D = dateBefore.AddTenor(new Tenor("-30D"), isRounded: true);
             var data30D = GetAllocationToTable(date30D);
-            this.PublishInfo($"{date30D} - 30 Days PnL: {Math.Round(pnl - data30D["Total"].TotalPnL, 2)} {Fiat.ToFullName()}");
+            this.PublishInfo($"{date30D} - 30 Days PnL: {Math.Round(position - data30D["Total"].Position, 2)} {Fiat.ToFullName()}");
         }
     }
 }

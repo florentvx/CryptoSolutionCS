@@ -98,7 +98,7 @@ namespace CryptoApp
             else
             {
                 var data = TSP.GetLastAllocationToTable();
-                double pnl = data["Total"].TotalPnL;
+                double position = data["Total"].Position;
                 dataGridViewAllocation.Rows.Clear();
                 foreach (var key in data.Keys)
                 {
@@ -115,7 +115,7 @@ namespace CryptoApp
                         Math.Round(item.Fees, 2), 
                         Math.Round(item.RealizedPnL, 2));
                 }
-                TSP.GetOnGoingPnLs(pnl);
+                TSP.GetOnGoingPnLs(position);
             }
         }
 
