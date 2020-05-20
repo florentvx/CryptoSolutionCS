@@ -29,7 +29,11 @@ namespace CryptoApp
                 _view.SetChartData(_TSManager.GetChartData(_view.IsIndex, _view.Frame, _view.ChartDataStartDate));
                 _view.PrintChart();
             }
-            if (updateAllocationTable) _view.AllocationTableUpdate();
+            if (updateAllocationTable)
+            {
+                _view.AllocationTableUpdate();
+                _view.TxExplorerTableUpdate();
+            }
         }
 
         internal async void FullUpdate(Frequency freq)

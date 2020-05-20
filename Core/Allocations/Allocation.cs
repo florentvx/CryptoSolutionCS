@@ -111,7 +111,7 @@ namespace Core.Allocations
             //// Changing the Amounts
             
             // Received
-            if ((tx.Type == TransactionType.Deposit && tx.Received.Ccy.IsFiat()) || tx.Type == TransactionType.Trade)
+            if ((tx.Type == TransactionType.Deposit && tx.Received.Ccy.IsFiat()) || tx.Type == TransactionType.Trade || tx.Type == TransactionType.Transfer)
             {
                 AllocationElement RecElement = res.GetElement(tx.Received.Ccy);
                 if (RecElement != null)

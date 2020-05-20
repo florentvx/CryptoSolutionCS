@@ -45,6 +45,7 @@
             this.dateSelectorControl1 = new CustomControls.DateSelectorControl();
             this.button1 = new System.Windows.Forms.Button();
             this.dataGridViewPnL = new System.Windows.Forms.DataGridView();
+            this.TxExplorer = new System.Windows.Forms.TabPage();
             this.richTextBoxLogger = new System.Windows.Forms.RichTextBox();
             this.label1 = new System.Windows.Forms.Label();
             this.comboBoxFiat = new System.Windows.Forms.ComboBox();
@@ -53,6 +54,8 @@
             this.buttonFullDataUpdate = new System.Windows.Forms.Button();
             this.buttonLoad = new System.Windows.Forms.Button();
             this.ButtonLedger = new System.Windows.Forms.Button();
+            this.labelTxExplorer = new System.Windows.Forms.Label();
+            this.dataGridViewTxExplorer = new System.Windows.Forms.DataGridView();
             this.tabControl1.SuspendLayout();
             this.Allocation.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dataGridViewAllocation)).BeginInit();
@@ -61,6 +64,8 @@
             ((System.ComponentModel.ISupportInitialize)(this.chart1)).BeginInit();
             this.tabPage1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dataGridViewPnL)).BeginInit();
+            this.TxExplorer.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.dataGridViewTxExplorer)).BeginInit();
             this.SuspendLayout();
             // 
             // tabControl1
@@ -71,6 +76,7 @@
             this.tabControl1.Controls.Add(this.Allocation);
             this.tabControl1.Controls.Add(this.Graphs);
             this.tabControl1.Controls.Add(this.tabPage1);
+            this.tabControl1.Controls.Add(this.TxExplorer);
             this.tabControl1.Location = new System.Drawing.Point(12, 59);
             this.tabControl1.Name = "tabControl1";
             this.tabControl1.SelectedIndex = 0;
@@ -220,6 +226,18 @@
             this.dataGridViewPnL.Size = new System.Drawing.Size(1257, 467);
             this.dataGridViewPnL.TabIndex = 0;
             // 
+            // TxExplorer
+            // 
+            this.TxExplorer.Controls.Add(this.dataGridViewTxExplorer);
+            this.TxExplorer.Controls.Add(this.labelTxExplorer);
+            this.TxExplorer.Location = new System.Drawing.Point(4, 25);
+            this.TxExplorer.Name = "TxExplorer";
+            this.TxExplorer.Padding = new System.Windows.Forms.Padding(3);
+            this.TxExplorer.Size = new System.Drawing.Size(1270, 561);
+            this.TxExplorer.TabIndex = 3;
+            this.TxExplorer.Text = "TxExplorer";
+            this.TxExplorer.UseVisualStyleBackColor = true;
+            // 
             // richTextBoxLogger
             // 
             this.richTextBoxLogger.BackColor = System.Drawing.SystemColors.ActiveCaptionText;
@@ -296,6 +314,27 @@
             this.ButtonLedger.UseVisualStyleBackColor = true;
             this.ButtonLedger.Click += new System.EventHandler(this.ButtonLedger_Click);
             // 
+            // labelTxExplorer
+            // 
+            this.labelTxExplorer.AutoSize = true;
+            this.labelTxExplorer.Location = new System.Drawing.Point(6, 3);
+            this.labelTxExplorer.Name = "labelTxExplorer";
+            this.labelTxExplorer.Size = new System.Drawing.Size(79, 17);
+            this.labelTxExplorer.TabIndex = 0;
+            this.labelTxExplorer.Text = "Tx Explorer";
+            // 
+            // dataGridViewTxExplorer
+            // 
+            this.dataGridViewTxExplorer.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.dataGridViewTxExplorer.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            this.dataGridViewTxExplorer.Location = new System.Drawing.Point(6, 23);
+            this.dataGridViewTxExplorer.Name = "dataGridViewTxExplorer";
+            this.dataGridViewTxExplorer.RowTemplate.Height = 24;
+            this.dataGridViewTxExplorer.Size = new System.Drawing.Size(1258, 532);
+            this.dataGridViewTxExplorer.TabIndex = 1;
+            // 
             // CryptoForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
@@ -321,6 +360,9 @@
             ((System.ComponentModel.ISupportInitialize)(this.chart1)).EndInit();
             this.tabPage1.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.dataGridViewPnL)).EndInit();
+            this.TxExplorer.ResumeLayout(false);
+            this.TxExplorer.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.dataGridViewTxExplorer)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -350,6 +392,9 @@
         private System.Windows.Forms.Button button1;
         private CustomControls.DateSelectorControl dateSelectorControl1;
         private CustomControls.DateSelectorControl dateSelectorControlGraph;
+        private System.Windows.Forms.TabPage TxExplorer;
+        private System.Windows.Forms.Label labelTxExplorer;
+        private System.Windows.Forms.DataGridView dataGridViewTxExplorer;
     }
 }
 

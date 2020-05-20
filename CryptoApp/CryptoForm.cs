@@ -13,6 +13,7 @@ using TimeSeriesAnalytics;
 using log4net;
 using Logging;
 using log4net.Config;
+using Core.Transactions;
 
 namespace CryptoApp
 {
@@ -75,6 +76,19 @@ namespace CryptoApp
             dataGridViewPnL.Columns[4].Name = "Δ Pos";
             dataGridViewPnL.Columns[5].Name = "Δ Rate";
             dataGridViewPnL.Columns[6].Name = "Total Δ";
+
+            /// Tx Explorer
+            dataGridViewTxExplorer.ColumnCount = 9;
+            dataGridViewTxExplorer.Columns[0].Name = "Date";
+            dataGridViewTxExplorer.Columns[1].Name = "Type";
+            dataGridViewTxExplorer.Columns[2].Name = "Pay Amnt";
+            dataGridViewTxExplorer.Columns[3].Name = "Pay Ccy";
+            dataGridViewTxExplorer.Columns[4].Name = "Rec. Amnt";
+            dataGridViewTxExplorer.Columns[5].Name = "Rec. Ccy";
+            dataGridViewTxExplorer.Columns[6].Name = "Fees Amnt";
+            dataGridViewTxExplorer.Columns[7].Name = "Fees Ccy";
+            dataGridViewTxExplorer.Columns[8].Name = "XRate";
+
         }
 
         private string PercentageToString(double? input, string dflt = "")
@@ -159,6 +173,35 @@ namespace CryptoApp
                             0,
                             Math.Round(AbsoluteValueChange,2),
                             PercentageToString(RelativeChange));
+                }
+            }
+        }
+
+        public void TxExplorerTableUpdate()
+        {
+            if (dataGridViewTxExplorer.InvokeRequired)
+            {
+                DelegateTables d = new DelegateTables(TxExplorerTableUpdate);
+                this.Invoke(d, new object[] { });
+            }
+            else
+            {
+                dataGridViewTxExplorer.Rows.Clear();
+                var data = TSP.DataProvider.GetTransactionList();
+                foreach (KeyValuePair<DateTime, Transaction> date_tx in data)
+                {
+                    DateTime dt = date_tx.Key;
+                    Transaction tx = date_tx.Value;
+                    dataGridViewTxExplorer.Rows.
+                        Add(dt,
+                        tx.Type.ToString(),
+                        tx.Paid.Amount,
+                        tx.Paid.Ccy,
+                        tx.Received.Amount,
+                        tx.Received.Ccy,
+                        tx.Fees.Amount,
+                        tx.Fees.Ccy,
+                        tx.XRate.ToString());
                 }
             }
         }

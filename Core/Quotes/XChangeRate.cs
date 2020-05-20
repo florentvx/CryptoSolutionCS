@@ -28,7 +28,10 @@ namespace Core.Quotes
 
         public string ToString(int precision = 4)
         {
-            return $"{Math.Round(Rate,precision)} {CcyPair.ToString()}";
+            if (Rate > 0.01)
+                return $"{Math.Round(Rate, precision)} {CcyPair.ToString()}";
+            else
+                return GetInverse().ToString();
         }
 
         public XChangeRate GetInverse()

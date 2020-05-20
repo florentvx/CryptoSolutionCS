@@ -11,7 +11,8 @@ namespace Core.Transactions
         None,
         Deposit,
         Trade,
-        WithDrawal
+        WithDrawal,
+        Transfer
     }
 
     public static class TransactionTypeProperties

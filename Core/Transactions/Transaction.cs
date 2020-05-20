@@ -29,7 +29,7 @@ namespace Core.Transactions
             switch (type)
             {
                 case TransactionType.Trade:
-                    double ratio = Convert.ToInt32(paid.Amount / received.Amount * 10000) / 10000.0;
+                    double ratio = paid.Amount / received.Amount;
                     XRate = new XChangeRate(ratio, received.Ccy, paid.Ccy);
                     break;
                 case TransactionType.WithDrawal:

@@ -187,6 +187,14 @@ namespace Core.PnL
                             newPnLT.Position += amount;
                             PnLElements.Add(lastDate, newPnLT);
                             break;
+                        case TransactionType.Transfer:
+                            PnLElement pnlTf = GetLastPnLElement();
+                            PnLElement newPnLTf = (PnLElement)pnlTf.Clone();
+                            newPnLTf.Position += tx.Received.Amount;
+                            double newWeightTf = 1 / (1 + pnlTf.Position / tx.Received.Amount);
+                            newPnLT.AverageCost = (1 - newWeightTf) * pnlTf.AverageCost + newWeightTf * 0;
+                            PnLElements.Add(lastDate, newPnLTf);
+                            break;
                         default:
                             break;
                     }
