@@ -25,24 +25,28 @@ namespace UnitTestProject.TestsCore
         public static SortedList<DateTime, Transaction> GetTransactionList()
         {
             SortedList<DateTime, Transaction> txList = new SortedList<DateTime, Transaction> { };
-            Transaction tx0 = new Transaction(TransactionType.Deposit,
+            Transaction tx0 = new Transaction("ID0",
+                                        TransactionType.Deposit,
                                         MarketTestTools.date1.AddDays(-1),
                                         new Price(0,Currency.None),
                                         new Price(1110, Currency.USD));
             txList.Add(tx0.Date, tx0);
-            Transaction tx1 = new Transaction(TransactionType.Trade,
+            Transaction tx1 = new Transaction("ID1", 
+                                        TransactionType.Trade,
                                         MarketTestTools.date1,
                                         new Price(1000, Currency.USD),
                                         new Price(1, Currency.XBT),
                                         new Price(10, Currency.USD));
             txList.Add(tx1.Date, tx1);
-            Transaction tx2 = new Transaction(TransactionType.Trade,
+            Transaction tx2 = new Transaction("ID2",
+                                        TransactionType.Trade,
                                         MarketTestTools.date2,
                                         new Price(0.5, Currency.XBT),
                                         new Price(525, Currency.USD),
                                         new Price(5, Currency.USD));
             txList.Add(tx2.Date, tx2);
-            Transaction tx3 = new Transaction(TransactionType.WithDrawal,
+            Transaction tx3 = new Transaction("ID3",
+                                        TransactionType.WithDrawal,
                                         MarketTestTools.date3,
                                         new Price(125, Currency.USD),
                                         new Price(0, Currency.None),
@@ -85,7 +89,8 @@ namespace UnitTestProject.TestsCore
         public void Allocation_AddTransaction_DepositFiat()
         {
             Allocation alloc = AllocationsTools.GetAllocation();
-            Transaction DFtx = new Transaction(TransactionType.Deposit, 
+            Transaction DFtx = new Transaction("ID_DF",
+                                                TransactionType.Deposit, 
                                                 DateTime.UtcNow, 
                                                 null, 
                                                 new Price(100, Currency.USD));
@@ -97,7 +102,8 @@ namespace UnitTestProject.TestsCore
         public void Allocation_AddTransaction_DepositCrypto()
         {
             Allocation alloc = AllocationsTools.GetAllocation();
-            Transaction DCtx = new Transaction(TransactionType.Deposit,
+            Transaction DCtx = new Transaction("ID_DC",
+                                                TransactionType.Deposit,
                                                 DateTime.UtcNow,
                                                 null,
                                                 new Price(0.1, Currency.XBT));
@@ -110,7 +116,8 @@ namespace UnitTestProject.TestsCore
         {
             Allocation alloc = AllocationsTools.GetAllocation();
             Price Fees = new Price(50, Currency.USD);
-            Transaction Ttx = new Transaction(TransactionType.Trade,
+            Transaction Ttx = new Transaction("ID_Trade",
+                                                TransactionType.Trade,
                                                 DateTime.UtcNow,
                                                 new Price(0.5, Currency.XBT),
                                                 new Price(450, Currency.USD),
@@ -126,7 +133,8 @@ namespace UnitTestProject.TestsCore
         public void Allocation_AddTransaction_WithDrawFiat()
         {
             Allocation alloc = AllocationsTools.GetAllocation();
-            Transaction WFtx = new Transaction(TransactionType.WithDrawal,
+            Transaction WFtx = new Transaction("ID_WDFiat",
+                                                TransactionType.WithDrawal,
                                                 DateTime.UtcNow,
                                                 new Price(20, Currency.USD),
                                                 null,
@@ -139,7 +147,8 @@ namespace UnitTestProject.TestsCore
         public void Allocation_AddTransaction_WithDrawCrypto()
         {
             Allocation alloc = AllocationsTools.GetAllocation();
-            Transaction WCtx = new Transaction(TransactionType.WithDrawal,
+            Transaction WCtx = new Transaction("ID_WdCrypto",
+                                                TransactionType.WithDrawal,
                                                 DateTime.UtcNow,
                                                 new Price(0.5, Currency.XBT),
                                                 null,

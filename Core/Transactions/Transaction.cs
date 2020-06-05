@@ -9,6 +9,7 @@ namespace Core.Transactions
 {
     public class Transaction
     {
+        public string ID { get; }
         public TransactionType Type { get; }
         public DateTime Date;
         public Price Paid { get; }
@@ -16,10 +17,20 @@ namespace Core.Transactions
         public Price Fees { get; }
         public XChangeRate XRate { get; }
 
+        public void SetFees(double feesAmount, Currency ccy)
+        {
+            if (Fees.IsNull)
+            {
+                Fees.Amount = feesAmount;
+                Fees.Ccy = ccy;
+            }
+        }
+
         public CryptoFiatPair GetCryptoFiatPair { get { return XRate.GetCryptoFiatPair; } }
 
-        public Transaction(TransactionType type, DateTime date, Price paid, Price received, Price fees = null)
+        public Transaction(string id, TransactionType type, DateTime date, Price paid, Price received, Price fees = null)
         {
+            ID = id;
             Type = type;
             Date = date;
             Paid = paid;

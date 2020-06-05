@@ -1062,11 +1062,13 @@ namespace KrakenApi
 
     public class GetDepositAddressesResult
     {
+        public string Address;
+        public int Expiretm;
     }
 
     public class GetDepositAddressesResponse : ResponseBase
     {
-        public GetDepositAddressesResult Result;
+        public GetDepositAddressesResult[] Result;
     }
 
     public class GetDepositStatusResult
@@ -2062,7 +2064,7 @@ namespace KrakenApi
         /// Asset class (optional):
         /// currency(default).</param>
         /// <param name="new">Whether or not to generate a new address (optional.  default = false).</param>
-        public GetDepositAddressesResult GetDepositAddresses(string asset, string method, string aclass = null, bool? @new = null)
+        public GetDepositAddressesResult[] GetDepositAddresses(string asset, string method, string aclass = null, bool? @new = null)
         {
             var param = new Dictionary<string, string>();
             param.Add("asset", asset);

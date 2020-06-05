@@ -23,6 +23,7 @@ namespace DataLibrary
         public Dictionary<string, LedgerInfo> Ledger = new Dictionary<string, LedgerInfo>();
         public Frequency SavingMinimumFrequency { get { return Frequency.Hour1; } }
         public bool UseInternet;
+        public Dictionary<Currency, List<string>> DepositAddresses = new Dictionary<Currency, List<string>>();
 
         // Logging
         private event LoggingEventHandler _log;
@@ -42,6 +43,7 @@ namespace DataLibrary
             }
             KrakenApi = new Kraken(userName, key);
             UseInternet = useInternet;
+            //LoadDepositAddresses(Currency.XBT);
         }
 
         #region Path Management
@@ -244,7 +246,7 @@ namespace DataLibrary
         }
         #endregion
 
-        #endregion
+        #region OHLC Timeseries
 
         /// <summary>
         /// Get OHLC TimeSeries untreated
@@ -264,7 +266,7 @@ namespace DataLibrary
             }
         }
 
-        public List<Tuple<DateTime,double>> GetTimeSeries(ITimeSeriesKey itsk, bool isIndex, DateTime startDate)
+        public List<Tuple<DateTime, double>> GetTimeSeries(ITimeSeriesKey itsk, bool isIndex, DateTime startDate)
         {
             List<Tuple<DateTime, double>> res = new List<Tuple<DateTime, double>>();
             double value;
@@ -290,6 +292,10 @@ namespace DataLibrary
             }
             return res;
         }
+
+        #endregion
+
+        #endregion
 
         #region Ledger
 
@@ -425,6 +431,7 @@ namespace DataLibrary
                     case TransactionType.Deposit:
                         Currency ccyDp = CurrencyPorperties.FromNameToCurrency(item.Asset);
                         Transaction txDepo = new Transaction(
+                            item.Refid,
                             TransactionType.Deposit,
                             dt,
                             new Price(0, Currency.None),
@@ -435,6 +442,7 @@ namespace DataLibrary
                     case TransactionType.WithDrawal:
                         Currency ccyWd = CurrencyPorperties.FromNameToCurrency(item.Asset);
                         Transaction txWd = new Transaction(
+                            item.Refid,
                             TransactionType.WithDrawal,
                             dt,
                             new Price((double)-item.Amount, ccyWd),
@@ -446,28 +454,47 @@ namespace DataLibrary
                     case TransactionType.Trade:
                         if (item.Amount < 0)
                         {
-                            Currency ccy = CurrencyPorperties.FromNameToCurrency(item.Asset);
-                            Price paid = new Price(-(double)item.Amount, ccy);
-                            Price fees = new Price((double)item.Fee, ccy);
+                            Currency ccyTradeM = CurrencyPorperties.FromNameToCurrency(item.Asset);
+                            Price paid = new Price(-(double)item.Amount, ccyTradeM);
+                            Price fees = new Price((double)item.Fee, ccyTradeM);
                             i++;
                             LedgerInfo nextItem = items[i];
                             Price received = new Price(nextItem.Amount, nextItem.Asset);
-                            res.Add(dt, new Transaction(TransactionType.Trade, dt, paid, received, fees));
-                            //AddLedgerCurrency(ccy);
-                            //AddLedgerCurrency(received.Ccy);
+                            res.Add(dt, new Transaction(
+                                item.Refid,
+                                TransactionType.Trade,
+                                dt,
+                                paid,
+                                received,
+                                fees));
                         }
                         else
                         {
                             Price received = new Price(item.Amount, item.Asset);
                             i++;
                             LedgerInfo nextItem = items[i];
-                            Currency ccy = CurrencyPorperties.FromNameToCurrency(nextItem.Asset);
-                            Price paid = new Price(-(double)nextItem.Amount, ccy);
-                            Price fees = new Price((double)nextItem.Fee, ccy);
-                            res.Add(dt, new Transaction(TransactionType.Trade, dt, paid, received, fees));
-                            //AddLedgerCurrency(ccy);
-                            //AddLedgerCurrency(received.Ccy);
+                            Currency ccyTradeP = CurrencyPorperties.FromNameToCurrency(nextItem.Asset);
+                            Price paid = new Price(-(double)nextItem.Amount, ccyTradeP);
+                            Price fees = new Price((double)nextItem.Fee, ccyTradeP);
+                            res.Add(dt, new Transaction(
+                                item.Refid,
+                                TransactionType.Trade,
+                                dt, 
+                                paid, 
+                                received, 
+                                fees));
                         }
+                        break;
+                    case TransactionType.Transfer:
+                        Currency ccyTransfer = CurrencyPorperties.FromNameToCurrency(item.Asset);
+                        if (!ccyTransfer.IsNone())
+                            res.Add(dt, new Transaction(
+                                item.Refid,
+                                TransactionType.Transfer, 
+                                dt, 
+                                new Price(0, Currency.None), 
+                                new Price((double)item.Amount, 
+                                ccyTransfer)));
                         break;
                     default:
                         break;
@@ -486,6 +513,27 @@ namespace DataLibrary
                     res.Add(item.Key, item.Value);
             }
             return res;
+        }
+
+        #endregion
+
+        #region DepositAdresses
+
+        public List<string> LoadDepositAddresses(Currency ccy)
+        {
+            if (!DepositAddresses.ContainsKey(ccy))
+            {
+                var x = KrakenApi.GetDepositMethods(asset: ccy.ToString());
+                List<string> addresses = new List<string>();
+                GetDepositAddressesResult[] data = KrakenApi.GetDepositAddresses(ccy.ToString(), x[0].Method);
+                for (int i = 0; i < data.Length; i++)
+                {
+                    addresses.Add(data[i].Address);
+                }
+                DepositAddresses[ccy] = addresses;
+                this.PublishDebug($"{ccy.ToFullName()} Adress:{data[0].Address}");
+            }
+            return DepositAddresses[ccy];
         }
 
         #endregion

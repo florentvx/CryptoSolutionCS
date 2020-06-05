@@ -54,6 +54,10 @@
       <Project>{3bd6744b-a4b7-4de0-bf78-93eda8097cde}</Project>
       <Name>DataLibrary</Name>
     </ProjectReference>
+    <ProjectReference Include="..\Info.Blockchain.API\Info.Blockchain.API.csproj">
+      <Project>{8271D6C0-2F72-4D36-BB68-AECDE109C59A}</Project>
+      <Name>Info.Blockchain.API</Name>
+    </ProjectReference>
     <ProjectReference Include="..\KrakenApi\KrakenApi.csproj">
       <Project>{F14FBC9A-BB60-4D11-B94D-9D36D621BAC3}</Project>
       <Name>KrakenApi</Name>

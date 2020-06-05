@@ -22,6 +22,7 @@ namespace DataLibrary
         public string CredPath;
         public KrakenProvider KrakenData = null;
         public FXDataProvider FXData = null;
+        public BlockchainProvider BlockchainData = null;
         public List<Currency> LedgerCurrencies = new List<Currency>();
 
         // Logging
@@ -41,18 +42,43 @@ namespace DataLibrary
 
             KrakenData = new KrakenProvider(Path, CredPath, view: view, useInternet: useInternet);
             FXData = new FXDataProvider(Path, CredPath, view: view, useInternet: useInternet);
+            BlockchainData = new BlockchainProvider(Path, CredPath, view: view, useInternet: useInternet);
+        }
+
+        public void LoadBlockchainFees(SortedList<DateTime, Transaction> tx_list)
+        {
+            foreach (KeyValuePair<DateTime, Transaction> item in tx_list)
+            {
+                Transaction tx = item.Value;
+                if (tx.Type == TransactionType.Deposit
+                    && !tx.Received.Ccy.IsFiat())
+                {
+                    Currency ccy = tx.Received.Ccy;
+                    if (BlockchainData.IsAcceptedCryptoCurrency(ccy) && true) /// Tx Test
+                    {
+                        List<string> DepositAddresses = KrakenData.LoadDepositAddresses(ccy);
+                        double fees = (double)BlockchainData.GetTransactionFees(tx, DepositAddresses).GetBtc();
+                        tx.SetFees(fees, ccy);
+                    }
+                }
+            }
+            BlockchainData.WriteFeesMemory();
         }
 
         public SortedList<DateTime, Transaction> GetTransactionList(bool useKraken = false)
         {
             KrakenData.LoadLedger(useKraken);
-            return KrakenData.GetTransactionList();
+            SortedList<DateTime, Transaction> tx_list = KrakenData.GetTransactionList();
+            LoadBlockchainFees(tx_list);
+            return tx_list;
         }
 
         public SortedList<DateTime, Transaction> GetTransactionList(DateTime startDate, bool isBefore = false, bool useKraken = false)
         {
             KrakenData.LoadLedger(useKraken);
-            return KrakenData.GetTransactionList(startDate, isBefore);
+            SortedList<DateTime, Transaction> txList = KrakenData.GetTransactionList(startDate, isBefore);
+            LoadBlockchainFees(txList);
+            return txList;
         }
 
         public DateTime GetLastTransactionDate()

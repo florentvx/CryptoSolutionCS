@@ -169,7 +169,14 @@ namespace Core.PnL
                                 newPnLD.Position += tx.Received.Amount;
                                 PnLElements.Add(lastDate, newPnLD);
                             }
-                            // TODO else figure out the fees
+                            else
+                            {
+                                PnLElement pnlDCrypto = GetLastPnLElement();
+                                PnLElement newPnLDCrypto = (PnLElement)pnlDCrypto.Clone();
+                                newPnLDCrypto.Position -= tx.Fees.Amount;
+                                newPnLDCrypto.Fees += tx.Fees.Amount;
+                                PnLElements.Add(lastDate, newPnLDCrypto);
+                            }
                             break;
                         case TransactionType.Trade:
                             PnLElement pnlT = GetLastPnLElement();
