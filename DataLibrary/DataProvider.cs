@@ -171,6 +171,11 @@ namespace DataLibrary
             return fxmh;
         }
 
+        public void ResetReadFiles()
+        {
+            FXData.ResetReadFiles();
+        }
+
         /// <summary>
         /// Get the FX Market history implied by the OHLC timeseries
         /// </summary>
@@ -182,6 +187,7 @@ namespace DataLibrary
         public void UpdateFXMarketHistory(FXMarketHistory fxmh, Currency fiat, DateTime startDate,
             Frequency freq = Frequency.Hour4)
         {
+            ResetReadFiles();
             // Need To Duplicate the market in order to have "clean" dates
             List<CurrencyPair> cpList = new List<CurrencyPair>(fxmh.CpList);
             List<Currency> fiatList = new List<Currency> { };
@@ -220,13 +226,14 @@ namespace DataLibrary
             {
                 foreach (Tuple<DateTime, double> item in ts)
                     fxmh.AddQuote(item.Item1, new XChangeRate(item.Item2, cpts.CurPair));
-                if (ts.First().Item1 > startDate)
-                {
-                    CurrencyPairTimeSeries newCpts = (CurrencyPairTimeSeries)cpts.Clone();
-                    newCpts.IncreaseFreq();
-                    if (newCpts.Freq != Frequency.None)
-                        FillFXMarketHistory(fxmh, newCpts, startDate);
-                }
+            }
+            DateTime firstDate = fxmh.GetFirstDate(cpts.CurPair);
+            if (firstDate > startDate)
+            {
+                CurrencyPairTimeSeries newCpts = (CurrencyPairTimeSeries)cpts.Clone();
+                newCpts.IncreaseFreq();
+                if (newCpts.Freq != Frequency.None)
+                    FillFXMarketHistory(fxmh, newCpts, startDate);
             }
         }
 

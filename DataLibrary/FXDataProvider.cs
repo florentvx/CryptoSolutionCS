@@ -34,6 +34,7 @@ namespace DataLibrary
         private static string RootAPIRequest = "https://openexchangerates.org/api/historical/{Date}.json?app_id={APIKey}&base={Base}&symbols={FX}&show_alternative=false&prettyprint=false";
         private static readonly HttpClient Client = new HttpClient();
         private FXMarketHistory Data = new FXMarketHistory(Frequency.Day1);
+        public List<string> ReadFiles = new List<string>();
         Frequency FXMinimunFrequency = Frequency.Day1;
         int ScheduleDepth = 50;
 
@@ -59,6 +60,11 @@ namespace DataLibrary
             UseInternet = useInternet;
         }
 
+        public void ResetReadFiles()
+        {
+            ReadFiles.Clear();
+        }
+
         public bool FXSaveableFrequency(Frequency freq)
         {
             return freq >= FXMinimunFrequency;
@@ -81,9 +87,21 @@ namespace DataLibrary
             return $"{FXPath}\\{cpts.CurPair.GetRequestID()}.csv";
         }
 
-        private void ReadFXHistory(CurrencyPairTimeSeries cpts)
+        private bool ReadFXHistory(CurrencyPairTimeSeries cpts)
         {
             string pathLib = GetFXLibraryPath(cpts);
+            if (!File.Exists(pathLib))
+            {
+                cpts = cpts.GetCloneWithInverseCcyPair();
+                pathLib = GetFXLibraryPath(cpts);
+            }
+            if (!File.Exists(pathLib))
+            {
+                return false;
+            }
+            if (ReadFiles.Contains(cpts.GetFullName()))
+                return true;
+            ReadFiles.Add(cpts.GetFullName());
             List<string[]> csv = StaticLibrary.LoadCsvFile(pathLib);
             bool isHeaders = true;
             string[] headers = null;
@@ -96,6 +114,7 @@ namespace DataLibrary
                     Data.AddQuote(StaticLibrary.UnixTimeStampToDateTime(ohlc.Time), new XChangeRate((double)ohlc.Close, cpts.CurPair));
                 }
             }
+            return false;
         }
 
         public void WriteFXHistory(CurrencyPairTimeSeries cpts)
@@ -205,7 +224,12 @@ namespace DataLibrary
         {
             List<Tuple<DateTime, double>> res = new List<Tuple<DateTime, double>>();
             CurrencyPairTimeSeries cpts = CurrencyPairTimeSeries.RequestIDToCurrencyPairTimeSeries(itsk.GetTimeSeriesKey());
-            if (!Data.CpList.Contains(cpts.CurPair)) ReadFXHistory(cpts);
+            if (!Data.CpList.Contains(cpts.CurPair))
+            {
+                bool loadTs = !ReadFXHistory(cpts);
+                if (!loadTs)
+                    return res;
+            }
             Frequency fq = itsk.GetFrequency();
             if (fq.IsInferiorFrequency(Frequency.Day1)) fq = Frequency.Day1;
             List<DateTime> schedule = fq.GetSchedule(DateTime.UtcNow, ScheduleDepth).Where(x => x > startDate).ToList();

@@ -9,6 +9,15 @@ namespace UnitTestProject.TestsCore
     public class TimeSeriesKeysUnitTests
     {
         [TestMethod]
+        public void Freq_Comparison()
+        {
+            bool test = Frequency.Day1.IsInferiorFrequency(Frequency.Day15);
+            test = test && Frequency.Min1.IsInferiorFrequency(Frequency.Min1);
+            test = test && !Frequency.Day1.IsInferiorFrequency(Frequency.Min15);
+            Assert.IsTrue(test);
+        }
+
+        [TestMethod]
         public void Freq_Adjust_Hour4()
         {
             DateTime date0 = new DateTime(2019, 5, 21, 19, 50, 20);

@@ -101,6 +101,14 @@ namespace Core.Markets
             }
         }
 
+        public DateTime GetFirstDate(CurrencyPair curPair)
+        {
+            foreach (DateTime mkt_t in RealFXMarkets.Keys)
+                if (RealFXMarkets[mkt_t].FXContains(curPair))
+                    return mkt_t;
+            return DateTime.UtcNow;
+        }
+
         #endregion
 
         #region Add Real Data

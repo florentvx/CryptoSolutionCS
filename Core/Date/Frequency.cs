@@ -97,7 +97,7 @@ namespace Core.Date
 
         public static bool IsInferiorFrequency(this Frequency freq, Frequency freq2)
         {
-            return freq.GetFrequency() <= freq.GetFrequency(); 
+            return freq.GetFrequency() <= freq2.GetFrequency(); 
         }
 
         public static DateTime Adjust(this Frequency freq, DateTime date, bool isNext = false)
