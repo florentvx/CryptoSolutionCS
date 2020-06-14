@@ -44,6 +44,14 @@ namespace Core.Quotes
             return (Ccy1 == x || Ccy2 == x);
         }
 
+        public bool Contains(List<Currency> ccyList)
+        {
+            foreach (Currency item in ccyList)
+                if (Contains(item))
+                    return true;
+            return false;
+        }
+
         public List<CurrencyPair> GetCurrencyPairs()
         {
             return new List<CurrencyPair> { (CurrencyPair)Clone() };
@@ -97,7 +105,7 @@ namespace Core.Quotes
 
         public string GetRequestID()
         {
-            if (!Contains(Currency.BCH))
+            if (!Contains(new List<Currency> { Currency.BCH, Currency.LINK }))
                 return Ccy1.Prefix() + Ccy1.ID() + Ccy2.Prefix() + Ccy2.ID();
             else
                 return Ccy1.ID() + Ccy2.ID();
@@ -124,12 +132,14 @@ namespace Core.Quotes
         public static CurrencyPair RequestIDToCurrencyPair(string input)
         {
             string input0 = input.Split(' ').First();
-            Currency ccy1 = CurrencyPorperties.FromNameToCurrency(input0.Substring(0, 4));
-            Currency ccy2 = CurrencyPorperties.FromNameToCurrency(input.Substring(4));
+            int i_sep = input0.Length - 4;
+            Currency ccy1 = CurrencyPorperties.FromNameToCurrency(input0.Substring(0, i_sep));
+            Currency ccy2 = CurrencyPorperties.FromNameToCurrency(input.Substring(i_sep));
             if (ccy1.IsNone() || ccy2.IsNone())
             {
-                ccy1 = CurrencyPorperties.FromNameToCurrency(input0.Substring(0, 3));
-                ccy2 = CurrencyPorperties.FromNameToCurrency(input0.Substring(3));
+                int i_sep_2 = input0.Length - 3;
+                ccy1 = CurrencyPorperties.FromNameToCurrency(input0.Substring(0, i_sep_2));
+                ccy2 = CurrencyPorperties.FromNameToCurrency(input0.Substring(i_sep_2));
             }
             return new CurrencyPair(ccy1, ccy2);
         }

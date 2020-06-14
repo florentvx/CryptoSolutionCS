@@ -2,6 +2,7 @@
 using Core.Quotes;
 using Core.TimeSeriesKeys;
 using Core.Date;
+using Core.Statics;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
@@ -110,7 +111,7 @@ namespace DataLibrary
                 if (isHeaders) { headers = array; isHeaders = false; }
                 else
                 {
-                    OHLC ohlc = StaticLibrary.ReadOHLCItems(array, headers);
+                    OHLC ohlc = DataLibraryStaticLibrary.ReadOHLCItems(array, headers);
                     Data.AddQuote(StaticLibrary.UnixTimeStampToDateTime(ohlc.Time), new XChangeRate((double)ohlc.Close, cpts.CurPair));
                 }
             }

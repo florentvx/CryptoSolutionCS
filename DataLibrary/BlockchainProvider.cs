@@ -12,6 +12,7 @@ using Transaction = Core.Transactions.Transaction;
 using ApiTx = Info.Blockchain.API.Models.Transaction;
 using Info.Blockchain.API.Models;
 using Info.Blockchain.API.Client;
+using Core.Statics;
 
 namespace DataLibrary
 {

@@ -98,7 +98,13 @@ namespace TimeSeriesAnalytics
             List<Currency> cryptoList = new List<Currency> { };
             List<Currency> fiatList = new List<Currency> { };
             foreach (Currency ccy in Enum.GetValues(typeof(Currency)))
-                if (ccy.IsFiat()) { fiatList.Add(ccy); } else { cryptoList.Add(ccy); }
+                if (!ccy.IsNone())
+                {
+                    if (ccy.IsFiat())
+                        fiatList.Add(ccy);
+                    else
+                        cryptoList.Add(ccy);
+                }
             List<ITimeSeriesKey> cptsL = new List<ITimeSeriesKey> { };
             foreach (Currency cr in cryptoList)
                 foreach (Currency fi in fiatList)

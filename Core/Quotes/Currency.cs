@@ -9,7 +9,7 @@ namespace Core.Quotes
     {
         None,
         EUR, USD,
-        XBT, ETH, BCH, LTC, XRP
+        XBT, ETH, BCH, LTC, XRP, LINK
     }
 
     public static class CurrencyPorperties
@@ -57,6 +57,8 @@ namespace Core.Quotes
                     return "LiteCoin";
                 case Currency.XRP:
                     return "Ripple";
+                case Currency.LINK:
+                    return "ChainLink";
                 default:
                     throw new Exception("Unknown Currency");
             }

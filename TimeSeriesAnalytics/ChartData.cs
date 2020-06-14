@@ -21,14 +21,22 @@ namespace TimeSeriesAnalytics
             _frame = frame;
         }
 
-        public double GlobalMin
+        public double GetGlobalValue(double value, double frame)
         {
-            get { return _globalMin < 100 ? Math.Round((_globalMin - _frame) / 10.0, 0) * 10.0 : Math.Round(_globalMin * (1 - _frame) / 100.0, 0) * 100.0; }
+            int n = Convert.ToInt32(Math.Round(Math.Log10(value), 0));
+            double scale = Math.Pow(10, n - 2);
+            return Math.Round(value * (1 + frame) / scale, 0) * scale;
         }
 
+        public double GlobalMin
+        {
+            get { return GetGlobalValue(_globalMin, -_frame); }
+        }
+
+        // Chainlink has a Max price of 4EUR => need to aply the same logic to go at !0^-n if needed n++
         public double GlobalMax
         {
-            get{ return _globalMax < 100 ? Math.Round((_globalMax + _frame) / 10.0, 0) * 10.0 : Math.Round(_globalMax * (1 + _frame) / 100.0, 0) * 100.0; }
+            get{ return GetGlobalValue(_globalMax, _frame); }
         }
 
         public ITimeSeries GetTimeSeries(ITimeSeriesKey itsk)

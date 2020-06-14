@@ -5,6 +5,7 @@ using System.Windows.Forms;
 using Core.Quotes;
 using Core.Interfaces;
 using Core.PnL;
+using Core.Statics;
 using System.Windows.Forms.DataVisualization.Charting;
 using Core.Allocations;
 using Core.TimeSeriesKeys;
@@ -187,11 +188,11 @@ namespace CryptoApp
             else
             {
                 dataGridViewTxExplorer.Rows.Clear();
-                var data = TSP.DataProvider.GetTransactionList();
-                foreach (KeyValuePair<DateTime, Transaction> date_tx in data)
+                SortedList<DateTime,Transaction> data_tx = TSP.DataProvider.GetTransactionList();
+                List<DateTime> data_dates = data_tx.GetReversedKeys();
+                foreach (DateTime dt in data_dates)
                 {
-                    DateTime dt = date_tx.Key;
-                    Transaction tx = date_tx.Value;
+                    Transaction tx = data_tx[dt];
                     dataGridViewTxExplorer.Rows.
                         Add(dt,
                         tx.Type.ToString(),

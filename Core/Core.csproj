@@ -55,6 +55,7 @@
     <Compile Include="Interfaces\ITimeSeriesManager.cs" />
     <Compile Include="Interfaces\IView.cs" />
     <Compile Include="Kraken\KrakenApiClasses.cs" />
+    <Compile Include="Statics\StaticLibrary.cs" />
     <Compile Include="TimeSeriesKeys\AllocationSrategy.cs" />
     <Compile Include="Interfaces\ITimeSeriesKey.cs" />
     <Compile Include="Interfaces\ITimeSeriesProvider.cs" />

@@ -8,42 +8,9 @@ using Core.Kraken;
 
 namespace DataLibrary
 {
-    public static class StaticLibrary
+    public static class DataLibraryStaticLibrary
     {
-        public static List<string[]> LoadCsvFile(string filePath)
-        {
-            List<string[]> searchList = new List<string[]>();
-            using (var reader = new StreamReader(File.OpenRead(filePath)))
-            {
-                while (!reader.EndOfStream)
-                {
-                    var line = reader.ReadLine();
-                    string[] array = line.Split(',');
-                    searchList.Add(array);
-                }
-            }
-            return searchList;
-        }
-
-        public static DateTime UnixTimeStampToDateTime(double unixTimeStamp)
-        {
-            // Unix timestamp is seconds past epoch
-            DateTime dtDateTime = new DateTime(1970, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc);
-            dtDateTime = dtDateTime.AddSeconds(unixTimeStamp).ToUniversalTime();
-            return dtDateTime;
-        }
-
-        public static Int32 DateTimeToUnixTimeStamp(DateTime date)
-        {
-            return (Int32)(date.Subtract(new DateTime(1970, 1, 1))).TotalSeconds;
-        }
-
-        public static bool DateTimeDistTest(DateTime d1, DateTime d2, double nbHours)
-        {
-            Int32 d1_int = DateTimeToUnixTimeStamp(d1);
-            Int32 d2_int = DateTimeToUnixTimeStamp(d2);
-            return Math.Abs(d1_int - d2_int) / 3600.0 < nbHours;
-        }
+        #region Kraken
 
         public static OHLC ReadOHLCItems(string[] array, string[] headers)
         {
@@ -126,5 +93,6 @@ namespace DataLibrary
             }
             return new Tuple<string, LedgerInfo>(key, res);
         }
+        #endregion
     }
 }

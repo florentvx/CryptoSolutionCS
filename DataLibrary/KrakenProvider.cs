@@ -12,6 +12,7 @@ using Core.Date;
 using Core.Transactions;
 using KrakenApi;
 using Logging;
+using Core.Statics;
 
 namespace DataLibrary
 {
@@ -116,7 +117,7 @@ namespace DataLibrary
                 if (isHeaders) { headers = array; isHeaders = false; }
                 else
                 {
-                    OHLC ohlc = StaticLibrary.ReadOHLCItems(array, headers);
+                    OHLC ohlc = DataLibraryStaticLibrary.ReadOHLCItems(array, headers);
                     res.Pairs[curPair.GetRequestID()].Add(ohlc);
                 }
             }
@@ -202,7 +203,11 @@ namespace DataLibrary
                     UpdateAndSaving(cpts);
                 }
                 else
+                {
                     OHLCData[cpts.GetTimeSeriesKey()] = GetKrakenOHLC(ccyPair, freq).Pairs[ccyPair.GetRequestID()];
+                    SaveOHLC(cpts);
+                }
+                    
             }
         }
 
@@ -358,7 +363,7 @@ namespace DataLibrary
                     if (isHeaders) { headers = array; isHeaders = false; }
                     else
                     {
-                        Tuple<string, LedgerInfo> li = StaticLibrary.ReadLedgerItems(array, headers);
+                        Tuple<string, LedgerInfo> li = DataLibraryStaticLibrary.ReadLedgerItems(array, headers);
                         res.Ledger.Add(li.Item1, li.Item2);
                     }
                 }
