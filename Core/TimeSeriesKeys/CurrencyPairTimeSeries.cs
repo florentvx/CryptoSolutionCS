@@ -83,5 +83,12 @@ namespace Core.TimeSeriesKeys
         {
             return new CurrencyPairTimeSeries(CurPair.GetInverse(), Freq);
         }
+
+        public ITimeSeriesKey GetNextFrequency()
+        {
+            CurrencyPairTimeSeries res = (CurrencyPairTimeSeries)Clone();
+            res.Freq = res.Freq.GetNextFrequency();
+            return res;
+        }
     }
 }

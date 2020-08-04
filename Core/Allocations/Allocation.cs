@@ -21,7 +21,7 @@ namespace Core.Allocations
         }
     }
 
-    public class Allocation : ICloneable, ITimeSeriesKey
+    public class Allocation : ICloneable
     {
         private List<AllocationElement> Data;
         public AllocationElement Fees;

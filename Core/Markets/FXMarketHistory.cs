@@ -16,8 +16,9 @@ namespace Core.Markets
         public SortedDictionary<DateTime, FXMarket> RealFXMarkets = new SortedDictionary<DateTime, FXMarket>();
         public SortedDictionary<DateTime, FXMarket> ArtificialFXMarkets = new SortedDictionary<DateTime, FXMarket>();
         public DateTime LastRealDate { get { return RealFXMarkets.LastOrDefault().Key; }}
+        public DateTime LastRealDate_NoLive;
 
-        public FXMarketHistory(Frequency freq = Frequency.Day1) { _Freq = freq; }
+        public FXMarketHistory(Frequency freq = Frequency.Day1) { _Freq = freq; LastRealDate_NoLive = new DateTime(2000, 1, 1); }
 
         #region Ccy Management
 
@@ -113,12 +114,20 @@ namespace Core.Markets
 
         #region Add Real Data
 
+        private void UpdateLastReadDate_NoLive(DateTime date)
+        {
+            if (date > LastRealDate_NoLive && date.Year < 9999)
+                LastRealDate_NoLive = date;
+        }
+
+
         public void AddQuote(DateTime date, XChangeRate quote)
         {
             if (quote.IsIdentity) return;
             AddCcyPair(quote.CcyPair);
             DateTime AdjustedDate = Freq.Adjust(date);
             FXMarket FX = GetRealFXMarketSimple(AdjustedDate);
+            UpdateLastReadDate_NoLive(AdjustedDate);
             if (FX != null)
                 FX.AddQuote(quote);
             else
@@ -129,6 +138,7 @@ namespace Core.Markets
         public void AddFXMarket(FXMarket fX)
         {
             DateTime date = fX.Date;
+            UpdateLastReadDate_NoLive(date);
             foreach (XChangeRate xcr in fX.FX)
             {
                 AddQuote(date, xcr);

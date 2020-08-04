@@ -258,12 +258,37 @@ namespace DataLibrary
         /// </summary>
         /// <param name="itsk"></param>
         /// <returns></returns>
-        private List<OHLC> GetOHLCTimeSeries(ITimeSeriesKey itsk)
+        private List<OHLC> GetOHLCTimeSeries(   ITimeSeriesKey itsk, 
+                                                Int64? startDate = null, 
+                                                Int64? endDate = null)
         {
+            Int64 startDateUnix; ;
+            if (!startDate.HasValue)
+                startDateUnix = StaticLibrary.DateTimeToUnixTimeStamp(new DateTime(2000, 1, 1));
+            else
+                startDateUnix = startDate.Value;
+
+            Int64 endDateUnix;
+            if (!endDate.HasValue)
+                endDateUnix = StaticLibrary.DateTimeToUnixTimeStamp(new DateTime(3000, 1, 1));
+            else
+                endDateUnix = endDate.Value;
+
             try
             {
                 LoadOHLC(itsk);
-                return OHLCData[itsk.GetTimeSeriesKey()];
+                List<OHLC> res = OHLCData[itsk.GetTimeSeriesKey()];
+                res = res   .Where(x => startDateUnix <= x.Time && x.Time < endDateUnix)
+                            .ToList();
+                if (res.First().Time <= startDateUnix)
+                    return res;
+                else
+                {
+                    List<OHLC> prevRes = GetOHLCTimeSeries(itsk.GetNextFrequency(), startDate, res.First().Time);
+                    prevRes.AddRange(res);
+                    return prevRes;
+                }
+
             }
             catch
             {
@@ -277,7 +302,7 @@ namespace DataLibrary
             double value;
             double lastItemValue = Double.NaN;
             double lastTSValue = 10000;
-            foreach (OHLC item in GetOHLCTimeSeries(itsk))
+            foreach (OHLC item in GetOHLCTimeSeries(itsk, StaticLibrary.DateTimeToUnixTimeStamp(startDate)))
             {
                 DateTime itemTime = StaticLibrary.UnixTimeStampToDateTime(item.Time);
                 itemTime = itsk.GetFrequency().Add(itemTime);

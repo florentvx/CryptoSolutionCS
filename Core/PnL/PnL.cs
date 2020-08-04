@@ -18,17 +18,23 @@ namespace Core.PnL
         public double OnGoingPnL;
         public double Fees;
         public double RealizedPnL;
+        public double Deposit;
+        public double Withdrawal;
 
         public double TotalPnL { get { return OnGoingPnL + RealizedPnL; } }
 
+        public double TotalPnLWithFees { get { return TotalPnL - Fees; } }
+
         public PnLElement(double position, double averageCost, double fees, 
-            double onPnl,double realPnl)
+            double onPnl, double realPnl, double deposit = 0, double withdrawal = 0)
         {
             Position = position;
             AverageCost = averageCost;
             Fees = fees;
             OnGoingPnL = onPnl;
             RealizedPnL = realPnl;
+            Deposit = deposit;
+            Withdrawal = withdrawal;
             xChangeRate = null;
             Weight = null;
         }
@@ -50,7 +56,9 @@ namespace Core.PnL
                 Position = Position,
                 AverageCost = AverageCost,
                 Fees = Fees,
-                RealizedPnL = RealizedPnL
+                RealizedPnL = RealizedPnL,
+                Deposit = Deposit,
+                Withdrawal = Withdrawal
             };
             return res;
         }
@@ -108,6 +116,8 @@ namespace Core.PnL
             res += $"AverageCost: {AverageCost}";
             res += $"OnGoingPnL: {OnGoingPnL}";
             res += $"Fees: {Fees}";
+            res += $"Deposit: {Deposit}";
+            res += $"Withdrawal: {Withdrawal}";
             res += $"RealizedPnL: {RealizedPnL}";
             res += $"TotalPnL: {TotalPnL}";
             return res;
@@ -118,12 +128,14 @@ namespace Core.PnL
     {
         Currency Ccy;
         Currency CcyRef;
+        CurrencyPair CpRef;
         SortedDictionary<DateTime, PnLElement> PnLElements = new SortedDictionary<DateTime, PnLElement> { };
 
         public PnLItem(Currency ccy, Currency ccyRef)
         {
             Ccy = ccy;
             CcyRef = ccyRef;
+            CpRef = new CurrencyPair(Ccy, CcyRef);
         }
 
         public PnLElement GetPnLElement(DateTime date)
@@ -137,6 +149,21 @@ namespace Core.PnL
             KeyValuePair<DateTime,PnLElement>? pnl = PnLElements.LastOrDefault();
             if (pnl.HasValue) return pnl.Value.Value;
             else return new PnLElement();
+        }
+
+        public XChangeRate GetAdjustedFXRate(DateTime date, XChangeRate tx_xr, FXMarketHistory fxmh)
+        {
+            if (CpRef.IsFiatPair)
+                return fxmh.GetQuote(date, CpRef, isArtificial: true).Item2;
+            CryptoFiatPair cfp = tx_xr.CcyPair.GetCryptoFiatPair;
+            if (cfp.IsNone)
+                return fxmh.GetQuote(date, tx_xr.CcyPair, isArtificial: true).Item2;
+            CurrencyPair cp = new CurrencyPair(cfp.Fiat, CcyRef);
+            XChangeRate mkt_rate = fxmh.GetQuote(date, cp, isArtificial: true).Item2;
+            double alpha = 1;
+            if (Ccy != tx_xr.CcyPair.Ccy1)
+                alpha = -1;
+            return new XChangeRate(mkt_rate.Rate * Math.Pow(tx_xr.Rate, alpha), cfp.Crypto, cfp.Fiat);
         }
 
         public void AddTransactions(SortedList<DateTime, Transaction> txList, FXMarketHistory fxmh)
@@ -167,6 +194,7 @@ namespace Core.PnL
                                 double newWeightD = 1 / (1 + pnlD.Position / tx.Received.Amount);
                                 newPnLD.AverageCost = (1 - newWeightD) * pnlD.AverageCost + newWeightD * xrD.Rate;
                                 newPnLD.Position += tx.Received.Amount;
+                                newPnLD.Deposit += tx.Received.Amount * xrD.Rate;
                                 PnLElements.Add(lastDate, newPnLD);
                             }
                             else
@@ -182,12 +210,13 @@ namespace Core.PnL
                             PnLElement pnlT = GetLastPnLElement();
                             PnLElement newPnLT = (PnLElement)pnlT.Clone();
                             CurrencyPair cpT = new CurrencyPair(tx.Received.Ccy, CcyRef);
-                            XChangeRate xrT = fxmh.GetQuote(lastDate, cpT, isArtificial: true).Item2;
+                            //XChangeRate xrT = fxmh.GetQuote(lastDate, cpT, isArtificial: true).Item2;
+                            XChangeRate xrT = GetAdjustedFXRate(lastDate, tx.XRate, fxmh);
                             double amount = tx.Received.Amount;
                             if (tx.Fees.Ccy == Ccy)
                             {
                                 amount -= tx.Fees.Amount;
-                                newPnLT.Fees += tx.Fees.Amount;
+                                newPnLT.Fees += tx.Fees.Amount * xrT.Rate;
                             }
                             double newWeight = 1 / (1 + pnlT.Position / amount);
                             newPnLT.AverageCost = (1 - newWeight) * pnlT.AverageCost + newWeight * xrT.Rate;
@@ -224,7 +253,8 @@ namespace Core.PnL
                                 newPnLTrade.Position -= feesT.Amount;
                             }
                             CurrencyPair cpT2 = new CurrencyPair(tx.Paid.Ccy, CcyRef);
-                            XChangeRate xrT2 = fxmh.GetQuote(lastDate, cpT2, isArtificial: true).Item2;
+                            //XChangeRate xrT2 = fxmh.GetQuote(lastDate, cpT2, isArtificial: true).Item2;
+                            XChangeRate xrT2 = GetAdjustedFXRate(lastDate, tx.XRate, fxmh);
                             newPnLTrade.RealizedPnL += tx.Paid.Amount * (xrT2.Rate - newPnLTrade.AverageCost);
                             PnLElements.Add(lastDate, newPnLTrade);
                             break;
@@ -237,7 +267,16 @@ namespace Core.PnL
                             newPnLW.Fees += xW.ConvertPrice(feesW).Amount;
                             newPnLW.Position -= feesW.Amount;
                             if (tx.Paid.Ccy.IsFiat())
+                            {
                                 newPnLW.Position -= tx.Paid.Amount;
+                                newPnLW.Withdrawal += xW.ConvertPrice(tx.Paid).Amount;
+                                newPnLW.RealizedPnL += (tx.Paid.Amount + feesW.Amount) * (xW.Rate - newPnLW.AverageCost);
+                            }
+                            else
+                            {
+                                newPnLW.RealizedPnL += feesW.Amount * (xW.Rate - newPnLW.AverageCost);
+                            }
+                            
                             PnLElements.Add(lastDate, newPnLW);
                             break;
                         default:
@@ -260,14 +299,31 @@ namespace Core.PnL
             return res;
         }
 
-        internal Tuple<string,PnLElement> ToArray(XChangeRate xChangeRate)
+        internal Tuple<string,PnLElement> ToArray(XChangeRate xChangeRate, DateTime date)
         {
-            PnLElement pnl = PnLElements[PnLElements.Keys.Last()];
-            int round = Ccy.IsFiat() ? 2 : 8;
-            PnLElement res = (PnLElement)pnl.Clone();
-            res.xChangeRate = xChangeRate.Rate;
-            res.OnGoingPnL = pnl.Position * (xChangeRate.Rate - pnl.AverageCost);
-            return new Tuple<string, PnLElement>(Ccy.ToFullName(), res);
+            var dateList = PnLElements.Keys.Where(x => x <= date);
+            if (dateList.Count() == 0)
+            {
+                PnLElement res = new PnLElement(0,0,0,0,0);
+                res.Weight = 0;
+                res.xChangeRate = xChangeRate.Rate;
+                return new Tuple<string, PnLElement>(Ccy.ToFullName(), res);
+            }
+            else
+            {
+                DateTime dateToUse = dateList.Last();
+                PnLElement pnl = PnLElements[dateToUse];
+                int round = Ccy.IsFiat() ? 2 : 8;
+                PnLElement res = (PnLElement)pnl.Clone();
+                res.xChangeRate = xChangeRate.Rate;
+                res.OnGoingPnL = pnl.Position * (xChangeRate.Rate - pnl.AverageCost);
+                return new Tuple<string, PnLElement>(Ccy.ToFullName(), res);
+            }
+        }
+
+        internal Tuple<string, PnLElement> ToArray(XChangeRate xChangeRate)
+        {
+            return ToArray(xChangeRate, PnLElements.Keys.Last());
         }
     }
 }

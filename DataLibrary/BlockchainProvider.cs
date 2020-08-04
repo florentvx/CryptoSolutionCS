@@ -57,7 +57,7 @@ namespace DataLibrary
         private static BlockchainApiHelper BlockChainApi;
         private Dictionary<Currency, bool> UpdateMemory = new Dictionary<Currency, bool>();
 
-        private static readonly List<Currency> AvailableCryptoCurrencies = new List<Currency> { Currency.XBT, Currency.ETH, Currency.BCH };
+        private static readonly List<Currency> AvailableCryptoCurrencies = new List<Currency> { Currency.XBT };
         public bool IsAcceptedCryptoCurrency(Currency ccy){ return AvailableCryptoCurrencies.Contains(ccy); }
 
         public Dictionary<Currency, SortedDictionary<DateTime, Tuple<string, BitcoinValue>>> FeesMemory = new Dictionary<Currency, SortedDictionary<DateTime, Tuple<string, BitcoinValue>>>();
@@ -134,7 +134,7 @@ namespace DataLibrary
                 foreach (ApiTx item in tx_add)
                 {
                     if (item.GetAmountFromAddress(address).GetBtc() == (decimal)tx.Received.Amount)
-                        if (StaticLibrary.DateTimeDistTest(tx.Date, item.Time, 2))
+                        if (StaticLibrary.DateTimeDistTest(tx.Date, item.Time, 4))
                         {
                             res = item.GetFees().GetBtc();
                             tx_date = item.Time;

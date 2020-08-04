@@ -7,21 +7,31 @@ using Core.Date;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Logging;
 using System.Text;
 using System.Threading.Tasks;
 
 namespace Core.Allocations
 {
-    public class AllocationHistory: ITimeSeriesProvider
+    public class AllocationHistory: ITimeSeriesProvider, ILogger
     {
-        public Currency CcyRef;
+        
         public SortedDictionary<DateTime, Allocation> History = new SortedDictionary<DateTime, Allocation>();
-        public FXMarketHistory FXMH;
-        public List<Currency> Currencies { get { return FXMH.CcyList; } }
-        public List<CurrencyPair> CurrencyPairs
+        private bool TxLoaded = false;
+        public Currency CcyRefLoaded = Currency.None;
+        private Frequency FreqLoaded = Frequency.None;
+
+        // Logging
+        private event LoggingEventHandler _log;
+        public LoggingEventHandler LoggingEventHandler { get { return _log; } }
+        public void AddLoggingLink(LoggingEventHandler function) { _log += function; }
+
+        public AllocationHistory(IView view = null)
         {
-            get { return Currencies.Select(x => new CurrencyPair(x, CcyRef)).ToList(); }
+            if (view != null)
+                AddLoggingLink(view.PublishLogMessage);
         }
+
         public DateTime StartDate { get { return History.Keys.First(); } }
 
         public Allocation GetAllocation(DateTime date)
@@ -29,12 +39,9 @@ namespace Core.Allocations
             return History[date];
         }
 
-        public DateTime LastAllocationDate { get { return History.Keys.Last(); } }
+        public DateTime LastAllocationDate { get { return History.Last().Key; } }
 
-        public DateTime LastAllocationDate_NoLive
-        {
-            get { return History.Keys.Where(x => x.Year < 9999).Last(); }
-        }
+        //public DateTime LastAllocationDate_NoLive { get { return FXMH.LastRealDate_NoLive; } }
 
         public Allocation GetLastAllocation()
         {
@@ -43,27 +50,24 @@ namespace Core.Allocations
 
         private Allocation GetClosestAllocation(DateTime date, bool isDateExcluded = false)
         {
-            if (History.Count == 0) { return new Allocation(CcyRef); }
+            if (History.Count == 0) { return new Allocation(CcyRefLoaded); }
             if (isDateExcluded) return History.Where(x => x.Key < date).Last().Value;
             return History.Where(x => x.Key <= date).Last().Value;
         }
 
-        private void AddAllocationToHistory(Allocation alloc, DateTime date)
+        private void AddAllocationToHistory(Allocation alloc, FXMarket fx)
         {
             Allocation newAlloc = (Allocation)alloc.Clone();
             newAlloc.CancelFee();
-            FXMarket fx = FXMH.GetArtificialFXMarket(date, FXMH.CpList);
             newAlloc.Update(fx);
-            if (History.ContainsKey(date)) { History[date] = newAlloc; }
-            else { History.Add(date, newAlloc); }
+            if (History.ContainsKey(fx.Date)) { History[fx.Date] = newAlloc; }
+            else { History.Add(fx.Date, newAlloc); }
         }
 
-        private void AddTransaction(Transaction tx, DateTime nextTxDate)
+        private void AddTransaction(Transaction tx, DateTime nextTxDate, FXMarketHistory fxmh)
         {
             Allocation alloc = GetClosestAllocation(tx.Date, true);
-            // add transaction
-            //FXMH.AddQuote(tx.Date, tx.XRate);
-            FXMarket FX = FXMH.GetArtificialFXMarket(tx.Date, CurrencyPairs);
+            FXMarket FX = fxmh.GetArtificialFXMarket(tx.Date);
             alloc = alloc.AddTransaction(tx, FX);
             alloc.CalculateTotal(FX);
             if (History.ContainsKey(tx.Date))
@@ -71,52 +75,59 @@ namespace Core.Allocations
             History.Add(tx.Date, alloc);
 
             // update the same allocation for the following days
-            List<DateTime> datesList = FXMH.ArtificialFXMarkets.Keys.Where(x => x > tx.Date && x < nextTxDate)
-                                                            .Select(x => x).ToList();
+            List<DateTime> datesList = fxmh.ArtificialFXMarkets
+                                            .Keys
+                                            .Where(x => x > tx.Date && x < nextTxDate)
+                                            .Select(x => x).ToList();
+
             foreach (DateTime date in datesList)
             {
-                AddAllocationToHistory(alloc, date);
+                AddAllocationToHistory(alloc, fxmh.GetArtificialFXMarket(tx.Date));
             }
         }
 
-        private void AddTransaction(Transaction tx)
+        private void AddTransaction(Transaction tx, FXMarketHistory fxmh)
         {
-            AddTransaction(tx, new DateTime(9999, 1, 1));
+            AddTransaction(tx, new DateTime(9999, 1, 1), fxmh);
         }
 
-        public void UpdateTransactions(SortedList<DateTime, Transaction> stxList)
+        public void AddTransactions(Currency FiatRef, SortedList<DateTime, Transaction> stxList, FXMarketHistory fxmh)
         {
-            List<Transaction> txList = stxList.Select(x => x.Value).ToList();
-            if (txList.Count > 0)
+            if (!TxLoaded || FiatRef != CcyRefLoaded)
             {
-                //txList.OrderBy(x => x.Date).ToList();
-
-                for (int i = 0; i < txList.Count - 1; i++)
+                TxLoaded = true;
+                CcyRefLoaded = FiatRef;
+                List<Transaction> txList = stxList.Select(x => x.Value).ToList();
+                if (txList.Count > 0)
                 {
-                    AddTransaction(txList[i], txList[i + 1].Date);
+                    for (int i = 0; i < txList.Count - 1; i++)
+                    {
+                        AddTransaction(txList[i], txList[i + 1].Date, fxmh);
+                    }
+                    AddTransaction(txList.Last(), fxmh);
                 }
-                AddTransaction(txList.Last());
             }
         }
 
-        public AllocationHistory(SortedList<DateTime, Transaction> txList, FXMarketHistory fxMH, Currency ccyRef)
+        public void UpdateHistory(Currency ccyChek, FXMarketHistory fxmh)
         {
-            FXMH = fxMH;
-            CcyRef = ccyRef;
-            UpdateTransactions(txList);
-        }
-
-        public void UpdateHistory(Currency fiat)
-        {
-            CcyRef = fiat;
-            foreach (DateTime date in FXMH.GetAllDates())
+            if (!TxLoaded)
+                throw new Exception("Load Transactions First!");
+            if (ccyChek != CcyRefLoaded)
+                throw new Exception("Load Transactions First with correct Fiat!");
+            if (fxmh.Freq != FreqLoaded)
             {
-                if (date >= StartDate)
+                FreqLoaded = fxmh.Freq;
+                this.PublishInfo($"Recalculating Chart Data {CcyRefLoaded} - {FreqLoaded} ...");
+                foreach (DateTime date in fxmh.GetAllDates())
                 {
-                    FXMarket fx = FXMH.GetArtificialFXMarket(date);
-                    if (!History.Keys.Contains(date))
-                        AddAllocationToHistory(GetClosestAllocation(date), date);
-                    History[date].CalculateTotal(fx, fiat);
+                    if (date >= StartDate)
+                    {
+                        FXMarket fx = fxmh.GetArtificialFXMarket(date);
+                        if (!History.Keys.Contains(date))
+                            AddAllocationToHistory(GetClosestAllocation(date), fx);
+                        History[date].CalculateTotal(fx, CcyRefLoaded);
+                    }
                 }
             }
         }

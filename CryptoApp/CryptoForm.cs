@@ -69,14 +69,16 @@ namespace CryptoApp
             dataGridViewAllocation.Columns[7].Name = "RPnL";
 
             /// PnL Explain Tab
-            dataGridViewPnL.ColumnCount = 7;
+            dataGridViewPnL.ColumnCount = 9;
             dataGridViewPnL.Columns[0].Name = "Ccy";
             dataGridViewPnL.Columns[1].Name = "Pos";
             dataGridViewPnL.Columns[2].Name = "Rate";
             dataGridViewPnL.Columns[3].Name = "Weight";
             dataGridViewPnL.Columns[4].Name = "Δ Pos";
             dataGridViewPnL.Columns[5].Name = "Δ Rate";
-            dataGridViewPnL.Columns[6].Name = "Total Δ";
+            dataGridViewPnL.Columns[6].Name = "Δ Fees";
+            dataGridViewPnL.Columns[7].Name = "Deposit Net";
+            dataGridViewPnL.Columns[8].Name = "Total Δ";
 
             /// Tx Explorer
             dataGridViewTxExplorer.ColumnCount = 9;
@@ -112,7 +114,7 @@ namespace CryptoApp
             }
             else
             {
-                var data = TSP.GetLastAllocationToTable();
+                var data = TSP.GetLastAllocationToTable(LiveTxHistory: true);
                 double position = data["Total"].Position;
                 dataGridViewAllocation.Rows.Clear();
                 foreach (var key in data.Keys)
@@ -130,7 +132,7 @@ namespace CryptoApp
                         Math.Round(item.Fees, 2), 
                         Math.Round(item.RealizedPnL, 2));
                 }
-                TSP.GetOnGoingPnLs(position);
+                TSP.GetOnGoingPnLs();
             }
         }
 
@@ -143,19 +145,23 @@ namespace CryptoApp
             }
             else
             {
-                DateTime dateNow = TSP.AH.LastAllocationDate_NoLive;
+                DateTime dateNow = TSP.FXMH.LastRealDate_NoLive;
                 DateTime dateBefore = dateSelectorControl1.Date.GetRoundDate(TenorUnit.Day);
                 var data = TSP.GetAllocationToTable(dateBefore);
                 var data2 = TSP.GetLastAllocationToTable();
                 dataGridViewPnL.Rows.Clear();
-                double AbsoluteValueChange = data2["Total"].Position - data["Total"].Position;
+                double value1 = data["Total"].Position - (data["Total"].Deposit - data["Total"].Withdrawal);
+                double value2 = data2["Total"].Position - (data2["Total"].Deposit - data2["Total"].Withdrawal);
+                double AbsoluteValueChange = value2 - value1;
                 double RelativeChange = AbsoluteValueChange / data["Total"].Position;
                 foreach (var key in data.Keys)
                 {
                     PnLElement item = data[key];
                     PnLElement item2 = data2[key];
                     Currency ccy = CurrencyPorperties.FromNameToCurrency(key);
-                    if (ccy.IsNone()) ccy = Fiat;
+                    if (ccy.IsNone())
+                        ccy = Fiat;
+                    double depositValue = Math.Round((item2.Deposit - item.Deposit) - (item2.Withdrawal - item.Withdrawal), 2);
                     if (key != "Total")
                         dataGridViewPnL.Rows.
                             Add(key,
@@ -164,6 +170,8 @@ namespace CryptoApp
                             PercentageToString(item.Weight),
                             PercentageToString(item2.Position / item.Position - 1),
                             PercentageToString(item2.xChangeRate / item.xChangeRate - 1),
+                            Math.Round(item2.Fees - item.Fees,2),
+                            depositValue,
                             item.Value != 0 ? PercentageToString(item2.Value / item.Value - 1) : "");
                     else
                         dataGridViewPnL.Rows.
@@ -173,6 +181,8 @@ namespace CryptoApp
                             PercentageToString(item.Weight),
                             0,
                             Math.Round(AbsoluteValueChange,2),
+                            Math.Round(item2.Fees - item.Fees, 2),
+                            depositValue,
                             PercentageToString(RelativeChange));
                 }
             }

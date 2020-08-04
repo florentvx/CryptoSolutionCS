@@ -24,6 +24,7 @@ namespace DataLibrary
         public FXDataProvider FXData = null;
         public BlockchainProvider BlockchainData = null;
         public List<Currency> LedgerCurrencies = new List<Currency>();
+        private SortedList<DateTime, Transaction> TransactionList = null;
 
         // Logging
         private event LoggingEventHandler _log;
@@ -67,10 +68,14 @@ namespace DataLibrary
 
         public SortedList<DateTime, Transaction> GetTransactionList(bool useKraken = false)
         {
-            KrakenData.LoadLedger(useKraken);
-            SortedList<DateTime, Transaction> tx_list = KrakenData.GetTransactionList();
-            LoadBlockchainFees(tx_list);
-            return tx_list;
+            if (TransactionList == null)
+            {
+                KrakenData.LoadLedger(useKraken);
+                SortedList<DateTime, Transaction> tx_list = KrakenData.GetTransactionList();
+                LoadBlockchainFees(tx_list);
+                TransactionList = tx_list;
+            }
+            return TransactionList;
         }
 
         public SortedList<DateTime, Transaction> GetTransactionList(DateTime startDate, bool isBefore = false, bool useKraken = false)

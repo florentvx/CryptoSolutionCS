@@ -22,19 +22,19 @@ namespace UnitTestProject.TestsCore
             return new Allocation(Currency.USD, data);
         }
 
-        public static SortedList<DateTime, Transaction> GetTransactionList()
+        public static SortedList<DateTime, Transaction> GetTransactionList(bool addCryptoWD = true)
         {
             SortedList<DateTime, Transaction> txList = new SortedList<DateTime, Transaction> { };
             Transaction tx0 = new Transaction("ID0",
                                         TransactionType.Deposit,
                                         MarketTestTools.date1.AddDays(-1),
                                         new Price(0,Currency.None),
-                                        new Price(1110, Currency.USD));
+                                        new Price(1115, Currency.USD));
             txList.Add(tx0.Date, tx0);
             Transaction tx1 = new Transaction("ID1", 
                                         TransactionType.Trade,
                                         MarketTestTools.date1,
-                                        new Price(1000, Currency.USD),
+                                        new Price(1005, Currency.USD),
                                         new Price(1, Currency.XBT),
                                         new Price(10, Currency.USD));
             txList.Add(tx1.Date, tx1);
@@ -42,7 +42,7 @@ namespace UnitTestProject.TestsCore
                                         TransactionType.Trade,
                                         MarketTestTools.date2,
                                         new Price(0.5, Currency.XBT),
-                                        new Price(525, Currency.USD),
+                                        new Price(530, Currency.USD),
                                         new Price(5, Currency.USD));
             txList.Add(tx2.Date, tx2);
             Transaction tx3 = new Transaction("ID3",
@@ -52,14 +52,24 @@ namespace UnitTestProject.TestsCore
                                         new Price(0, Currency.None),
                                         new Price(1, Currency.USD));
             txList.Add(tx3.Date, tx3);
+            if (addCryptoWD)
+            {
+                Transaction tx4 = new Transaction("ID4",
+                                        TransactionType.WithDrawal,
+                                        MarketTestTools.date4,
+                                        new Price(0.25, Currency.XBT),
+                                        new Price(0, Currency.None),
+                                        new Price(0.01, Currency.XBT));
+                txList.Add(tx4.Date, tx4);
+            }
             return txList;
         }
 
-        public static AllocationHistory GetAllocationHistory()
+        public static AllocationHistory GetAllocationHistory(FXMarketHistory fxmh, bool addCryptoWD = false, Currency Fiat = Currency.USD)
         {
-            return new AllocationHistory(GetTransactionList(),
-                                         MarketTestTools.CreateMktHistory(),
-                                         Currency.USD);
+            AllocationHistory AH = new AllocationHistory();
+            AH.AddTransactions(Fiat, GetTransactionList(addCryptoWD), fxmh);
+            return AH;                                         
         }
     }
 
@@ -207,7 +217,8 @@ namespace UnitTestProject.TestsCore
         [TestMethod]
         public void AllocationHistory_Init()
         {
-            AllocationHistory allocH = AllocationsTools.GetAllocationHistory();
+            FXMarketHistory fxmh = MarketTestTools.CreateMktHistory();
+            AllocationHistory allocH = AllocationsTools.GetAllocationHistory(fxmh);
             Allocation alloc = allocH.GetAllocation(MarketTestTools.date1);
             Allocation allocTest = AllocationsTools.GetAllocation();
             allocTest.Update(MarketTestTools.CreateMarket());
@@ -217,13 +228,14 @@ namespace UnitTestProject.TestsCore
         [TestMethod]
         public void AllocationHistory_Update()
         {
-            AllocationHistory allocH = AllocationsTools.GetAllocationHistory();
+            FXMarketHistory fxmh = MarketTestTools.CreateMktHistory();
+            AllocationHistory allocH = AllocationsTools.GetAllocationHistory(fxmh, Fiat: Currency.EUR);
             CurrencyPair testCP = new CurrencyPair(Currency.EUR, Currency.USD);
-            allocH.FXMH.ConstructQuotes(testCP);
-            allocH.UpdateHistory(Currency.EUR);
+            //fxmh.ConstructQuotes(testCP);
+            allocH.UpdateHistory(Currency.EUR, fxmh);
             Price total = allocH.GetLastAllocation().Total;
             Assert.IsTrue(total
-                          .Equals(new Price(928.15, Currency.EUR), precision: 2));
+                          .Equals(new Price(932.687, Currency.EUR), precision: 2));
         }
         
         #endregion

@@ -52,5 +52,10 @@ namespace Core.Allocations
         {
             return Freq;
         }
+
+        ITimeSeriesKey ITimeSeriesKey.GetNextFrequency()
+        {
+            return new AllocationSrategy(Name, CcyRef, Freq.GetNextFrequency());
+        }
     }
 }

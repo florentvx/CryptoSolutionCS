@@ -12,7 +12,7 @@ namespace Core.PnL
     public class AggregatedPnL
     {
         Currency CcyRef;
-        //List<Currency> Currencies;
+        Dictionary<Currency, SortedList<DateTime, Transaction>> TxDict = new Dictionary<Currency, SortedList<DateTime, Transaction>> { };
         Dictionary<Currency, PnLItem> PnLs = new Dictionary<Currency, PnLItem> { };
 
         public AggregatedPnL(Currency ccyRef)
@@ -20,32 +20,50 @@ namespace Core.PnL
             CcyRef = ccyRef;
         }
 
-        private static void AddTransactionToDictionary(Dictionary<Currency, SortedList<DateTime, Transaction>> dictionary, 
-            Transaction tx, Currency ccy)
+        private void AddTransactionToDictionary(Transaction tx, Currency ccy)
         {
-            if (!dictionary.Keys.Contains(ccy))
-                dictionary[ccy] = new SortedList<DateTime, Transaction>();
-            dictionary[ccy].Add(tx.Date, tx);
+            if (!TxDict.Keys.Contains(ccy))
+                TxDict[ccy] = new SortedList<DateTime, Transaction>();
+            TxDict[ccy].Add(tx.Date, tx);
         }
 
-        public void AddTransactions(SortedList<DateTime, Transaction> txList, FXMarketHistory fxmh)
+        public void AddTransactions(SortedList<DateTime, Transaction> txList)
         {
             Dictionary<Currency, SortedList<DateTime, Transaction>> dictionary = new Dictionary<Currency, SortedList<DateTime, Transaction>> { };
             foreach (var item in txList)
             {
                 Transaction tx = item.Value;
                 Currency recCcy = tx.Received.Ccy;
-                if (!recCcy.IsNone()) AddTransactionToDictionary(dictionary, tx, recCcy);
+                if (!recCcy.IsNone()) AddTransactionToDictionary(tx, recCcy);
                 Currency payCcy = tx.Paid.Ccy;
-                if (!payCcy.IsNone()) AddTransactionToDictionary(dictionary, tx, payCcy);
+                if (!payCcy.IsNone()) AddTransactionToDictionary(tx, payCcy);
                 Currency feeCcy = tx.Fees.Ccy;
                 if (!feeCcy.IsNone() && feeCcy != recCcy && feeCcy != payCcy)
-                    AddTransactionToDictionary(dictionary, tx, feeCcy);
+                    AddTransactionToDictionary(tx, feeCcy);
             }
-            foreach (Currency ccy in dictionary.Keys)
+        }
+
+        private void CalculatePnLs(FXMarketHistory fxmh)
+        {
+            foreach (Currency ccy in TxDict.Keys)
             {
                 PnLs[ccy] = new PnLItem(ccy, CcyRef);
-                PnLs[ccy].AddTransactions(dictionary[ccy], fxmh);
+                PnLs[ccy].AddTransactions(TxDict[ccy], fxmh);
+            }
+        }
+
+        public void AddTransactions(SortedList<DateTime, Transaction> txList, FXMarketHistory fxmh)
+        {
+            AddTransactions(txList);
+            CalculatePnLs(fxmh);
+        }
+
+        public void ChangeCcyRef(Currency ccy, FXMarketHistory fxmh)
+        {
+            if (ccy != CcyRef)
+            {
+                CcyRef = ccy;
+                CalculatePnLs(fxmh);
             }
         }
 
@@ -58,12 +76,14 @@ namespace Core.PnL
             {
                 CurrencyPair cpCcy = new CurrencyPair(ccy, CcyRef);
                 XChangeRate xrCcy = fxmh.GetQuote(date, cpCcy, isArtificial: true).Item2;
-                Tuple<string, PnLElement> item = PnLs[ccy].ToArray(xrCcy);
+                Tuple<string, PnLElement> item = PnLs[ccy].ToArray(xrCcy, date);
                 res.Add(item.Item1, item.Item2);
                 total.Position += item.Item2.Position * item.Item2.xChangeRate.Value;
                 total.OnGoingPnL += item.Item2.OnGoingPnL;
                 total.Fees += item.Item2.Fees;
                 total.RealizedPnL += item.Item2.RealizedPnL;
+                total.Deposit += item.Item2.Deposit;
+                total.Withdrawal += item.Item2.Withdrawal;
             }
             total.Weight = 1.0;
             res.Add("Total", total);

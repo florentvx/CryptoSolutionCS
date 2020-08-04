@@ -129,7 +129,7 @@ namespace DataLibrary
             foreach (DateTime date in DateList)
             {
                 double close = Data.GetQuote(date, cpts.CurPair).Item2.Rate;
-                Int32 dateUnix = StaticLibrary.DateTimeToUnixTimeStamp(date);
+                Int64 dateUnix = StaticLibrary.DateTimeToUnixTimeStamp(date);
                 //if (StaticLibrary.UnixTimeStampToDateTime(dateUnix + FXMinimunFrequency.GetFrequency(true)) < DateTime.UtcNow)
                 if (StaticLibrary.UnixTimeStampToDateTime(dateUnix) < DateTime.UtcNow)
                     sb.AppendLine($"{dateUnix},{close}");

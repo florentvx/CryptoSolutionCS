@@ -32,15 +32,15 @@ namespace Core.Statics
             return dtDateTime;
         }
 
-        public static Int32 DateTimeToUnixTimeStamp(DateTime date)
+        public static Int64 DateTimeToUnixTimeStamp(DateTime date)
         {
-            return (Int32)(date.Subtract(new DateTime(1970, 1, 1))).TotalSeconds;
+            return (Int64)(date.Subtract(new DateTime(1970, 1, 1))).TotalSeconds;
         }
 
         public static bool DateTimeDistTest(DateTime d1, DateTime d2, double nbHours)
         {
-            Int32 d1_int = DateTimeToUnixTimeStamp(d1);
-            Int32 d2_int = DateTimeToUnixTimeStamp(d2);
+            Int64 d1_int = DateTimeToUnixTimeStamp(d1);
+            Int64 d2_int = DateTimeToUnixTimeStamp(d2);
             return Math.Abs(d1_int - d2_int) / 3600.0 < nbHours;
         }
         public static List<Type1> GetReversedKeys<Type1, Type2>(this IDictionary<Type1, Type2> x)

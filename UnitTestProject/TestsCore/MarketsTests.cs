@@ -31,6 +31,7 @@ namespace UnitTestProject.TestsCore
         public static DateTime date2 = new DateTime(2010, 1, 4);
         public static DateTime dateArt = new DateTime(2010, 1, 2);
         public static DateTime date3 = new DateTime(2010, 1, 5);
+        public static DateTime date4 = new DateTime(2010, 1, 6);
 
         public static FXMarket CreateMarket()
         {
@@ -43,22 +44,28 @@ namespace UnitTestProject.TestsCore
             return fxMkt;
         }
 
-        public static FXMarket CreateMarket2()
+        public static FXMarket CreateMarket2(DateTime? date = null)
         {
+            if (!date.HasValue)
+                date = date2;
             List<XChangeRate> xrList = new List<XChangeRate> { };
             xrList.Add(new XChangeRate(1050, Currency.XBT, Currency.USD));
             xrList.Add(new XChangeRate(1 / (110.0), Currency.USD, Currency.ETH));
             xrList.Add(new XChangeRate(960, Currency.XBT, Currency.EUR));
             xrList.Add(new XChangeRate(0.0101, Currency.EUR, Currency.ETH));
-            FXMarket fxMkt = new FXMarket(date2, xrList);
+            FXMarket fxMkt = new FXMarket(date.Value, xrList);
             return fxMkt;
         }
 
-        public static FXMarketHistory CreateMktHistory()
+        public static FXMarketHistory CreateMktHistory(bool addDate3 = false, bool addDate4 = false)
         {
             FXMarketHistory fxmh = new FXMarketHistory(FrequencyRef);
             fxmh.AddFXMarket(CreateMarket());
             fxmh.AddFXMarket(CreateMarket2());
+            if (addDate3)
+                fxmh.AddFXMarket(CreateMarket2(MarketTestTools.date3));
+            if (addDate4)
+                fxmh.AddFXMarket(CreateMarket2(MarketTestTools.date4));
             return fxmh;
         }
 

@@ -20,11 +20,11 @@ namespace TimeSeriesAnalytics
         public string BasePath = Environment.GetFolderPath(Environment.SpecialFolder.Personal);
         public Currency Fiat;
         public DataProvider DataProvider;
+        private DateTime StartDate;
         public AllocationHistory AH;
         public List<ITimeSeriesKey> TimeSeriesKeyList = new List<ITimeSeriesKey>();
-
-        //public AllocationSummary AS;
         public FXMarketHistory FXMH;
+        public AggregatedPnL APnL;
 
         // Logging
         private event LoggingEventHandler _log;
@@ -36,7 +36,6 @@ namespace TimeSeriesAnalytics
             SortedList<DateTime, Transaction> txList = DataProvider.GetTransactionList(useKraken: useKraken);
             DateTime startDate = txList.First().Key;
             FXMH = DataProvider.GetFXMarketHistory(Fiat, DataProvider.GetCurrencyPairs(txList), startDate, freq);
-            AH = new AllocationHistory(txList, FXMH, Fiat);
         }
 
         public TimeSeriesManager(   Currency fiat, Frequency freq = Frequency.Hour4, 
@@ -48,19 +47,28 @@ namespace TimeSeriesAnalytics
             Fiat = fiat;
             if (path != null) BasePath = path;
             DataProvider = new DataProvider(BasePath, view, useInternet: useInternet);
-            SetUpAllHistory(freq, useKraken);
+            SortedList<DateTime, Transaction> txList = DataProvider.GetTransactionList(useKraken: useKraken);
+            StartDate = txList.First().Key;
+            FXMH = DataProvider.GetFXMarketHistory(Fiat, DataProvider.GetCurrencyPairs(txList), StartDate, freq);
+            AH = new AllocationHistory(view);
+            APnL = new AggregatedPnL(fiat);
+            APnL.AddTransactions(txList, FXMH);
         }
 
         public void Update(Currency fiat, Frequency freq, List<ITimeSeriesKey> tskl, bool useLowerFrequencies)
         {
             TimeSeriesKeyList = tskl;
             DataProvider.LoadPrices(TimeSeriesKeyList, useLowerFrequencies: useLowerFrequencies);
-            this.PublishInfo($"Loading Data {fiat} - {freq} ...");
             Fiat = fiat;
             if (FXMH.Freq != freq)
                 SetUpAllHistory(freq);
-            DataProvider.UpdateFXMarketHistory(FXMH, Fiat, AH.StartDate, freq);
-            AH.UpdateHistory(Fiat);
+            DataProvider.UpdateFXMarketHistory(FXMH, Fiat, StartDate, freq);
+            APnL.ChangeCcyRef(fiat, FXMH);
+            if (tskl.Select(x => x.GetKeyType() == TimeSeriesKeyType.AllocationHistory).FirstOrDefault())
+            {
+                AH.AddTransactions(fiat, DataProvider.GetTransactionList(), FXMH);
+                AH.UpdateHistory(fiat, FXMH);
+            }
         }
 
         public void UpdateLedger(bool useKraken)
@@ -68,29 +76,24 @@ namespace TimeSeriesAnalytics
             DateTime lastDate = DataProvider.GetLastTransactionDate();
             SortedList<DateTime, Transaction> txList = DataProvider.GetTransactionList(startDate: lastDate, useKraken: useKraken);
             this.PublishWarning($"Number of New Transactions: {txList.Count}");
-            if (txList.Count > 0) this.PublishWarning("Click on Load to update the data !");
-            DataProvider.UpdateFXMarketHistory(FXMH, Fiat, AH.StartDate);
-            //AS.UpdateTransactions(txList);
-            AH.UpdateTransactions(txList);
+            if (txList.Count > 0)
+            {
+                this.PublishWarning("Click on Load to update the data !");
+                DataProvider.UpdateFXMarketHistory(FXMH, Fiat, txList.First().Key); // not sure abou start date
+            }
         }
-
-        //public Allocation PriceLastAllocation()
-        //{
-        //    FXMarket fxMkt = FXMH.GetLastFXMarket();
-        //    return AS.PriceAllocation(fxMkt);
-        //}
 
         public Dictionary<string,PnLElement> GetAllocationToTable(DateTime date)
         {
-            AggregatedPnL AAPnL = new AggregatedPnL(AH.CcyRef);
-            SortedList<DateTime, Transaction> txLFiltered = DataProvider.GetTransactionList(startDate: date, isBefore: true);
-            AAPnL.AddTransactions(txLFiltered, FXMH);
-            return AAPnL.ToTable(FXMH, date);
+            return APnL.ToTable(FXMH, date);
         }
 
-        public Dictionary<string,PnLElement> GetLastAllocationToTable()
+        public Dictionary<string,PnLElement> GetLastAllocationToTable(bool LiveTxHistory = false)
         {
-            return GetAllocationToTable(AH.LastAllocationDate);
+            if (LiveTxHistory)
+                return GetAllocationToTable(new DateTime(9999, 1, 1));
+            else
+                return GetAllocationToTable(FXMH.LastRealDate);
         }
 
         public void FullUpdate(Frequency freq)
@@ -154,25 +157,36 @@ namespace TimeSeriesAnalytics
             return res;
         }
 
-        public void GetOnGoingPnLs(double position)
+        public void GetOnGoingPnLs(bool extra = false)
         {
-            DateTime dateBefore = AH.LastAllocationDate_NoLive;
+            DateTime dateBefore = FXMH.LastRealDate_NoLive;
+            var dataRef = GetAllocationToTable(dateBefore);
+            double refPnL = dataRef["Total"].TotalPnLWithFees;
             this.PublishDebug($"PnL Report - {dateBefore}");
             DateTime dateYear = dateBefore.GetRoundDate(TenorUnit.Year);
             var dataYear = GetAllocationToTable(dateYear);
-            this.PublishInfo($"{dateYear} - Ongoing Year PnL: {Math.Round(position - dataYear["Total"].Position, 2)} {Fiat.ToFullName()}");
+            this.PublishInfo($"{dateYear} - Ongoing Year PnL: {Math.Round(refPnL - dataYear["Total"].TotalPnLWithFees, 2)} {Fiat.ToFullName()}");
             DateTime dateMonth = dateBefore.GetRoundDate(TenorUnit.Month);
             var dataMonth = GetAllocationToTable(dateMonth);
-            this.PublishInfo($"{dateMonth} - Ongoing Month PnL: {Math.Round(position - dataMonth["Total"].Position, 2)} {Fiat.ToFullName()}");
+            this.PublishInfo($"{dateMonth} - Ongoing Month PnL: {Math.Round(refPnL - dataMonth["Total"].TotalPnLWithFees, 2)} {Fiat.ToFullName()}");
             DateTime dateWeek = dateBefore.GetRoundDate(TenorUnit.Week);
             var dataWeek = GetAllocationToTable(dateWeek);
-            this.PublishInfo($"{dateWeek} - Ongoing Week PnL: {Math.Round(position - dataWeek["Total"].Position, 2)} {Fiat.ToFullName()}");
+            this.PublishInfo($"{dateWeek} - Ongoing Week PnL: {Math.Round(refPnL - dataWeek["Total"].TotalPnLWithFees, 2)} {Fiat.ToFullName()}");
             DateTime dateDay = dateBefore.GetRoundDate(TenorUnit.Day);
             var dataDay = GetAllocationToTable(dateDay);
-            this.PublishInfo($"{dateDay} - Ongoing Day PnL: {Math.Round(position - dataDay["Total"].Position, 2)} {Fiat.ToFullName()}");
+            this.PublishInfo($"{dateDay} - Ongoing Day PnL: {Math.Round(refPnL - dataDay["Total"].TotalPnLWithFees, 2)} {Fiat.ToFullName()}");
             DateTime date30D = dateBefore.AddTenor(new Tenor("-30D"), isRounded: true);
             var data30D = GetAllocationToTable(date30D);
-            this.PublishInfo($"{date30D} - 30 Days PnL: {Math.Round(position - data30D["Total"].Position, 2)} {Fiat.ToFullName()}");
+            this.PublishInfo($"{date30D} - 30 Days PnL: {Math.Round(refPnL - data30D["Total"].TotalPnLWithFees, 2)} {Fiat.ToFullName()}");
+            if (extra)
+            {
+                for (int i = 1; i < 30; i++)
+                {
+                    DateTime date_i = dateBefore.AddTenor(new Tenor($"-{i}W"), isRounded: true);
+                    var data_i = GetAllocationToTable(date_i);
+                    this.PublishInfo($"{date_i} - {i} Weeks PnL: {Math.Round(refPnL - data_i["Total"].TotalPnLWithFees, 2)} {Fiat.ToFullName()}");
+                }
+            }
         }
     }
 }
