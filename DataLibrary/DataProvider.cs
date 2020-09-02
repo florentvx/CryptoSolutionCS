@@ -66,9 +66,9 @@ namespace DataLibrary
             BlockchainData.WriteFeesMemory();
         }
 
-        public SortedList<DateTime, Transaction> GetTransactionList(bool useKraken = false)
+        public SortedList<DateTime, Transaction> GetTransactionList(bool useKraken = false, bool forceReload = false)
         {
-            if (TransactionList == null)
+            if (TransactionList == null || forceReload)
             {
                 KrakenData.LoadLedger(useKraken);
                 SortedList<DateTime, Transaction> tx_list = KrakenData.GetTransactionList();

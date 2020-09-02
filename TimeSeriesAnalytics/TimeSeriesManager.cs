@@ -25,6 +25,7 @@ namespace TimeSeriesAnalytics
         public List<ITimeSeriesKey> TimeSeriesKeyList = new List<ITimeSeriesKey>();
         public FXMarketHistory FXMH;
         public AggregatedPnL APnL;
+        public bool ChangeLedger = false;
 
         // Logging
         private event LoggingEventHandler _log;
@@ -33,7 +34,8 @@ namespace TimeSeriesAnalytics
 
         public void SetUpAllHistory(Frequency freq, bool useKraken = false)
         {
-            SortedList<DateTime, Transaction> txList = DataProvider.GetTransactionList(useKraken: useKraken);
+            SortedList<DateTime, Transaction> txList = DataProvider.GetTransactionList(useKraken: useKraken, forceReload: ChangeLedger);
+            ChangeLedger = false;
             DateTime startDate = txList.First().Key;
             FXMH = DataProvider.GetFXMarketHistory(Fiat, DataProvider.GetCurrencyPairs(txList), startDate, freq);
         }
@@ -60,7 +62,7 @@ namespace TimeSeriesAnalytics
             TimeSeriesKeyList = tskl;
             DataProvider.LoadPrices(TimeSeriesKeyList, useLowerFrequencies: useLowerFrequencies);
             Fiat = fiat;
-            if (FXMH.Freq != freq)
+            if (FXMH.Freq != freq || ChangeLedger)
                 SetUpAllHistory(freq);
             DataProvider.UpdateFXMarketHistory(FXMH, Fiat, StartDate, freq);
             APnL.ChangeCcyRef(fiat, FXMH);
@@ -79,7 +81,8 @@ namespace TimeSeriesAnalytics
             if (txList.Count > 0)
             {
                 this.PublishWarning("Click on Load to update the data !");
-                DataProvider.UpdateFXMarketHistory(FXMH, Fiat, txList.First().Key); // not sure abou start date
+                //DataProvider.UpdateFXMarketHistory(FXMH, Fiat, txList.First().Key); // not sure abou start date
+                ChangeLedger = true;
             }
         }
 
