@@ -278,7 +278,7 @@ namespace DataLibrary
             {
                 LoadOHLC(itsk);
                 List<OHLC> res = OHLCData[itsk.GetTimeSeriesKey()];
-                res = res   .Where(x => startDateUnix <= x.Time && x.Time < endDateUnix)
+                res = res   .Where(x => startDateUnix <= x.Time && x.Time < endDateUnix && x.Low > 0)
                             .ToList();
                 if (res.First().Time <= startDateUnix)
                     return res;
