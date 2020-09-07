@@ -273,9 +273,16 @@ namespace CryptoApp
                 {
                     foreach (ITimeSeriesKey itsk in TimeSeriesKeyList)
                     {
-                        chart1.Series.Add(itsk.GetFullName());
-                        chart1.Series[itsk.GetFullName()].XValueType = ChartValueType.DateTime;
-                        chart1.Series[itsk.GetFullName()].ChartType = SeriesChartType.Line;
+                        string fullName = itsk.GetFullName();
+                        Currency mainCcy = itsk.GetMainCurrency();
+                        if (mainCcy.IsFiat())
+                            chart1.Series.Add(fullName);
+                        else
+                            chart1.Series.Insert(0, new Series(fullName));
+                        chart1.Series[fullName].XValueType = ChartValueType.DateTime;
+                        chart1.Series[fullName].ChartType = SeriesChartType.Line;
+                        chart1.Series[fullName].BorderWidth = 2;
+                        chart1.Series[fullName].Color = mainCcy.GetColor();
                         int i = 0;
                         ITimeSeries timeSeries = _chartData.GetTimeSeries(itsk);
                         foreach (Tuple<DateTime, double> item in timeSeries)

@@ -23,6 +23,8 @@ namespace Core.Allocations
             Freq = freq;
         }
 
+        public Currency GetMainCurrency() { return CcyRef; }
+
         public Currency GetCurrencyRef() { return CcyRef; }
 
         public List<CurrencyPair> GetCurrencyPairs()

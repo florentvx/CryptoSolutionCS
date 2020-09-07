@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Linq;
 using System.Text;
 
@@ -59,6 +60,32 @@ namespace Core.Quotes
                     return "Ripple";
                 case Currency.LINK:
                     return "ChainLink";
+                default:
+                    throw new Exception("Unknown Currency");
+            }
+        }
+
+        public static Color GetColor(this Currency ccy)
+        {
+            switch (ccy)
+            {
+                case Currency.None:
+                    return Color.Black;
+                case Currency.EUR:
+                case Currency.USD:
+                    return Color.Crimson;
+                case Currency.XBT:
+                    return Color.DarkOrange;
+                case Currency.ETH:
+                    return Color.RoyalBlue;
+                case Currency.BCH:
+                    return Color.MediumSeaGreen;
+                case Currency.LTC:
+                    return Color.Gray;
+                case Currency.XRP:
+                    return Color.MediumPurple;
+                case Currency.LINK:
+                    return Color.SkyBlue;
                 default:
                     throw new Exception("Unknown Currency");
             }
