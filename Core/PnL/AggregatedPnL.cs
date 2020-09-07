@@ -27,9 +27,10 @@ namespace Core.PnL
             TxDict[ccy].Add(tx.Date, tx);
         }
 
-        public void AddTransactions(SortedList<DateTime, Transaction> txList)
+        private void AddTransactions(SortedList<DateTime, Transaction> txList, bool reload = false)
         {
-            Dictionary<Currency, SortedList<DateTime, Transaction>> dictionary = new Dictionary<Currency, SortedList<DateTime, Transaction>> { };
+            if (reload)
+                TxDict = new Dictionary<Currency, SortedList<DateTime, Transaction>> { };
             foreach (var item in txList)
             {
                 Transaction tx = item.Value;
@@ -52,9 +53,9 @@ namespace Core.PnL
             }
         }
 
-        public void AddTransactions(SortedList<DateTime, Transaction> txList, FXMarketHistory fxmh)
+        public void AddTransactions(SortedList<DateTime, Transaction> txList, FXMarketHistory fxmh, bool fullReload = false)
         {
-            AddTransactions(txList);
+            AddTransactions(txList, fullReload);
             CalculatePnLs(fxmh);
         }
 

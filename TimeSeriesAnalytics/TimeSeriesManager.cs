@@ -35,7 +35,6 @@ namespace TimeSeriesAnalytics
         public void SetUpAllHistory(Frequency freq, bool useKraken = false)
         {
             SortedList<DateTime, Transaction> txList = DataProvider.GetTransactionList(useKraken: useKraken, forceReload: ChangeLedger);
-            ChangeLedger = false;
             DateTime startDate = txList.First().Key;
             FXMH = DataProvider.GetFXMarketHistory(Fiat, DataProvider.GetCurrencyPairs(txList), startDate, freq);
         }
@@ -66,7 +65,13 @@ namespace TimeSeriesAnalytics
                 SetUpAllHistory(freq);
             DataProvider.UpdateFXMarketHistory(FXMH, Fiat, StartDate, freq);
             APnL.ChangeCcyRef(fiat, FXMH);
-            if (tskl.Select(x => x.GetKeyType() == TimeSeriesKeyType.AllocationHistory).FirstOrDefault())
+            bool ReloadAllocationHistory = tskl.Select(x => x.GetKeyType() == TimeSeriesKeyType.AllocationHistory).Count() > 0;
+            if (ChangeLedger || ReloadAllocationHistory)
+            {
+                ChangeLedger = false;
+                APnL.AddTransactions(DataProvider.GetTransactionList(), FXMH, fullReload: true);
+            }
+            if (ReloadAllocationHistory)
             {
                 AH.AddTransactions(fiat, DataProvider.GetTransactionList(), FXMH);
                 AH.UpdateHistory(fiat, FXMH);
