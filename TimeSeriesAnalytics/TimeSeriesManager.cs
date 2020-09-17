@@ -65,7 +65,7 @@ namespace TimeSeriesAnalytics
                 SetUpAllHistory(freq);
             DataProvider.UpdateFXMarketHistory(FXMH, Fiat, StartDate, freq);
             APnL.ChangeCcyRef(fiat, FXMH);
-            bool ReloadAllocationHistory = tskl.Select(x => x.GetKeyType() == TimeSeriesKeyType.AllocationHistory).Count() > 0;
+            bool ReloadAllocationHistory = tskl.Where(x => x.GetKeyType() == TimeSeriesKeyType.AllocationHistory).Count() > 0;
             if (ChangeLedger || ReloadAllocationHistory)
             {
                 ChangeLedger = false;
