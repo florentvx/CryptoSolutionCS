@@ -505,7 +505,15 @@ namespace DataLibrary
                             LedgerInfo nextItem = items[i];
                             Currency ccyTradeP = CurrencyPorperties.FromNameToCurrency(nextItem.Asset);
                             Price paid = new Price(-(double)nextItem.Amount, ccyTradeP);
-                            Price fees = new Price((double)nextItem.Fee, ccyTradeP);
+                            Price fees;
+                            if (ccyTradeP.IsFiat())
+                                fees = new Price((double)nextItem.Fee, ccyTradeP);
+                            else
+                            {
+                                Currency ccyFees = CurrencyPorperties.FromNameToCurrency(item.Asset);
+                                fees = new Price((double)item.Fee, ccyFees);
+                            }
+                                
                             res.Add(dt, new Transaction(
                                 item.Refid,
                                 TransactionType.Trade,
