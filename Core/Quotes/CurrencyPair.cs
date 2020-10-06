@@ -105,7 +105,7 @@ namespace Core.Quotes
 
         public string GetRequestID()
         {
-            if (!Contains(new List<Currency> { Currency.BCH, Currency.LINK }))
+            if (!Contains(new List<Currency> { Currency.BCH, Currency.LINK, Currency.DOT }))
                 return Ccy1.Prefix() + Ccy1.ID() + Ccy2.Prefix() + Ccy2.ID();
             else
                 return Ccy1.ID() + Ccy2.ID();

@@ -10,7 +10,7 @@ namespace Core.Quotes
     {
         None,
         EUR, USD,
-        XBT, ETH, BCH, LTC, XRP, LINK
+        XBT, ETH, BCH, LTC, XRP, LINK, DOT
     }
 
     public static class CurrencyPorperties
@@ -60,6 +60,8 @@ namespace Core.Quotes
                     return "Ripple";
                 case Currency.LINK:
                     return "ChainLink";
+                case Currency.DOT:
+                    return "PolkaDot";
                 default:
                     throw new Exception("Unknown Currency");
             }
@@ -86,6 +88,8 @@ namespace Core.Quotes
                     return Color.MediumPurple;
                 case Currency.LINK:
                     return Color.SkyBlue;
+                case Currency.DOT:
+                    return Color.MediumVioletRed;
                 default:
                     throw new Exception("Unknown Currency");
             }
