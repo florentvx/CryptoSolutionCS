@@ -47,6 +47,7 @@
   <ItemGroup>
     <Compile Include="Allocations\Allocation.cs" />
     <Compile Include="Date\Tenor.cs" />
+    <Compile Include="Orders\OpenOrder.cs" />
     <Compile Include="PnL\AggregatedPnL.cs" />
     <Compile Include="Allocations\AllocationElement.cs" />
     <Compile Include="Allocations\AllocationHistory.cs" />

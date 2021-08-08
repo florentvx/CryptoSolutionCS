@@ -15,6 +15,7 @@ using log4net;
 using Logging;
 using log4net.Config;
 using Core.Transactions;
+using Core.Orders;
 
 namespace CryptoApp
 {
@@ -186,6 +187,11 @@ namespace CryptoApp
                             PercentageToString(RelativeChange));
                 }
             }
+        }
+
+        public void ShowOpenOrders()
+        {
+            List<OpenOrder> openOrders = TSP.GetOpenOrders();
         }
 
         public void TxExplorerTableUpdate()

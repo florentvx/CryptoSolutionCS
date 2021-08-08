@@ -12,6 +12,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using Core.Orders;
 
 namespace TimeSeriesAnalytics
 {
@@ -195,6 +196,13 @@ namespace TimeSeriesAnalytics
                     this.PublishInfo($"{date_i} - {i} Weeks PnL: {Math.Round(refPnL - data_i["Total"].TotalPnLWithFees, 2)} {Fiat.ToFullName()}");
                 }
             }
+        }
+
+        public List<OpenOrder> GetOpenOrders()
+        {
+            FXMarket fxmkt = FXMH.GetArtificialFXMarket(DateTime.UtcNow);
+            Dictionary<string, PnLElement> pnlInfo = APnL.ToTable(FXMH, DateTime.UtcNow);
+            return DataProvider.GetOpenOrders(fxmkt, pnlInfo);
         }
     }
 }

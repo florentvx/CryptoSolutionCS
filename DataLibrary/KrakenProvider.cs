@@ -13,6 +13,9 @@ using Core.Transactions;
 using KrakenApi;
 using Logging;
 using Core.Statics;
+using Core.Orders;
+using Core.Markets;
+using Core.PnL;
 
 namespace DataLibrary
 {
@@ -588,6 +591,21 @@ namespace DataLibrary
                 this.PublishDebug($"{ccy.ToFullName()} Adress:{data[0].Address}");
             }
             return DepositAddresses[ccy];
+        }
+
+        #endregion
+
+        #region OpenOrders
+
+        public List<OpenOrder> GetOpenOrders(FXMarket fxmkt, Dictionary<string, PnLElement> pnlInfo)
+        {
+            Dictionary<string, OrderInfo> openOrders = KrakenApi.GetOpenOrders();
+            List<OpenOrder> orders = new List<OpenOrder> { };
+            foreach (var item in openOrders)
+            {
+                orders.Add(new OpenOrder(item.Key, item.Value, fxmkt, pnlInfo));
+            }
+            return orders;
         }
 
         #endregion

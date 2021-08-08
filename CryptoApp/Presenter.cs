@@ -66,7 +66,12 @@ namespace CryptoApp
 
         internal async void CalculatePnL()
         {
-            await Task.Run(() => _view.PnLTableUpdate());
+            //await Task.Run(() => _view.PnLTableUpdate());
+            await Task.Run(() => 
+            {
+                _view.PnLTableUpdate(); 
+                _view.ShowOpenOrders(); // TEMPORARY HACK!
+            }) ;
         }
     }
 }
