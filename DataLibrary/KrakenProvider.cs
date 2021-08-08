@@ -207,7 +207,6 @@ namespace DataLibrary
                     OHLCData[cpts.GetTimeSeriesKey()] = GetKrakenOHLC(ccyPair, freq).Pairs[ccyPair.GetRequestID()];
                     SaveOHLC(cpts);
                 }
-                    
             }
         }
 
@@ -258,8 +257,8 @@ namespace DataLibrary
         /// </summary>
         /// <param name="itsk"></param>
         /// <returns></returns>
-        private List<OHLC> GetOHLCTimeSeries(   ITimeSeriesKey itsk, 
-                                                Int64? startDate = null, 
+        private List<OHLC> GetOHLCTimeSeries(   ITimeSeriesKey itsk,
+                                                Int64? startDate = null,
                                                 Int64? endDate = null)
         {
             Int64 startDateUnix; ;
@@ -290,7 +289,7 @@ namespace DataLibrary
                 }
 
             }
-            catch
+            catch (Exception e)
             {
                 return new List<OHLC> { };
             }
@@ -449,92 +448,109 @@ namespace DataLibrary
         public SortedList<DateTime, Transaction> GetTransactionList()
         {
             SortedList<DateTime, Transaction> res = new SortedList<DateTime, Transaction>();
-            List<LedgerInfo> items = Ledger.OrderBy(x => x.Value.Time).Select(x => x.Value).ToList();
-            for (int i = 0; i < items.Count; i++)
+            var items = Ledger.Select(x => x.Value).GroupBy(x => x.Refid).ToDictionary(g => g.Key, g => g.ToList());
+            var sortedKeys = items.Values.Select(x => new Tuple<double, string>(x.First().Time, x.First().Refid))
+                                            .OrderBy(x => x.Item1);
+            foreach (var key in sortedKeys)
             {
-                LedgerInfo item = items[i];
-                DateTime dt = StaticLibrary.UnixTimeStampToDateTime(item.Time);
+                DateTime dt = StaticLibrary.UnixTimeStampToDateTime(key.Item1);
                 if (dt < res.LastOrDefault().Key.AddSeconds(1))
                     dt = res.Last().Key.AddSeconds(1);
-                switch (TransactionTypeProperties.ReadTransactionType(item.Type))
+                var item = items[key.Item2];
+                TransactionType ttype = TransactionTypeProperties.ReadTransactionType(item[0].Type);
+                switch (ttype)
                 {
                     case TransactionType.Deposit:
-                        Currency ccyDp = CurrencyPorperties.FromNameToCurrency(item.Asset);
+                        if (item.Count > 1)
+                            throw new Exception("One Transaction Only for Deposit");
+                        Currency ccyDp = CurrencyPorperties.FromNameToCurrency(item[0].Asset);
                         Transaction txDepo = new Transaction(
-                            item.Refid,
+                            item[0].Refid,
                             TransactionType.Deposit,
                             dt,
                             new Price(0, Currency.None),
-                            new Price((double)item.Amount, ccyDp));
+                            new Price((double)item[0].Amount, ccyDp));
                         res.Add(dt, txDepo);
-                        //AddLedgerCurrency(ccyDp);
                         break;
+
                     case TransactionType.WithDrawal:
-                        Currency ccyWd = CurrencyPorperties.FromNameToCurrency(item.Asset);
+                        if (item.Count > 1)
+                            throw new Exception("One Transaction Only for Withdrawal");
+                        Currency ccyWd = CurrencyPorperties.FromNameToCurrency(item[0].Asset);
                         Transaction txWd = new Transaction(
-                            item.Refid,
+                            item[0].Refid,
                             TransactionType.WithDrawal,
                             dt,
-                            new Price((double)-item.Amount, ccyWd),
+                            new Price((double)-item[0].Amount, ccyWd),
                             new Price(0, Currency.None),
-                            new Price((double)item.Fee, ccyWd));
+                            new Price((double)item[0].Fee, ccyWd));
                         res.Add(dt, txWd);
-                        //AddLedgerCurrency(ccyWd);
                         break;
-                    case TransactionType.Trade:
-                        if (item.Amount < 0)
-                        {
-                            Currency ccyTradeM = CurrencyPorperties.FromNameToCurrency(item.Asset);
-                            Price paid = new Price(-(double)item.Amount, ccyTradeM);
-                            Price fees = new Price((double)item.Fee, ccyTradeM);
-                            i++;
-                            LedgerInfo nextItem = items[i];
-                            Price received = new Price(nextItem.Amount, nextItem.Asset);
-                            res.Add(dt, new Transaction(
-                                item.Refid,
-                                TransactionType.Trade,
-                                dt,
-                                paid,
-                                received,
-                                fees));
-                        }
-                        else
-                        {
-                            Price received = new Price(item.Amount, item.Asset);
-                            i++;
-                            LedgerInfo nextItem = items[i];
-                            Currency ccyTradeP = CurrencyPorperties.FromNameToCurrency(nextItem.Asset);
-                            Price paid = new Price(-(double)nextItem.Amount, ccyTradeP);
-                            Price fees;
-                            if (ccyTradeP.IsFiat())
-                                fees = new Price((double)nextItem.Fee, ccyTradeP);
-                            else
-                            {
-                                Currency ccyFees = CurrencyPorperties.FromNameToCurrency(item.Asset);
-                                fees = new Price((double)item.Fee, ccyFees);
-                            }
-                                
-                            res.Add(dt, new Transaction(
-                                item.Refid,
-                                TransactionType.Trade,
-                                dt, 
-                                paid, 
-                                received, 
-                                fees));
-                        }
-                        break;
+
                     case TransactionType.Transfer:
-                        Currency ccyTransfer = CurrencyPorperties.FromNameToCurrency(item.Asset);
+                        if (item.Count > 1)
+                            throw new Exception("One Transaction Only for Transfer");
+                        Currency ccyTransfer = CurrencyPorperties.FromNameToCurrency(item[0].Asset);
                         if (!ccyTransfer.IsNone())
                             res.Add(dt, new Transaction(
-                                item.Refid,
-                                TransactionType.Transfer, 
-                                dt, 
-                                new Price(0, Currency.None), 
-                                new Price((double)item.Amount, 
+                                item[0].Refid,
+                                TransactionType.Transfer,
+                                dt,
+                                new Price(0, Currency.None),
+                                new Price((double)item[0].Amount,
                                 ccyTransfer)));
                         break;
-                    default:
+
+                    case TransactionType.Trade:
+                        if (item.Count < 2)
+                            break;
+                        var itemPay = item.Where(x => x.Amount < 0).ToList();
+                        if (itemPay.Count != 1)
+                            throw new Exception("Temp Condition");
+                        var itemRec = item.Where(x => x.Amount > 0).ToList();
+                        if (itemRec.Count != 1)
+                            throw new Exception("Temp Condition");
+
+                        //if (item.Amount < 0)
+                        //{
+                        Currency ccyTradeM = CurrencyPorperties.FromNameToCurrency(itemPay[0].Asset);
+                        Price paid = new Price(-(double)itemPay[0].Amount, ccyTradeM);
+                        Price fees = new Price((double)itemPay[0].Fee, ccyTradeM);
+                        //i++;
+                        //LedgerInfo nextItem = items[i];
+                        Price received = new Price(itemRec[0].Amount, itemRec[0].Asset);
+                        res.Add(dt, new Transaction(
+                            item[0].Refid,
+                            TransactionType.Trade,
+                            dt,
+                            paid,
+                            received,
+                            fees));
+                        //}
+                        //else
+                        //{
+                        //    Price received = new Price(item.Amount, item.Asset);
+                        //    i++;
+                        //    LedgerInfo nextItem = items[i];
+                        //    Currency ccyTradeP = CurrencyPorperties.FromNameToCurrency(nextItem.Asset);
+                        //    Price paid = new Price(-(double)nextItem.Amount, ccyTradeP);
+                        //    Price fees;
+                        //    if (ccyTradeP.IsFiat())
+                        //        fees = new Price((double)nextItem.Fee, ccyTradeP);
+                        //    else
+                        //    {
+                        //        Currency ccyFees = CurrencyPorperties.FromNameToCurrency(item.Asset);
+                        //        fees = new Price((double)item.Fee, ccyFees);
+                        //    }
+
+                        //    res.Add(dt, new Transaction(
+                        //        item.Refid,
+                        //        TransactionType.Trade,
+                        //        dt,
+                        //        paid,
+                        //        received,
+                        //        fees));
+                        //}
                         break;
                 }
             }
@@ -547,7 +563,7 @@ namespace DataLibrary
             SortedList<DateTime, Transaction> res = new SortedList<DateTime, Transaction>();
             foreach (var item in txList)
             {
-                if (isBefore ^ item.Key > date.AddSeconds(1))
+                if (isBefore ^ item.Key > date.AddSeconds(3))
                     res.Add(item.Key, item.Value);
             }
             return res;
