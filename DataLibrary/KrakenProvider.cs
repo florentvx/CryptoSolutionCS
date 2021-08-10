@@ -280,20 +280,30 @@ namespace DataLibrary
             {
                 LoadOHLC(itsk);
                 List<OHLC> res = OHLCData[itsk.GetTimeSeriesKey()];
-                res = res   .Where(x => startDateUnix <= x.Time && x.Time < endDateUnix && x.Low > 0)
+                int FreqInSecs = itsk.GetFrequency().GetFrequency(inSecs: true);
+                res = res   .Where(x => startDateUnix - FreqInSecs  <= x.Time && x.Time < endDateUnix && x.Low > 0)
                             .ToList();
-                if (res.First().Time <= startDateUnix)
+                if (res.Count() == 0)
+                    return GetOHLCTimeSeries(itsk.GetNextFrequency(), startDateUnix, endDateUnix);
+                else if (res.First().Time <= startDateUnix)
                     return res;
                 else
                 {
-                    List<OHLC> prevRes = GetOHLCTimeSeries(itsk.GetNextFrequency(), startDate, res.First().Time);
-                    prevRes.AddRange(res);
-                    return prevRes;
+                    ITimeSeriesKey nextFreqTSK = itsk.GetNextFrequency();
+                    if (nextFreqTSK.GetFrequency() == Frequency.None)
+                        return new List<OHLC> { };
+                    else
+                    {
+                        List<OHLC> prevRes = GetOHLCTimeSeries(nextFreqTSK, startDate, res.First().Time);
+                        prevRes.AddRange(res);
+                        return prevRes;
+                    }
                 }
 
             }
             catch (Exception e)
             {
+                this.PublishWarning(e.Message);
                 return new List<OHLC> { };
             }
         }
