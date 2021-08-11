@@ -93,6 +93,9 @@ namespace CryptoApp
             dataGridViewTxExplorer.Columns[7].Name = "Fees Ccy";
             dataGridViewTxExplorer.Columns[8].Name = "XRate";
 
+            /// Open Orders
+            comboBoxCcy1.Items.Clear();
+            comboBoxCcy2.Items.Clear();
         }
 
         private string PercentageToString(double? input, string dflt = "")
@@ -189,9 +192,45 @@ namespace CryptoApp
             }
         }
 
+        public void OpenOrdersPreparation()
+        {
+            if (comboBoxCcy1.InvokeRequired)
+            {
+                DelegateTables d = new DelegateTables(OpenOrdersPreparation);
+                this.Invoke(d, new object[] { });
+            }
+            else
+            {
+                foreach (var item in TSP.Currencies)
+                {
+                    if (!item.IsFiat())
+                        comboBoxCcy1.Items.Add(item.ToString());
+                    else
+                        comboBoxCcy2.Items.Add(item.ToString());
+                }
+                comboBoxCcy1.SelectedIndex = 0;
+                comboBoxCcy2.SelectedIndex = 0;
+            }
+        }
+
         public void ShowOpenOrders()
         {
-            List<OpenOrder> openOrders = TSP.GetOpenOrders();
+            if (comboBoxCcy1.InvokeRequired)
+            {
+                DelegateTables d = new DelegateTables(ShowOpenOrders);
+                this.Invoke(d, new object[] { });
+            }
+            else
+            {
+                CurrencyPair cp = new CurrencyPair((string)comboBoxCcy1.SelectedItem,
+                                                (string)comboBoxCcy2.SelectedItem);
+                List<OpenOrder> openOrders = TSP.GetOpenOrders(cp);
+                PublishLogMessage(  this, 
+                                    new LogMessageEventArgs() { 
+                                        Level = LevelType.WARNING, 
+                                        Message = $" Filtered {openOrders.Count} open orders" 
+                                    });
+            }
         }
 
         public void TxExplorerTableUpdate()
@@ -335,6 +374,11 @@ namespace CryptoApp
         private void ButtonCalculatePnL_Click(object sender, EventArgs e)
         {
             CryptoPresenter.CalculatePnL();
+        }
+
+        private void ButtonOpenOrdersShow_Click(object sender, EventArgs e)
+        {
+            CryptoPresenter.ShowOpenOrders();
         }
     }
 

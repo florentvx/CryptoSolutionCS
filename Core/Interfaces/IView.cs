@@ -16,6 +16,7 @@ namespace Core.Interfaces
         void AllocationTableUpdate();
         void TxExplorerTableUpdate();
         void PnLTableUpdate();
+        void OpenOrdersPreparation();
         void ShowOpenOrders();
         void PublishLogMessage(object sender, LogMessageEventArgs e);
     }

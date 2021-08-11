@@ -33,6 +33,7 @@ namespace CryptoApp
             {
                 _view.AllocationTableUpdate();
                 _view.TxExplorerTableUpdate();
+                _view.OpenOrdersPreparation();
             }
         }
 
@@ -66,12 +67,12 @@ namespace CryptoApp
 
         internal async void CalculatePnL()
         {
-            //await Task.Run(() => _view.PnLTableUpdate());
-            await Task.Run(() => 
-            {
-                _view.PnLTableUpdate(); 
-                _view.ShowOpenOrders(); // TEMPORARY HACK!
-            }) ;
+            await Task.Run(() => { _view.PnLTableUpdate(); }) ;
+        }
+
+        internal async void ShowOpenOrders()
+        {
+            await Task.Run(() => { _view.ShowOpenOrders(); });
         }
     }
 }

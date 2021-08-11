@@ -15,6 +15,7 @@ namespace Core.Orders
         public string ID { get; }
         public double Volume { get; }
         public XChangeRate Rate { get; }
+        public CurrencyPair CurPair { get { return Rate.CcyPair; } }
         public XChangeRate CurrentRate { get; }
         public double Return { get; }
         public bool IsBuyOrder { get; }

@@ -31,6 +31,8 @@ namespace TimeSeriesAnalytics
         // Logging
         private event LoggingEventHandler _log;
         public LoggingEventHandler LoggingEventHandler { get { return _log; } }
+
+        public List<Currency> Currencies { get { return FXMH.CcyList; } }
         public void AddLoggingLink(LoggingEventHandler function) { _log += function; }
 
         public void SetUpAllHistory(Frequency freq, bool useKraken = false)
@@ -198,11 +200,16 @@ namespace TimeSeriesAnalytics
             }
         }
 
-        public List<OpenOrder> GetOpenOrders()
+        public List<OpenOrder> GetOpenOrders(CurrencyPair CurPair)
         {
             FXMarket fxmkt = FXMH.GetArtificialFXMarket(DateTime.UtcNow);
             Dictionary<string, PnLElement> pnlInfo = APnL.ToTable(FXMH, DateTime.UtcNow);
-            return DataProvider.GetOpenOrders(fxmkt, pnlInfo);
+            List<OpenOrder> res = new List<OpenOrder> { };
+            var fullList = DataProvider.GetOpenOrders(fxmkt, pnlInfo);
+            foreach (OpenOrder item in fullList)
+                if (CurPair.IsEquivalent(item.CurPair))
+                    res.Add(item);
+            return res;
         }
     }
 }
