@@ -94,8 +94,26 @@ namespace CryptoApp
             dataGridViewTxExplorer.Columns[8].Name = "XRate";
 
             /// Open Orders
-            comboBoxCcy1.Items.Clear();
-            comboBoxCcy2.Items.Clear();
+            dataGridViewOpenSellOrders.ColumnCount = 6;
+            dataGridViewOpenBuyOrders.ColumnCount = 6;
+            dataGridViewOpenSellOrders.Columns[0].Name = "Volume";
+            dataGridViewOpenBuyOrders.Columns[0].Name = "Volume";
+            dataGridViewOpenSellOrders.Columns[1].Name = "Ord.Price";
+            dataGridViewOpenBuyOrders.Columns[1].Name = "Ord.Price";
+            dataGridViewOpenSellOrders.Columns[2].Name = "Return";
+            dataGridViewOpenBuyOrders.Columns[2].Name = "Return";
+            dataGridViewOpenSellOrders.Columns[3].Name = "Av.Cost";
+            dataGridViewOpenBuyOrders.Columns[3].Name = "Av.Cost";
+            dataGridViewOpenSellOrders.Columns[4].Name = "Real.PnL";
+            dataGridViewOpenBuyOrders.Columns[4].Name = "Nw.Cost";
+            dataGridViewOpenSellOrders.Columns[5].Name = "Tot.PnL";
+            dataGridViewOpenBuyOrders.Columns[5].Name = "Tot.PnL";
+
+            for (int i = 0; i < 6; i++)
+            {
+                dataGridViewOpenSellOrders.Columns[i].Width = 72;
+                dataGridViewOpenBuyOrders.Columns[i].Width = 72;
+            }
         }
 
         private string PercentageToString(double? input, string dflt = "")
@@ -222,9 +240,20 @@ namespace CryptoApp
             }
             else
             {
+                dataGridViewOpenBuyOrders.Rows.Clear();
+                dataGridViewOpenSellOrders.Rows.Clear();
                 CurrencyPair cp = new CurrencyPair((string)comboBoxCcy1.SelectedItem,
                                                 (string)comboBoxCcy2.SelectedItem);
                 List<OpenOrder> openOrders = TSP.GetOpenOrders(cp);
+                foreach (var item in openOrders)
+                {
+                    object[] newRow = item.GetDataRow();
+
+                    if (item.Return < 0)
+                        dataGridViewOpenBuyOrders.Rows.Add(newRow);
+                    else
+                        dataGridViewOpenSellOrders.Rows.Add(newRow);
+                }
                 PublishLogMessage(  this, 
                                     new LogMessageEventArgs() { 
                                         Level = LevelType.WARNING, 

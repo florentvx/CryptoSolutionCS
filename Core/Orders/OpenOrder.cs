@@ -37,7 +37,7 @@ namespace Core.Orders
             CurrencyPair cp = new CurrencyPair(ccy1, ccy2);
             Rate = new XChangeRate((double)orderInfo.Descr.Price, cp);
             CurrentRate = fxmkt.GetQuote(cp);
-            Return = Rate.Rate/CurrentRate.Rate - 1;
+            Return = Rate.Rate / CurrentRate.Rate - 1;
             if (!cp.IsCryptoPair && !cp.IsFiatPair)
             {
                 Currency cryptoCcy = cp.GetCryptoFiatPair.Crypto;
@@ -47,8 +47,25 @@ namespace Core.Orders
                 if (IsBuyOrder)
                     NewCost = (Volume * Rate.Rate + pnl.Position * AverageCost) / (pnl.Position + Volume);
                 else
-                    RealizedPnL = (Rate.Rate - AverageCost) * pnl.Position;
+                    RealizedPnL = (Rate.Rate - AverageCost) * Volume;
             }
         }
+        public object[] GetDataRow()
+        {
+            object[] newRow = new object[] 
+            { 
+                Volume,
+                Rate.Rate,
+                $"{Math.Round(Return, 4) * 100} %",
+                Math.Round(AverageCost, 2),
+                Return > 0 ? Math.Round(RealizedPnL, 2) : Math.Round(NewCost, 2),
+                Math.Round(TotalPnL, 2) 
+            };
+            return newRow;
+        }
+
+        //TODO: Order OpenOrders in dataGridRow
+        //TODO: Take account of smaller order being executed
+        //TODO: Cache open orders for ~2min before requesting thme from Kraken again
     }
 }
