@@ -607,13 +607,13 @@ namespace DataLibrary
 
         #region OpenOrders
 
-        public List<OpenOrder> GetOpenOrders(FXMarket fxmkt, Dictionary<string, PnLElement> pnlInfo)
+        public List<OpenOrder> GetOpenOrders(FXMarket fxmkt)
         {
             Dictionary<string, OrderInfo> openOrders = KrakenApi.GetOpenOrders();
             List<OpenOrder> orders = new List<OpenOrder> { };
             foreach (var item in openOrders)
             {
-                orders.Add(new OpenOrder(item.Key, item.Value, fxmkt, pnlInfo));
+                orders.Add(new OpenOrder(item.Key, item.Value, fxmkt));
             }
             return orders;
         }

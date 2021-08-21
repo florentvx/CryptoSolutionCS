@@ -204,12 +204,7 @@ namespace TimeSeriesAnalytics
         {
             FXMarket fxmkt = FXMH.GetArtificialFXMarket(DateTime.UtcNow);
             Dictionary<string, PnLElement> pnlInfo = APnL.ToTable(FXMH, DateTime.UtcNow);
-            List<OpenOrder> res = new List<OpenOrder> { };
-            var fullList = DataProvider.GetOpenOrders(fxmkt, pnlInfo);
-            foreach (OpenOrder item in fullList)
-                if (CurPair.IsEquivalent(item.CurPair))
-                    res.Add(item);
-            return res;
+            return DataProvider.GetOpenOrders(fxmkt, pnlInfo, CurPair);
         }
     }
 }

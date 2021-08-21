@@ -246,9 +246,12 @@ namespace DataLibrary
 
         #endregion
 
-        public List<OpenOrder> GetOpenOrders(FXMarket fxmkt, Dictionary<string, PnLElement> pnlInfo)
+        public List<OpenOrder> GetOpenOrders(   FXMarket fxmkt,
+                                                Dictionary<string, PnLElement> pnlInfo,
+                                                CurrencyPair cp)
         {
-            return KrakenData.GetOpenOrders(fxmkt, pnlInfo);
+            List<OpenOrder> listoo = KrakenData.GetOpenOrders(fxmkt);
+            return listoo.SortOpenOrders(pnlInfo, cp);
         }
     }
 }
