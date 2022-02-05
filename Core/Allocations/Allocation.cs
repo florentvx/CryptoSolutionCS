@@ -197,6 +197,8 @@ namespace Core.Allocations
             if (Total.Ccy != cp.Ccy2)
                 throw new NotImplementedException();
             AllocationElement ae = GetElement(cp.Ccy1);
+            if (ae.Price.Amount == 0)
+                return 0;
             double rate = Total.Amount * ae.Share / ae.Price.Amount;
             return rate;
         }
@@ -210,7 +212,8 @@ namespace Core.Allocations
             {
                 double prevXR = prevAlloc.GetImpliedXChangeRate(cp);
                 double nextXR = GetImpliedXChangeRate(cp);
-                res += prevAlloc.GetElement(cp.Ccy1).Share * (nextXR / prevXR - 1);
+                if (prevXR != 0 && nextXR != 0)
+                    res += prevAlloc.GetElement(cp.Ccy1).Share * (nextXR / prevXR - 1);
             }
             return res;
         }
