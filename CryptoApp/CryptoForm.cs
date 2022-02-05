@@ -15,6 +15,7 @@ using log4net;
 using Logging;
 using log4net.Config;
 using Core.Transactions;
+using Core.Orders;
 
 namespace CryptoApp
 {
@@ -92,6 +93,27 @@ namespace CryptoApp
             dataGridViewTxExplorer.Columns[7].Name = "Fees Ccy";
             dataGridViewTxExplorer.Columns[8].Name = "XRate";
 
+            /// Open Orders
+            dataGridViewOpenSellOrders.ColumnCount = 6;
+            dataGridViewOpenBuyOrders.ColumnCount = 6;
+            dataGridViewOpenSellOrders.Columns[0].Name = "Volume";
+            dataGridViewOpenBuyOrders.Columns[0].Name = "Volume";
+            dataGridViewOpenSellOrders.Columns[1].Name = "Ord.Price";
+            dataGridViewOpenBuyOrders.Columns[1].Name = "Ord.Price";
+            dataGridViewOpenSellOrders.Columns[2].Name = "Return";
+            dataGridViewOpenBuyOrders.Columns[2].Name = "Return";
+            dataGridViewOpenSellOrders.Columns[3].Name = "Av.Cost";
+            dataGridViewOpenBuyOrders.Columns[3].Name = "Av.Cost";
+            dataGridViewOpenSellOrders.Columns[4].Name = "Real.PnL";
+            dataGridViewOpenBuyOrders.Columns[4].Name = "Nw.Cost";
+            dataGridViewOpenSellOrders.Columns[5].Name = "Tot.PnL";
+            dataGridViewOpenBuyOrders.Columns[5].Name = "Tot.PnL";
+
+            for (int i = 0; i < 6; i++)
+            {
+                dataGridViewOpenSellOrders.Columns[i].Width = 72;
+                dataGridViewOpenBuyOrders.Columns[i].Width = 72;
+            }
         }
 
         private string PercentageToString(double? input, string dflt = "")
@@ -185,6 +207,53 @@ namespace CryptoApp
                             depositValue,
                             PercentageToString(RelativeChange));
                 }
+            }
+        }
+
+        public void OpenOrdersPreparation()
+        {
+            if (comboBoxCcy1.InvokeRequired)
+            {
+                DelegateTables d = new DelegateTables(OpenOrdersPreparation);
+                this.Invoke(d, new object[] { });
+            }
+            else
+            {
+                foreach (var item in TSP.Currencies)
+                {
+                    if (!item.IsFiat())
+                        comboBoxCcy1.Items.Add(item.ToString());
+                    else
+                        comboBoxCcy2.Items.Add(item.ToString());
+                }
+                comboBoxCcy1.SelectedIndex = 0;
+                comboBoxCcy2.SelectedIndex = 0;
+            }
+        }
+
+        public void ShowOpenOrders()
+        {
+            if (comboBoxCcy1.InvokeRequired)
+            {
+                DelegateTables d = new DelegateTables(ShowOpenOrders);
+                this.Invoke(d, new object[] { });
+            }
+            else
+            {
+                dataGridViewOpenBuyOrders.Rows.Clear();
+                dataGridViewOpenSellOrders.Rows.Clear();
+                CurrencyPair cp = new CurrencyPair((string)comboBoxCcy1.SelectedItem,
+                                                (string)comboBoxCcy2.SelectedItem);
+                List<OpenOrder> openOrders = TSP.GetOpenOrders(cp);
+                foreach (var item in openOrders)
+                {
+                    object[] newRow = item.GetDataRow();
+
+                    if (item.Return < 0)
+                        dataGridViewOpenBuyOrders.Rows.Add(newRow);
+                    else
+                        dataGridViewOpenSellOrders.Rows.Add(newRow);
+                }                
             }
         }
 
@@ -329,6 +398,11 @@ namespace CryptoApp
         private void ButtonCalculatePnL_Click(object sender, EventArgs e)
         {
             CryptoPresenter.CalculatePnL();
+        }
+
+        private void ButtonOpenOrdersShow_Click(object sender, EventArgs e)
+        {
+            CryptoPresenter.ShowOpenOrders();
         }
     }
 

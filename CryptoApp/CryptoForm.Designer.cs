@@ -28,9 +28,9 @@
         /// </summary>
         private void InitializeComponent()
         {
-            System.Windows.Forms.DataVisualization.Charting.ChartArea chartArea1 = new System.Windows.Forms.DataVisualization.Charting.ChartArea();
-            System.Windows.Forms.DataVisualization.Charting.Legend legend1 = new System.Windows.Forms.DataVisualization.Charting.Legend();
-            System.Windows.Forms.DataVisualization.Charting.Series series1 = new System.Windows.Forms.DataVisualization.Charting.Series();
+            System.Windows.Forms.DataVisualization.Charting.ChartArea chartArea6 = new System.Windows.Forms.DataVisualization.Charting.ChartArea();
+            System.Windows.Forms.DataVisualization.Charting.Legend legend6 = new System.Windows.Forms.DataVisualization.Charting.Legend();
+            System.Windows.Forms.DataVisualization.Charting.Series series6 = new System.Windows.Forms.DataVisualization.Charting.Series();
             this.tabControl1 = new System.Windows.Forms.TabControl();
             this.Allocation = new System.Windows.Forms.TabPage();
             this.dataGridViewAllocation = new System.Windows.Forms.DataGridView();
@@ -46,6 +46,16 @@
             this.button1 = new System.Windows.Forms.Button();
             this.dataGridViewPnL = new System.Windows.Forms.DataGridView();
             this.TxExplorer = new System.Windows.Forms.TabPage();
+            this.dataGridViewTxExplorer = new System.Windows.Forms.DataGridView();
+            this.labelTxExplorer = new System.Windows.Forms.Label();
+            this.OpenOrders = new System.Windows.Forms.TabPage();
+            this.dataGridViewOpenSellOrders = new System.Windows.Forms.DataGridView();
+            this.dataGridViewOpenBuyOrders = new System.Windows.Forms.DataGridView();
+            this.buttonOpenOrdersShow = new System.Windows.Forms.Button();
+            this.label5 = new System.Windows.Forms.Label();
+            this.label4 = new System.Windows.Forms.Label();
+            this.comboBoxCcy2 = new System.Windows.Forms.ComboBox();
+            this.comboBoxCcy1 = new System.Windows.Forms.ComboBox();
             this.richTextBoxLogger = new System.Windows.Forms.RichTextBox();
             this.label1 = new System.Windows.Forms.Label();
             this.comboBoxFiat = new System.Windows.Forms.ComboBox();
@@ -54,8 +64,6 @@
             this.buttonFullDataUpdate = new System.Windows.Forms.Button();
             this.buttonLoad = new System.Windows.Forms.Button();
             this.ButtonLedger = new System.Windows.Forms.Button();
-            this.labelTxExplorer = new System.Windows.Forms.Label();
-            this.dataGridViewTxExplorer = new System.Windows.Forms.DataGridView();
             this.tabControl1.SuspendLayout();
             this.Allocation.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dataGridViewAllocation)).BeginInit();
@@ -66,6 +74,9 @@
             ((System.ComponentModel.ISupportInitialize)(this.dataGridViewPnL)).BeginInit();
             this.TxExplorer.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dataGridViewTxExplorer)).BeginInit();
+            this.OpenOrders.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.dataGridViewOpenSellOrders)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.dataGridViewOpenBuyOrders)).BeginInit();
             this.SuspendLayout();
             // 
             // tabControl1
@@ -77,6 +88,7 @@
             this.tabControl1.Controls.Add(this.Graphs);
             this.tabControl1.Controls.Add(this.tabPage1);
             this.tabControl1.Controls.Add(this.TxExplorer);
+            this.tabControl1.Controls.Add(this.OpenOrders);
             this.tabControl1.Location = new System.Drawing.Point(12, 59);
             this.tabControl1.Name = "tabControl1";
             this.tabControl1.SelectedIndex = 0;
@@ -103,6 +115,7 @@
             this.dataGridViewAllocation.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             this.dataGridViewAllocation.Location = new System.Drawing.Point(9, 23);
             this.dataGridViewAllocation.Name = "dataGridViewAllocation";
+            this.dataGridViewAllocation.RowHeadersWidth = 51;
             this.dataGridViewAllocation.RowTemplate.Height = 24;
             this.dataGridViewAllocation.Size = new System.Drawing.Size(1255, 532);
             this.dataGridViewAllocation.TabIndex = 3;
@@ -170,16 +183,16 @@
             this.chart1.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            chartArea1.Name = "ChartArea1";
-            this.chart1.ChartAreas.Add(chartArea1);
-            legend1.Name = "Legend1";
-            this.chart1.Legends.Add(legend1);
+            chartArea6.Name = "ChartArea1";
+            this.chart1.ChartAreas.Add(chartArea6);
+            legend6.Name = "Legend1";
+            this.chart1.Legends.Add(legend6);
             this.chart1.Location = new System.Drawing.Point(237, 6);
             this.chart1.Name = "chart1";
-            series1.ChartArea = "ChartArea1";
-            series1.Legend = "Legend1";
-            series1.Name = "Series1";
-            this.chart1.Series.Add(series1);
+            series6.ChartArea = "ChartArea1";
+            series6.Legend = "Legend1";
+            series6.Name = "Series1";
+            this.chart1.Series.Add(series6);
             this.chart1.Size = new System.Drawing.Size(1027, 549);
             this.chart1.TabIndex = 0;
             this.chart1.Text = "chart1";
@@ -222,6 +235,7 @@
             this.dataGridViewPnL.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             this.dataGridViewPnL.Location = new System.Drawing.Point(7, 87);
             this.dataGridViewPnL.Name = "dataGridViewPnL";
+            this.dataGridViewPnL.RowHeadersWidth = 51;
             this.dataGridViewPnL.RowTemplate.Height = 24;
             this.dataGridViewPnL.Size = new System.Drawing.Size(1257, 467);
             this.dataGridViewPnL.TabIndex = 0;
@@ -237,6 +251,118 @@
             this.TxExplorer.TabIndex = 3;
             this.TxExplorer.Text = "TxExplorer";
             this.TxExplorer.UseVisualStyleBackColor = true;
+            // 
+            // dataGridViewTxExplorer
+            // 
+            this.dataGridViewTxExplorer.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.dataGridViewTxExplorer.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            this.dataGridViewTxExplorer.Location = new System.Drawing.Point(6, 23);
+            this.dataGridViewTxExplorer.Name = "dataGridViewTxExplorer";
+            this.dataGridViewTxExplorer.RowHeadersWidth = 51;
+            this.dataGridViewTxExplorer.RowTemplate.Height = 24;
+            this.dataGridViewTxExplorer.Size = new System.Drawing.Size(1258, 532);
+            this.dataGridViewTxExplorer.TabIndex = 1;
+            // 
+            // labelTxExplorer
+            // 
+            this.labelTxExplorer.AutoSize = true;
+            this.labelTxExplorer.Location = new System.Drawing.Point(6, 3);
+            this.labelTxExplorer.Name = "labelTxExplorer";
+            this.labelTxExplorer.Size = new System.Drawing.Size(79, 17);
+            this.labelTxExplorer.TabIndex = 0;
+            this.labelTxExplorer.Text = "Tx Explorer";
+            // 
+            // OpenOrders
+            // 
+            this.OpenOrders.Controls.Add(this.dataGridViewOpenSellOrders);
+            this.OpenOrders.Controls.Add(this.dataGridViewOpenBuyOrders);
+            this.OpenOrders.Controls.Add(this.buttonOpenOrdersShow);
+            this.OpenOrders.Controls.Add(this.label5);
+            this.OpenOrders.Controls.Add(this.label4);
+            this.OpenOrders.Controls.Add(this.comboBoxCcy2);
+            this.OpenOrders.Controls.Add(this.comboBoxCcy1);
+            this.OpenOrders.Location = new System.Drawing.Point(4, 25);
+            this.OpenOrders.Name = "OpenOrders";
+            this.OpenOrders.Size = new System.Drawing.Size(1270, 561);
+            this.OpenOrders.TabIndex = 4;
+            this.OpenOrders.Text = "OpenOrders";
+            this.OpenOrders.UseVisualStyleBackColor = true;
+            // 
+            // dataGridViewOpenSellOrders
+            // 
+            this.dataGridViewOpenSellOrders.AllowUserToAddRows = false;
+            this.dataGridViewOpenSellOrders.AllowUserToDeleteRows = false;
+            this.dataGridViewOpenSellOrders.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            this.dataGridViewOpenSellOrders.Location = new System.Drawing.Point(651, 56);
+            this.dataGridViewOpenSellOrders.Name = "dataGridViewOpenSellOrders";
+            this.dataGridViewOpenSellOrders.ReadOnly = true;
+            this.dataGridViewOpenSellOrders.RowHeadersVisible = false;
+            this.dataGridViewOpenSellOrders.RowHeadersWidth = 51;
+            this.dataGridViewOpenSellOrders.RowTemplate.Height = 24;
+            this.dataGridViewOpenSellOrders.Size = new System.Drawing.Size(590, 502);
+            this.dataGridViewOpenSellOrders.TabIndex = 6;
+            // 
+            // dataGridViewOpenBuyOrders
+            // 
+            this.dataGridViewOpenBuyOrders.AllowUserToAddRows = false;
+            this.dataGridViewOpenBuyOrders.AllowUserToDeleteRows = false;
+            this.dataGridViewOpenBuyOrders.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            this.dataGridViewOpenBuyOrders.Location = new System.Drawing.Point(30, 56);
+            this.dataGridViewOpenBuyOrders.Name = "dataGridViewOpenBuyOrders";
+            this.dataGridViewOpenBuyOrders.ReadOnly = true;
+            this.dataGridViewOpenBuyOrders.RowHeadersVisible = false;
+            this.dataGridViewOpenBuyOrders.RowHeadersWidth = 51;
+            this.dataGridViewOpenBuyOrders.RowTemplate.Height = 24;
+            this.dataGridViewOpenBuyOrders.Size = new System.Drawing.Size(615, 502);
+            this.dataGridViewOpenBuyOrders.TabIndex = 5;
+            // 
+            // buttonOpenOrdersShow
+            // 
+            this.buttonOpenOrdersShow.Location = new System.Drawing.Point(323, 12);
+            this.buttonOpenOrdersShow.Name = "buttonOpenOrdersShow";
+            this.buttonOpenOrdersShow.Size = new System.Drawing.Size(96, 26);
+            this.buttonOpenOrdersShow.TabIndex = 4;
+            this.buttonOpenOrdersShow.Text = "Show";
+            this.buttonOpenOrdersShow.UseVisualStyleBackColor = true;
+            this.buttonOpenOrdersShow.Click += new System.EventHandler(this.ButtonOpenOrdersShow_Click);
+            // 
+            // label5
+            // 
+            this.label5.AutoSize = true;
+            this.label5.Location = new System.Drawing.Point(169, 17);
+            this.label5.Name = "label5";
+            this.label5.Size = new System.Drawing.Size(39, 17);
+            this.label5.TabIndex = 3;
+            this.label5.Text = "Ccy2";
+            // 
+            // label4
+            // 
+            this.label4.AutoSize = true;
+            this.label4.Location = new System.Drawing.Point(13, 17);
+            this.label4.Name = "label4";
+            this.label4.Size = new System.Drawing.Size(39, 17);
+            this.label4.TabIndex = 2;
+            this.label4.Text = "Ccy1";
+            // 
+            // comboBoxCcy2
+            // 
+            this.comboBoxCcy2.FormattingEnabled = true;
+            this.comboBoxCcy2.ItemHeight = 16;
+            this.comboBoxCcy2.Location = new System.Drawing.Point(214, 14);
+            this.comboBoxCcy2.Name = "comboBoxCcy2";
+            this.comboBoxCcy2.Size = new System.Drawing.Size(90, 24);
+            this.comboBoxCcy2.TabIndex = 1;
+            // 
+            // comboBoxCcy1
+            // 
+            this.comboBoxCcy1.FormattingEnabled = true;
+            this.comboBoxCcy1.ItemHeight = 16;
+            this.comboBoxCcy1.Location = new System.Drawing.Point(58, 14);
+            this.comboBoxCcy1.Name = "comboBoxCcy1";
+            this.comboBoxCcy1.Size = new System.Drawing.Size(90, 24);
+            this.comboBoxCcy1.TabIndex = 0;
             // 
             // richTextBoxLogger
             // 
@@ -314,27 +440,6 @@
             this.ButtonLedger.UseVisualStyleBackColor = true;
             this.ButtonLedger.Click += new System.EventHandler(this.ButtonLedger_Click);
             // 
-            // labelTxExplorer
-            // 
-            this.labelTxExplorer.AutoSize = true;
-            this.labelTxExplorer.Location = new System.Drawing.Point(6, 3);
-            this.labelTxExplorer.Name = "labelTxExplorer";
-            this.labelTxExplorer.Size = new System.Drawing.Size(79, 17);
-            this.labelTxExplorer.TabIndex = 0;
-            this.labelTxExplorer.Text = "Tx Explorer";
-            // 
-            // dataGridViewTxExplorer
-            // 
-            this.dataGridViewTxExplorer.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.dataGridViewTxExplorer.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            this.dataGridViewTxExplorer.Location = new System.Drawing.Point(6, 23);
-            this.dataGridViewTxExplorer.Name = "dataGridViewTxExplorer";
-            this.dataGridViewTxExplorer.RowTemplate.Height = 24;
-            this.dataGridViewTxExplorer.Size = new System.Drawing.Size(1258, 532);
-            this.dataGridViewTxExplorer.TabIndex = 1;
-            // 
             // CryptoForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
@@ -363,6 +468,10 @@
             this.TxExplorer.ResumeLayout(false);
             this.TxExplorer.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dataGridViewTxExplorer)).EndInit();
+            this.OpenOrders.ResumeLayout(false);
+            this.OpenOrders.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.dataGridViewOpenSellOrders)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.dataGridViewOpenBuyOrders)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -395,6 +504,14 @@
         private System.Windows.Forms.TabPage TxExplorer;
         private System.Windows.Forms.Label labelTxExplorer;
         private System.Windows.Forms.DataGridView dataGridViewTxExplorer;
+        private System.Windows.Forms.TabPage OpenOrders;
+        private System.Windows.Forms.Label label5;
+        private System.Windows.Forms.Label label4;
+        private System.Windows.Forms.ComboBox comboBoxCcy2;
+        private System.Windows.Forms.ComboBox comboBoxCcy1;
+        private System.Windows.Forms.Button buttonOpenOrdersShow;
+        private System.Windows.Forms.DataGridView dataGridViewOpenSellOrders;
+        private System.Windows.Forms.DataGridView dataGridViewOpenBuyOrders;
     }
 }
 

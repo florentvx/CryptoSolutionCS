@@ -12,6 +12,8 @@ using Core.TimeSeriesKeys;
 using Core.Date;
 using Core.Kraken;
 using Logging;
+using Core.Orders;
+using Core.PnL;
 
 namespace DataLibrary
 {
@@ -243,5 +245,13 @@ namespace DataLibrary
         }
 
         #endregion
+
+        public List<OpenOrder> GetOpenOrders(   FXMarket fxmkt,
+                                                Dictionary<string, PnLElement> pnlInfo,
+                                                CurrencyPair cp)
+        {
+            List<OpenOrder> listoo = KrakenData.GetOpenOrders(fxmkt);
+            return listoo.SortOpenOrders(pnlInfo, cp);
+        }
     }
 }

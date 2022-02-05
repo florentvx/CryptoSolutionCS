@@ -12,6 +12,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using Core.Orders;
 
 namespace TimeSeriesAnalytics
 {
@@ -30,6 +31,8 @@ namespace TimeSeriesAnalytics
         // Logging
         private event LoggingEventHandler _log;
         public LoggingEventHandler LoggingEventHandler { get { return _log; } }
+
+        public List<Currency> Currencies { get { return FXMH.CcyList; } }
         public void AddLoggingLink(LoggingEventHandler function) { _log += function; }
 
         public void SetUpAllHistory(Frequency freq, bool useKraken = false)
@@ -195,6 +198,13 @@ namespace TimeSeriesAnalytics
                     this.PublishInfo($"{date_i} - {i} Weeks PnL: {Math.Round(refPnL - data_i["Total"].TotalPnLWithFees, 2)} {Fiat.ToFullName()}");
                 }
             }
+        }
+
+        public List<OpenOrder> GetOpenOrders(CurrencyPair CurPair)
+        {
+            FXMarket fxmkt = FXMH.GetArtificialFXMarket(DateTime.UtcNow);
+            Dictionary<string, PnLElement> pnlInfo = APnL.ToTable(FXMH, DateTime.UtcNow);
+            return DataProvider.GetOpenOrders(fxmkt, pnlInfo, CurPair);
         }
     }
 }

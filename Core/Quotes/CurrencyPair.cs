@@ -33,6 +33,12 @@ namespace Core.Quotes
             Ccy2 = ccy2;
         }
 
+        public CurrencyPair(string ccy1, string ccy2)
+        {
+            Ccy1 = CurrencyPorperties.FromNameToCurrency(ccy1);
+            Ccy2 = CurrencyPorperties.FromNameToCurrency(ccy2);
+        }
+
         #region Tools
 
         public object Clone() { return new CurrencyPair(Ccy1, Ccy2); }
