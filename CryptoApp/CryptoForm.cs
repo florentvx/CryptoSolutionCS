@@ -253,12 +253,7 @@ namespace CryptoApp
                         dataGridViewOpenBuyOrders.Rows.Add(newRow);
                     else
                         dataGridViewOpenSellOrders.Rows.Add(newRow);
-                }
-                PublishLogMessage(  this, 
-                                    new LogMessageEventArgs() { 
-                                        Level = LevelType.WARNING, 
-                                        Message = $" Filtered {openOrders.Count} open orders" 
-                                    });
+                }                
             }
         }
 

@@ -28,6 +28,9 @@ namespace DataLibrary
         public Frequency SavingMinimumFrequency { get { return Frequency.Hour1; } }
         public bool UseInternet;
         public Dictionary<Currency, List<string>> DepositAddresses = new Dictionary<Currency, List<string>>();
+        public List<OpenOrder> OpenOrdersList = new List<OpenOrder> { };
+        public DateTime OpenOrdersLastUploadTime = DateTime.UtcNow.AddDays(-1);
+        
 
         // Logging
         private event LoggingEventHandler _log;
@@ -609,12 +612,17 @@ namespace DataLibrary
 
         public List<OpenOrder> GetOpenOrders(FXMarket fxmkt)
         {
+            if (DateTime.UtcNow.Subtract(OpenOrdersLastUploadTime) < TimeSpan.FromSeconds(60))
+                return OpenOrdersList;
             Dictionary<string, OrderInfo> openOrders = KrakenApi.GetOpenOrders();
             List<OpenOrder> orders = new List<OpenOrder> { };
             foreach (var item in openOrders)
             {
                 orders.Add(new OpenOrder(item.Key, item.Value, fxmkt));
             }
+            OpenOrdersList = orders;
+            OpenOrdersLastUploadTime = DateTime.UtcNow;
+            this.PublishInfo($"Open Orders: Downloaded {OpenOrdersList.Count} open orders from Kraken.");
             return orders;
         }
 
