@@ -219,6 +219,8 @@ namespace CryptoApp
             }
             else
             {
+                comboBoxCcy1.Items.Clear();
+                comboBoxCcy2.Items.Clear();
                 foreach (var item in TSP.Currencies)
                 {
                     if (!item.IsFiat())
