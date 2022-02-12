@@ -26,8 +26,6 @@ namespace Core.Transactions
             }
         }
 
-        public CryptoFiatPair GetCryptoFiatPair { get { return XRate.GetCryptoFiatPair; } }
-
         public Transaction(string id, TransactionType type, DateTime date, Price paid, Price received, Price fees = null)
         {
             ID = id;

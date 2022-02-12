@@ -28,26 +28,23 @@
         /// </summary>
         private void InitializeComponent()
         {
-            System.Windows.Forms.DataVisualization.Charting.ChartArea chartArea6 = new System.Windows.Forms.DataVisualization.Charting.ChartArea();
-            System.Windows.Forms.DataVisualization.Charting.Legend legend6 = new System.Windows.Forms.DataVisualization.Charting.Legend();
-            System.Windows.Forms.DataVisualization.Charting.Series series6 = new System.Windows.Forms.DataVisualization.Charting.Series();
+            System.Windows.Forms.DataVisualization.Charting.ChartArea chartArea2 = new System.Windows.Forms.DataVisualization.Charting.ChartArea();
+            System.Windows.Forms.DataVisualization.Charting.Legend legend2 = new System.Windows.Forms.DataVisualization.Charting.Legend();
+            System.Windows.Forms.DataVisualization.Charting.Series series2 = new System.Windows.Forms.DataVisualization.Charting.Series();
             this.tabControl1 = new System.Windows.Forms.TabControl();
             this.Allocation = new System.Windows.Forms.TabPage();
             this.dataGridViewAllocation = new System.Windows.Forms.DataGridView();
             this.label3 = new System.Windows.Forms.Label();
             this.Graphs = new System.Windows.Forms.TabPage();
-            this.dateSelectorControlGraph = new CustomControls.DateSelectorControl();
             this.groupBox1 = new System.Windows.Forms.GroupBox();
             this.buttonShow = new System.Windows.Forms.Button();
             this.checkedListBox1 = new System.Windows.Forms.CheckedListBox();
             this.chart1 = new System.Windows.Forms.DataVisualization.Charting.Chart();
             this.tabPage1 = new System.Windows.Forms.TabPage();
-            this.dateSelectorControl1 = new CustomControls.DateSelectorControl();
             this.button1 = new System.Windows.Forms.Button();
             this.dataGridViewPnL = new System.Windows.Forms.DataGridView();
             this.TxExplorer = new System.Windows.Forms.TabPage();
             this.dataGridViewTxExplorer = new System.Windows.Forms.DataGridView();
-            this.labelTxExplorer = new System.Windows.Forms.Label();
             this.OpenOrders = new System.Windows.Forms.TabPage();
             this.dataGridViewOpenSellOrders = new System.Windows.Forms.DataGridView();
             this.dataGridViewOpenBuyOrders = new System.Windows.Forms.DataGridView();
@@ -64,6 +61,13 @@
             this.buttonFullDataUpdate = new System.Windows.Forms.Button();
             this.buttonLoad = new System.Windows.Forms.Button();
             this.ButtonLedger = new System.Windows.Forms.Button();
+            this.label6 = new System.Windows.Forms.Label();
+            this.comboBoxTxExCcy = new System.Windows.Forms.ComboBox();
+            this.label7 = new System.Windows.Forms.Label();
+            this.comboBoxTxExType = new System.Windows.Forms.ComboBox();
+            this.dateSelectorControlGraph = new CustomControls.DateSelectorControl();
+            this.dateSelectorControl1 = new CustomControls.DateSelectorControl();
+            this.buttonTxExShow = new System.Windows.Forms.Button();
             this.tabControl1.SuspendLayout();
             this.Allocation.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dataGridViewAllocation)).BeginInit();
@@ -125,7 +129,7 @@
             this.label3.AutoSize = true;
             this.label3.Location = new System.Drawing.Point(6, 3);
             this.label3.Name = "label3";
-            this.label3.Size = new System.Drawing.Size(100, 17);
+            this.label3.Size = new System.Drawing.Size(95, 16);
             this.label3.TabIndex = 2;
             this.label3.Text = "Last Allocation";
             // 
@@ -141,13 +145,6 @@
             this.Graphs.TabIndex = 0;
             this.Graphs.Text = "Graphs";
             this.Graphs.UseVisualStyleBackColor = true;
-            // 
-            // dateSelectorControlGraph
-            // 
-            this.dateSelectorControlGraph.Location = new System.Drawing.Point(6, 0);
-            this.dateSelectorControlGraph.Name = "dateSelectorControlGraph";
-            this.dateSelectorControlGraph.Size = new System.Drawing.Size(233, 84);
-            this.dateSelectorControlGraph.TabIndex = 3;
             // 
             // groupBox1
             // 
@@ -183,16 +180,16 @@
             this.chart1.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            chartArea6.Name = "ChartArea1";
-            this.chart1.ChartAreas.Add(chartArea6);
-            legend6.Name = "Legend1";
-            this.chart1.Legends.Add(legend6);
+            chartArea2.Name = "ChartArea1";
+            this.chart1.ChartAreas.Add(chartArea2);
+            legend2.Name = "Legend1";
+            this.chart1.Legends.Add(legend2);
             this.chart1.Location = new System.Drawing.Point(237, 6);
             this.chart1.Name = "chart1";
-            series6.ChartArea = "ChartArea1";
-            series6.Legend = "Legend1";
-            series6.Name = "Series1";
-            this.chart1.Series.Add(series6);
+            series2.ChartArea = "ChartArea1";
+            series2.Legend = "Legend1";
+            series2.Name = "Series1";
+            this.chart1.Series.Add(series2);
             this.chart1.Size = new System.Drawing.Size(1027, 549);
             this.chart1.TabIndex = 0;
             this.chart1.Text = "chart1";
@@ -209,13 +206,6 @@
             this.tabPage1.TabIndex = 2;
             this.tabPage1.Text = "PnL Explain";
             this.tabPage1.UseVisualStyleBackColor = true;
-            // 
-            // dateSelectorControl1
-            // 
-            this.dateSelectorControl1.Location = new System.Drawing.Point(163, 0);
-            this.dateSelectorControl1.Name = "dateSelectorControl1";
-            this.dateSelectorControl1.Size = new System.Drawing.Size(297, 81);
-            this.dateSelectorControl1.TabIndex = 2;
             // 
             // button1
             // 
@@ -242,8 +232,12 @@
             // 
             // TxExplorer
             // 
+            this.TxExplorer.Controls.Add(this.buttonTxExShow);
+            this.TxExplorer.Controls.Add(this.comboBoxTxExType);
+            this.TxExplorer.Controls.Add(this.label7);
+            this.TxExplorer.Controls.Add(this.comboBoxTxExCcy);
+            this.TxExplorer.Controls.Add(this.label6);
             this.TxExplorer.Controls.Add(this.dataGridViewTxExplorer);
-            this.TxExplorer.Controls.Add(this.labelTxExplorer);
             this.TxExplorer.Location = new System.Drawing.Point(4, 25);
             this.TxExplorer.Name = "TxExplorer";
             this.TxExplorer.Padding = new System.Windows.Forms.Padding(3);
@@ -258,21 +252,12 @@
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.dataGridViewTxExplorer.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            this.dataGridViewTxExplorer.Location = new System.Drawing.Point(6, 23);
+            this.dataGridViewTxExplorer.Location = new System.Drawing.Point(6, 36);
             this.dataGridViewTxExplorer.Name = "dataGridViewTxExplorer";
             this.dataGridViewTxExplorer.RowHeadersWidth = 51;
             this.dataGridViewTxExplorer.RowTemplate.Height = 24;
-            this.dataGridViewTxExplorer.Size = new System.Drawing.Size(1258, 532);
+            this.dataGridViewTxExplorer.Size = new System.Drawing.Size(1258, 519);
             this.dataGridViewTxExplorer.TabIndex = 1;
-            // 
-            // labelTxExplorer
-            // 
-            this.labelTxExplorer.AutoSize = true;
-            this.labelTxExplorer.Location = new System.Drawing.Point(6, 3);
-            this.labelTxExplorer.Name = "labelTxExplorer";
-            this.labelTxExplorer.Size = new System.Drawing.Size(79, 17);
-            this.labelTxExplorer.TabIndex = 0;
-            this.labelTxExplorer.Text = "Tx Explorer";
             // 
             // OpenOrders
             // 
@@ -333,7 +318,7 @@
             this.label5.AutoSize = true;
             this.label5.Location = new System.Drawing.Point(169, 17);
             this.label5.Name = "label5";
-            this.label5.Size = new System.Drawing.Size(39, 17);
+            this.label5.Size = new System.Drawing.Size(38, 16);
             this.label5.TabIndex = 3;
             this.label5.Text = "Ccy2";
             // 
@@ -342,7 +327,7 @@
             this.label4.AutoSize = true;
             this.label4.Location = new System.Drawing.Point(13, 17);
             this.label4.Name = "label4";
-            this.label4.Size = new System.Drawing.Size(39, 17);
+            this.label4.Size = new System.Drawing.Size(38, 16);
             this.label4.TabIndex = 2;
             this.label4.Text = "Ccy1";
             // 
@@ -381,7 +366,7 @@
             this.label1.AutoSize = true;
             this.label1.Location = new System.Drawing.Point(9, 9);
             this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(92, 17);
+            this.label1.Size = new System.Drawing.Size(86, 16);
             this.label1.TabIndex = 3;
             this.label1.Text = "Fiat Currency";
             // 
@@ -398,7 +383,7 @@
             this.label2.AutoSize = true;
             this.label2.Location = new System.Drawing.Point(192, 9);
             this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(75, 17);
+            this.label2.Size = new System.Drawing.Size(72, 16);
             this.label2.TabIndex = 4;
             this.label2.Text = "Frequency";
             // 
@@ -439,6 +424,64 @@
             this.ButtonLedger.Text = "Ledger Update";
             this.ButtonLedger.UseVisualStyleBackColor = true;
             this.ButtonLedger.Click += new System.EventHandler(this.ButtonLedger_Click);
+            // 
+            // label6
+            // 
+            this.label6.AutoSize = true;
+            this.label6.Location = new System.Drawing.Point(18, 9);
+            this.label6.Name = "label6";
+            this.label6.Size = new System.Drawing.Size(61, 16);
+            this.label6.TabIndex = 2;
+            this.label6.Text = "Currency";
+            // 
+            // comboBoxTxExCcy
+            // 
+            this.comboBoxTxExCcy.FormattingEnabled = true;
+            this.comboBoxTxExCcy.Location = new System.Drawing.Point(85, 6);
+            this.comboBoxTxExCcy.Name = "comboBoxTxExCcy";
+            this.comboBoxTxExCcy.Size = new System.Drawing.Size(74, 24);
+            this.comboBoxTxExCcy.TabIndex = 3;
+            // 
+            // label7
+            // 
+            this.label7.AutoSize = true;
+            this.label7.Location = new System.Drawing.Point(176, 9);
+            this.label7.Name = "label7";
+            this.label7.Size = new System.Drawing.Size(58, 16);
+            this.label7.TabIndex = 4;
+            this.label7.Text = "Tx Type";
+            // 
+            // comboBoxTxExType
+            // 
+            this.comboBoxTxExType.FormattingEnabled = true;
+            this.comboBoxTxExType.Location = new System.Drawing.Point(240, 6);
+            this.comboBoxTxExType.Name = "comboBoxTxExType";
+            this.comboBoxTxExType.Size = new System.Drawing.Size(106, 24);
+            this.comboBoxTxExType.TabIndex = 5;
+            // 
+            // dateSelectorControlGraph
+            // 
+            this.dateSelectorControlGraph.Location = new System.Drawing.Point(6, 0);
+            this.dateSelectorControlGraph.Name = "dateSelectorControlGraph";
+            this.dateSelectorControlGraph.Size = new System.Drawing.Size(233, 84);
+            this.dateSelectorControlGraph.TabIndex = 3;
+            // 
+            // dateSelectorControl1
+            // 
+            this.dateSelectorControl1.Location = new System.Drawing.Point(163, 0);
+            this.dateSelectorControl1.Name = "dateSelectorControl1";
+            this.dateSelectorControl1.Size = new System.Drawing.Size(297, 81);
+            this.dateSelectorControl1.TabIndex = 2;
+            // 
+            // buttonTxExShow
+            // 
+            this.buttonTxExShow.Location = new System.Drawing.Point(384, 6);
+            this.buttonTxExShow.Name = "buttonTxExShow";
+            this.buttonTxExShow.Size = new System.Drawing.Size(84, 23);
+            this.buttonTxExShow.TabIndex = 6;
+            this.buttonTxExShow.Text = "Show";
+            this.buttonTxExShow.UseVisualStyleBackColor = true;
+            this.buttonTxExShow.Click += new System.EventHandler(this.buttonTxExShow_Click);
             // 
             // CryptoForm
             // 
@@ -502,7 +545,6 @@
         private CustomControls.DateSelectorControl dateSelectorControl1;
         private CustomControls.DateSelectorControl dateSelectorControlGraph;
         private System.Windows.Forms.TabPage TxExplorer;
-        private System.Windows.Forms.Label labelTxExplorer;
         private System.Windows.Forms.DataGridView dataGridViewTxExplorer;
         private System.Windows.Forms.TabPage OpenOrders;
         private System.Windows.Forms.Label label5;
@@ -512,6 +554,11 @@
         private System.Windows.Forms.Button buttonOpenOrdersShow;
         private System.Windows.Forms.DataGridView dataGridViewOpenSellOrders;
         private System.Windows.Forms.DataGridView dataGridViewOpenBuyOrders;
+        private System.Windows.Forms.ComboBox comboBoxTxExType;
+        private System.Windows.Forms.Label label7;
+        private System.Windows.Forms.ComboBox comboBoxTxExCcy;
+        private System.Windows.Forms.Label label6;
+        private System.Windows.Forms.Button buttonTxExShow;
     }
 }
 

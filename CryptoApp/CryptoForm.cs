@@ -259,31 +259,64 @@ namespace CryptoApp
             }
         }
 
-        public void TxExplorerTableUpdate()
+        public void TxExplorerPreparation()
+        {
+            if (comboBoxTxExCcy.InvokeRequired)
+            {
+                DelegateTables d = new DelegateTables(TxExplorerPreparation);
+                this.Invoke(d, new object[] { });
+            }
+            else
+            {
+                comboBoxTxExCcy.Items.Clear();
+                comboBoxTxExCcy.Items.Add("ALL");
+                foreach (var item in TSP.Currencies)
+                    comboBoxTxExCcy.Items.Add(item.ToString());
+                comboBoxTxExCcy.SelectedIndex = 0;
+
+                comboBoxTxExType.Items.Clear();
+                comboBoxTxExType.Items.Add("ALL");
+                foreach (TransactionType tt in Enum.GetValues(typeof(TransactionType)))
+                    if (tt != TransactionType.None) comboBoxTxExType.Items.Add(tt.ToString());
+                comboBoxTxExType.SelectedIndex = 0;
+            }
+        }
+
+        public void ShowTxExplorer()
         {
             if (dataGridViewTxExplorer.InvokeRequired)
             {
-                DelegateTables d = new DelegateTables(TxExplorerTableUpdate);
+                DelegateTables d = new DelegateTables(ShowTxExplorer);
                 this.Invoke(d, new object[] { });
             }
             else
             {
                 dataGridViewTxExplorer.Rows.Clear();
+                string selected_ccy = comboBoxTxExCcy.SelectedItem.ToString();
+                string selected_type = comboBoxTxExType.SelectedItem.ToString();
                 SortedList<DateTime,Transaction> data_tx = TSP.DataProvider.GetTransactionList();
                 List<DateTime> data_dates = data_tx.GetReversedKeys();
                 foreach (DateTime dt in data_dates)
                 {
                     Transaction tx = data_tx[dt];
-                    dataGridViewTxExplorer.Rows.
-                        Add(dt,
-                        tx.Type.ToString(),
-                        tx.Paid.Amount,
-                        tx.Paid.Ccy,
-                        tx.Received.Amount,
-                        tx.Received.Ccy,
-                        tx.Fees.Amount,
-                        tx.Fees.Ccy,
-                        tx.XRate.ToString());
+                    if (    tx.Paid.Ccy.ToString() == selected_ccy 
+                            || tx.Received.Ccy.ToString() == selected_ccy 
+                            || selected_ccy == "ALL")
+                        if (    tx.Type.ToString() == selected_type 
+                                || selected_type == "ALL")
+                            dataGridViewTxExplorer
+                                .Rows
+                                .Add(
+                                    dt,
+                                    tx.Type.ToString(),
+                                    tx.Paid.Amount,
+                                    tx.Paid.Ccy,
+                                    tx.Received.Amount,
+                                    tx.Received.Ccy,
+                                    tx.Fees.Amount,
+                                    tx.Fees.Ccy,
+                                    tx.XRate.ToString()
+                                );
                 }
             }
         }
@@ -405,6 +438,11 @@ namespace CryptoApp
         private void ButtonOpenOrdersShow_Click(object sender, EventArgs e)
         {
             CryptoPresenter.ShowOpenOrders();
+        }
+
+        private void buttonTxExShow_Click(object sender, EventArgs e)
+        {
+            CryptoPresenter.ShowTxExplorer();
         }
     }
 

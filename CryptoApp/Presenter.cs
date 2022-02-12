@@ -32,7 +32,7 @@ namespace CryptoApp
             if (updateAllocationTable)
             {
                 _view.AllocationTableUpdate();
-                _view.TxExplorerTableUpdate();
+                _view.TxExplorerPreparation();
                 _view.OpenOrdersPreparation();
             }
         }
@@ -73,6 +73,11 @@ namespace CryptoApp
         internal async void ShowOpenOrders()
         {
             await Task.Run(() => { _view.ShowOpenOrders(); });
+        }
+
+        internal async void ShowTxExplorer()
+        {
+            await Task.Run(() => { _view.ShowTxExplorer(); });
         }
     }
 }

@@ -26,12 +26,26 @@ namespace Core.Quotes
 
         public CryptoFiatPair GetCryptoFiatPair { get { return CcyPair.GetCryptoFiatPair; } }
 
+        public XChangeRate GetCryptoFiatRate()
+        {
+            CryptoFiatPair cp = GetCryptoFiatPair;
+            if (!cp.IsNone)
+            {
+                if (cp.Crypto == CcyPair.Ccy1)
+                    return (XChangeRate)Clone();
+                else
+                    return GetInverse();
+            }
+            else
+            {
+                return (XChangeRate)Clone();
+            }
+        }
+
         public string ToString(int precision = 4)
         {
-            if (Rate > 0.01)
-                return $"{Math.Round(Rate, precision)} {CcyPair.ToString()}";
-            else
-                return GetInverse().ToString();
+            XChangeRate xr = GetCryptoFiatRate();
+            return $"{Math.Round(xr.Rate, precision)} {xr.CcyPair}";
         }
 
         public XChangeRate GetInverse()

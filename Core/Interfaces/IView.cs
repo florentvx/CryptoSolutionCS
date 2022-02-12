@@ -14,7 +14,8 @@ namespace Core.Interfaces
         List<ITimeSeriesKey> TimeSeriesKeyList { get; }
         void SetChartData(IChartData icd);
         void AllocationTableUpdate();
-        void TxExplorerTableUpdate();
+        void TxExplorerPreparation();
+        void ShowTxExplorer();
         void PnLTableUpdate();
         void OpenOrdersPreparation();
         void ShowOpenOrders();
