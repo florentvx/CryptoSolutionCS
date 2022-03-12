@@ -72,14 +72,14 @@ namespace CryptoApp
             /// PnL Explain Tab
             dataGridViewPnL.ColumnCount = 9;
             dataGridViewPnL.Columns[0].Name = "Ccy";
-            dataGridViewPnL.Columns[1].Name = "Pos";
-            dataGridViewPnL.Columns[2].Name = "Rate";
+            dataGridViewPnL.Columns[1].Name = "Pos. (Start)";
+            dataGridViewPnL.Columns[2].Name = "Rate (Start)";
             dataGridViewPnL.Columns[3].Name = "Weight";
             dataGridViewPnL.Columns[4].Name = "Δ Pos";
             dataGridViewPnL.Columns[5].Name = "Δ Rate";
-            dataGridViewPnL.Columns[6].Name = "Δ Fees";
-            dataGridViewPnL.Columns[7].Name = "Deposit Net";
-            dataGridViewPnL.Columns[8].Name = "Total Δ";
+            dataGridViewPnL.Columns[6].Name = "ΔOnGngPnL";
+            dataGridViewPnL.Columns[7].Name = "ΔRealzdPnL";
+            dataGridViewPnL.Columns[8].Name = "Deposit Net";
 
             /// Tx Explorer
             dataGridViewTxExplorer.ColumnCount = 9;
@@ -183,29 +183,31 @@ namespace CryptoApp
                     Currency ccy = CurrencyPorperties.FromNameToCurrency(key);
                     if (ccy.IsNone())
                         ccy = Fiat;
-                    double depositValue = Math.Round((item2.Deposit - item.Deposit) - (item2.Withdrawal - item.Withdrawal), 2);
+                    double depositNetTotal = Math.Round((item2.Deposit - item.Deposit) - (item2.Withdrawal - item.Withdrawal), 2);
+                    double realizedPnLChange = item2.RealizedPnL - item.RealizedPnL;
+                    double onGoingPnLChange = item2.OnGoingPnL - item.OnGoingPnL + realizedPnLChange;
                     if (key != "Total")
                         dataGridViewPnL.Rows.
-                            Add(key,
-                            item.Presentation_Position(ccy),
-                            item.Presentation_XChangeRate(ccy),
-                            PercentageToString(item.Weight),
-                            PercentageToString(item2.Position / item.Position - 1),
-                            PercentageToString(item2.xChangeRate / item.xChangeRate - 1),
-                            Math.Round(item2.Fees - item.Fees,2),
-                            depositValue,
-                            item.Value != 0 ? PercentageToString(item2.Value / item.Value - 1) : "");
+                            Add(key,                                                            // Ccy
+                            item.Presentation_Position(ccy),                                    // Position
+                            item.Presentation_XChangeRate(ccy),                                 // Rate
+                            PercentageToString(item.Weight),                                    // Weight
+                            PercentageToString(item2.Position / item.Position - 1),             // Delta Pos.
+                            PercentageToString(item2.xChangeRate / item.xChangeRate - 1),       // Delta Rate
+                            Math.Round(onGoingPnLChange, 2),                                    // Delta On Going PnL
+                            Math.Round(realizedPnLChange, 2),                                   // Delta Realizes PnL
+                            depositNetTotal);                                                   // Deposit Net Total
                     else
-                        dataGridViewPnL.Rows.
-                            Add(key,
-                            item.Presentation_Position(ccy),
-                            item.Presentation_XChangeRate(ccy),
-                            PercentageToString(item.Weight),
-                            0,
-                            Math.Round(AbsoluteValueChange,2),
-                            Math.Round(item2.Fees - item.Fees, 2),
-                            depositValue,
-                            PercentageToString(RelativeChange));
+                        dataGridViewPnL.Rows.                                                   
+                            Add(key,                                                            // Ccy
+                            item.Presentation_Position(ccy),                                    // Total
+                            0,                                                                  // 0
+                            PercentageToString(item.Weight),                                    // Weight (100%)
+                            Math.Round(AbsoluteValueChange, 2),                                 // Delta Pos. (Total Absolute Change)
+                            PercentageToString(RelativeChange),                                 // Delta Rate (Total Relative Change)
+                            Math.Round(onGoingPnLChange, 2),                                    // Delta On Going PnL
+                            Math.Round(realizedPnLChange, 2),                                   // Delta Realized PnL
+                            depositNetTotal);                                                   // Deposit Net Total
                 }
             }
         }
