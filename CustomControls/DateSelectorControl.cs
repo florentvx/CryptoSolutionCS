@@ -15,10 +15,11 @@ namespace CustomControls
     {
         private Frequency ControlFreq = Frequency.Day1;
 
-        public DateSelectorControl()
+        public DateSelectorControl(string main_title) // default title: Date Selector
         {
             InitializeComponent();
             InputTenorCheckBox.Checked = true;
+            this.groupBox1.Text = main_title;
         }
 
         public void SetInitialInput(string text)

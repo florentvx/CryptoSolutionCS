@@ -52,7 +52,8 @@ namespace CryptoApp
             comboBoxFiat.SelectedIndex = 0;
             comboBoxFrequency.SelectedIndex = 5;
             AllocationTableCreation();
-            dateSelectorControl1.SetInitialInput("1D");
+            PnLExplainStartDateSelector.SetInitialInput("1D");
+            PnLExaplainEndDateSelector.SetInitialInput("0D");
             dateSelectorControlGraph.SetInitialInput("10Y");
         }
 
@@ -167,19 +168,29 @@ namespace CryptoApp
             }
             else
             {
-                DateTime dateNow = TSP.FXMH.LastRealDate_NoLive;
-                DateTime dateBefore = dateSelectorControl1.Date.GetRoundDate(TenorUnit.Day);
-                var data = TSP.GetAllocationToTable(dateBefore);
-                var data2 = TSP.GetLastAllocationToTable();
-                dataGridViewPnL.Rows.Clear();
-                double value1 = data["Total"].Position - (data["Total"].Deposit - data["Total"].Withdrawal);
-                double value2 = data2["Total"].Position - (data2["Total"].Deposit - data2["Total"].Withdrawal);
+                // start date
+                DateTime dateStart = PnLExplainStartDateSelector.Date.GetRoundDate(TenorUnit.Day);
+                var dataStart = TSP.GetAllocationToTable(dateStart);
+                // end date
+                DateTime dateEnd = PnLExaplainEndDateSelector.Date.GetRoundDate(TenorUnit.Day);
+                Dictionary<string, PnLElement> dataEnd;
+                if (dateEnd == TSP.FXMH.LastRealDate_NoLive.Date)
+                    dataEnd = TSP.GetLastAllocationToTable();
+                else
+                    dataEnd = TSP.GetAllocationToTable(dateEnd);
+                
+                // Total Statistics
+                double value1 = dataStart["Total"].Position - (dataStart["Total"].Deposit - dataStart["Total"].Withdrawal);
+                double value2 = dataEnd["Total"].Position - (dataEnd["Total"].Deposit - dataEnd["Total"].Withdrawal);
                 double AbsoluteValueChange = value2 - value1;
-                double RelativeChange = AbsoluteValueChange / data["Total"].Position;
-                foreach (var key in data.Keys)
+                double RelativeChange = AbsoluteValueChange / dataStart["Total"].Position;
+                
+                // fill rows
+                dataGridViewPnL.Rows.Clear();
+                foreach (var key in dataStart.Keys)
                 {
-                    PnLElement item = data[key];
-                    PnLElement item2 = data2[key];
+                    PnLElement item = dataStart[key];
+                    PnLElement item2 = dataEnd[key];
                     Currency ccy = CurrencyPorperties.FromNameToCurrency(key);
                     if (ccy.IsNone())
                         ccy = Fiat;
